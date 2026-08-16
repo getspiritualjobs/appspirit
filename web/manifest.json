@@ -1,0 +1,9 @@
+{
+  "name": "Spiritual Gifts Career Discovery",
+  "short_name": "GiftPath",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#F8F5EF",
+  "theme_color": "#2D5A4A",
+  "description": "A Scripture-informed spiritual gifts and career discovery app."
+}

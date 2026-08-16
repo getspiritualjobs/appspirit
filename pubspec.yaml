@@ -1,0 +1,29 @@
+name: spiritual_gifts_career_discovery
+description: A Flutter web MVP for spiritual gifts, career discovery, and job exploration.
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  go_router: ^14.2.7
+  google_fonts: ^6.2.1
+  supabase_flutter: ^2.8.0
+  fl_chart: ^0.69.0
+  share_plus: ^10.0.2
+  url_launcher: ^6.3.0
+  uuid: ^4.5.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  test: ^1.25.8
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
