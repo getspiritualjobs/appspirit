@@ -66,6 +66,32 @@ Recommended build settings:
 
 Cloudflare needs Flutter available in the build image. The simplest path is a GitHub Action that builds Flutter web and publishes the artifact, or configuring Cloudflare with a build image that installs Flutter before the build command.
 
+### Direct Cloudflare Deploy
+
+Create a local `.env.local` file. It is ignored by git.
+
+```bash
+SUPABASE_URL=https://nigdwvzpmgngsygkbfgd.supabase.co
+SUPABASE_ANON_KEY=...
+CLOUDFLARE_ACCOUNT_ID=efe98345b3630bd0df0f8142c5c0fb7c
+CLOUDFLARE_API_TOKEN=...
+CLOUDFLARE_PAGES_PROJECT=giftpath
+CLOUDFLARE_DOMAIN=giftpath.app
+```
+
+Then run:
+
+```bash
+bash tooling/cloudflare_check.sh
+bash tooling/cloudflare_pages_deploy.sh
+```
+
+If the Pages project deploys to `giftpath.pages.dev`, set up `www.giftpath.app`:
+
+```bash
+bash tooling/cloudflare_dns.sh
+```
+
 ## Tests
 
 ```bash
