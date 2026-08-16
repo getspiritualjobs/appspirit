@@ -25,6 +25,8 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
+    final session = Env.hasSupabase ? Supabase.instance.client.auth.currentSession : null;
+
     return SingleChildScrollView(
       child: PageBand(
         maxWidth: 620,
@@ -38,6 +40,14 @@ class _AuthPageState extends State<AuthPage> {
               const SizedBox(height: 18),
               if (!Env.hasSupabase)
                 const _SetupNotice()
+              else if (session != null)
+                _SignedInPanel(
+                  email: session.user.email ?? 'Signed-in user',
+                  onSignOut: () async {
+                    await Supabase.instance.client.auth.signOut();
+                    if (mounted) setState(() => message = 'Signed out.');
+                  },
+                )
               else ...[
                 TextField(controller: email, decoration: const InputDecoration(labelText: 'Email')),
                 const SizedBox(height: 12),
@@ -83,7 +93,35 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   Future<void> _google() async {
-    await Supabase.instance.client.auth.signInWithOAuth(OAuthProvider.google);
+    await Supabase.instance.client.auth.signInWithOAuth(
+      OAuthProvider.google,
+      redirectTo: Uri.base.origin,
+    );
+  }
+}
+
+class _SignedInPanel extends StatelessWidget {
+  const _SignedInPanel({required this.email, required this.onSignOut});
+
+  final String email;
+  final Future<void> Function() onSignOut;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(color: Color(0xFFE7F0EA), borderRadius: BorderRadius.all(Radius.circular(8))),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            const Icon(Icons.check_circle_outline),
+            const SizedBox(width: 12),
+            Expanded(child: Text('Signed in as $email')),
+            OutlinedButton(onPressed: onSignOut, child: const Text('Sign Out')),
+          ],
+        ),
+      ),
+    );
   }
 }
 
