@@ -53,7 +53,18 @@ async function searchAdzuna(titles: string[], req: SearchRequest): Promise<Norma
 
   const query = encodeURIComponent(titles.slice(0, 3).join(" OR "));
   const where = encodeURIComponent(req.location || "United States");
-  const url = `https://api.adzuna.com/v1/api/jobs/us/search/1?app_id=${appId}&app_key=${appKey}&results_per_page=20&what=${query}&where=${where}&content-type=application/json`;
+  const params = new URLSearchParams({
+    app_id: appId,
+    app_key: appKey,
+    results_per_page: "20",
+    what: titles.slice(0, 3).join(" OR "),
+    where: req.location || "United States",
+    "content-type": "application/json",
+  });
+  if (req.salaryMin) params.set("salary_min", String(req.salaryMin));
+  if (req.employmentType === "full_time") params.set("full_time", "1");
+  if (req.remote) params.set("what_or", "remote");
+  const url = `https://api.adzuna.com/v1/api/jobs/us/search/1?${params}`;
   const response = await fetch(url);
   if (!response.ok) return [];
   const data = await response.json();
