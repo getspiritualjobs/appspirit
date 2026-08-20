@@ -8,11 +8,13 @@ class JobSearchResult {
   const JobSearchResult({
     required this.jobs,
     required this.source,
+    this.providers = const [],
     this.message,
   });
 
   final List<JobListing> jobs;
   final JobSearchSource source;
+  final List<String> providers;
   final String? message;
 }
 
@@ -66,6 +68,9 @@ class JobSearchService {
       }
 
       final rawJobs = data['jobs'];
+      final providers = data['providers'] is List
+          ? (data['providers'] as List).map((item) => item.toString()).toList()
+          : const <String>[];
       if (rawJobs is! List || rawJobs.isEmpty) {
         return JobSearchResult(
           jobs: demoJobs,
@@ -84,6 +89,7 @@ class JobSearchService {
       return JobSearchResult(
         jobs: jobs.isEmpty ? demoJobs : jobs,
         source: jobs.isEmpty ? JobSearchSource.demo : JobSearchSource.live,
+        providers: jobs.isEmpty ? const [] : providers,
         message: jobs.isEmpty
             ? 'No live jobs matched those filters, so demo jobs are showing.'
             : null,

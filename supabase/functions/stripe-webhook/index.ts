@@ -16,6 +16,15 @@ Deno.serve(async (req) => {
     const event = JSON.parse(payload);
     if (event.type === "checkout.session.completed") {
       await handleCheckoutCompleted(event.data.object);
+    } else if (
+      event.type === "customer.subscription.created" ||
+      event.type === "customer.subscription.updated"
+    ) {
+      await handleSubscriptionUpsert(event.data.object);
+    } else if (event.type === "customer.subscription.deleted") {
+      await handleSubscriptionDeleted(event.data.object);
+    } else if (event.type === "invoice.payment_failed") {
+      await handleInvoicePaymentFailed(event.data.object);
     }
 
     return Response.json({ received: true });
@@ -37,33 +46,87 @@ async function handleCheckoutCompleted(session: Record<string, unknown>) {
     throw new Error("Checkout session is missing billing identifiers.");
   }
 
-  const stripeSecretKey = mustGetEnv("STRIPE_SECRET_KEY");
   const subscription = await stripeGet(
-    stripeSecretKey,
+    mustGetEnv("STRIPE_SECRET_KEY"),
     `/v1/subscriptions/${subscriptionId}`,
   );
 
-  const supabase = createClient(
-    mustGetEnv("SUPABASE_URL"),
-    mustGetEnv("SUPABASE_SERVICE_ROLE_KEY"),
-    { auth: { persistSession: false } },
-  );
+  await upsertCustomer(userId, customerId);
+  await upsertSubscription({ userId, customerId, subscriptionId, subscription });
+}
 
-  const item = subscription.items?.data?.[0];
-  const currentPeriodEnd = subscription.current_period_end
-    ? new Date(Number(subscription.current_period_end) * 1000).toISOString()
-    : null;
+async function handleSubscriptionUpsert(subscription: Record<string, unknown>) {
+  const subscriptionId = asString(subscription.id);
+  const customerId = asString(subscription.customer);
+  const userId =
+    asString(
+      (subscription.metadata as Record<string, unknown> | undefined)?.user_id,
+    ) ?? (customerId ? await findUserIdForCustomer(customerId) : null);
 
-  const { error: customerError } = await supabase
-    .from("billing_customers")
-    .upsert({
-      user_id: userId,
-      stripe_customer_id: customerId,
+  if (!userId || !customerId || !subscriptionId) {
+    throw new Error("Subscription event is missing billing identifiers.");
+  }
+
+  await upsertCustomer(userId, customerId);
+  await upsertSubscription({ userId, customerId, subscriptionId, subscription });
+}
+
+async function handleSubscriptionDeleted(subscription: Record<string, unknown>) {
+  const subscriptionId = asString(subscription.id);
+  if (!subscriptionId) throw new Error("Deleted subscription is missing an id.");
+
+  const { error } = await serviceClient()
+    .from("billing_subscriptions")
+    .update({
+      status: String(subscription.status ?? "canceled"),
+      current_period_end: currentPeriodEnd(subscription),
       updated_at: new Date().toISOString(),
-    });
-  if (customerError) throw customerError;
+    })
+    .eq("stripe_subscription_id", subscriptionId);
+  if (error) throw error;
+}
 
-  const { error: subscriptionError } = await supabase
+async function handleInvoicePaymentFailed(invoice: Record<string, unknown>) {
+  const parent = invoice.parent as Record<string, unknown> | undefined;
+  const details = parent?.subscription_details as
+    | Record<string, unknown>
+    | undefined;
+  const subscriptionId =
+    asString(invoice.subscription) ?? asString(details?.subscription);
+  if (!subscriptionId) return;
+
+  const { error } = await serviceClient()
+    .from("billing_subscriptions")
+    .update({
+      status: "past_due",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("stripe_subscription_id", subscriptionId);
+  if (error) throw error;
+}
+
+async function upsertCustomer(userId: string, customerId: string) {
+  const { error } = await serviceClient().from("billing_customers").upsert({
+    user_id: userId,
+    stripe_customer_id: customerId,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw error;
+}
+
+async function upsertSubscription({
+  userId,
+  customerId,
+  subscriptionId,
+  subscription,
+}: {
+  userId: string;
+  customerId: string;
+  subscriptionId: string;
+  subscription: Record<string, any>;
+}) {
+  const item = subscription.items?.data?.[0];
+  const { error } = await serviceClient()
     .from("billing_subscriptions")
     .upsert(
       {
@@ -72,12 +135,22 @@ async function handleCheckoutCompleted(session: Record<string, unknown>) {
         stripe_subscription_id: subscriptionId,
         stripe_price_id: item?.price?.id ?? null,
         status: String(subscription.status ?? "unknown"),
-        current_period_end: currentPeriodEnd,
+        current_period_end: currentPeriodEnd(subscription),
         updated_at: new Date().toISOString(),
       },
       { onConflict: "stripe_subscription_id" },
     );
-  if (subscriptionError) throw subscriptionError;
+  if (error) throw error;
+}
+
+async function findUserIdForCustomer(customerId: string) {
+  const { data, error } = await serviceClient()
+    .from("billing_customers")
+    .select("user_id")
+    .eq("stripe_customer_id", customerId)
+    .maybeSingle();
+  if (error) throw error;
+  return asString(data?.user_id);
 }
 
 async function stripeGet(secretKey: string, path: string) {
@@ -130,6 +203,20 @@ async function verifyStripeSignature(
   if (!signatures.some((signature) => timingSafeEqual(signature, expected))) {
     throw new Error("Invalid Stripe signature.");
   }
+}
+
+function currentPeriodEnd(subscription: Record<string, any>) {
+  return subscription.current_period_end
+    ? new Date(Number(subscription.current_period_end) * 1000).toISOString()
+    : null;
+}
+
+function serviceClient() {
+  return createClient(
+    mustGetEnv("SUPABASE_URL"),
+    mustGetEnv("SUPABASE_SERVICE_ROLE_KEY"),
+    { auth: { persistSession: false } },
+  );
 }
 
 function timingSafeEqual(a: string, b: string) {

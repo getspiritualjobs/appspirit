@@ -2,11 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/app_state.dart';
+import '../../core/models.dart';
 import '../../core/scoring.dart';
 import '../../widgets/responsive.dart';
 
-class SavedPage extends StatelessWidget {
+class SavedPage extends StatefulWidget {
   const SavedPage({super.key});
+
+  @override
+  State<SavedPage> createState() => _SavedPageState();
+}
+
+class _SavedPageState extends State<SavedPage> {
+  @override
+  void initState() {
+    super.initState();
+    appState.refreshSavedData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +36,16 @@ class SavedPage extends StatelessWidget {
                       style: Theme.of(context).textTheme.displayMedium),
                   const SizedBox(height: 8),
                   const Text(
-                      'Saved results, career matches, and jobs are private to your account when Supabase Auth is configured.'),
+                      'Saved results, career matches, and jobs are private to your account. Sign in to keep them across devices.'),
+                  if (appState.savedDataError != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Saved data is showing locally because sync failed.',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                          fontWeight: FontWeight.w700),
+                    ),
+                  ],
                   const SizedBox(height: 18),
                   const TabBar(tabs: [
                     Tab(text: 'Results'),
@@ -54,7 +75,8 @@ class SavedPage extends StatelessWidget {
 class _SavedResults extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    if (appState.savedResult.isEmpty) {
+    final results = appState.savedResults;
+    if (results.isEmpty && appState.savedResult.isEmpty) {
       return Center(
         child: EmptyState(
           icon: Icons.auto_awesome,
@@ -66,27 +88,69 @@ class _SavedResults extends StatelessWidget {
         ),
       );
     }
+    if (results.isEmpty) {
+      return ListView(
+        padding: const EdgeInsets.only(top: 18),
+        children: [
+          _SavedResultCard(
+              title: 'Current Gift Profile', scores: appState.savedResult)
+        ],
+      );
+    }
     return ListView(
       padding: const EdgeInsets.only(top: 18),
       children: [
-        InfoCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Saved Gift Profile',
-                  style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 12),
-              for (final score in appState.savedResult.take(7))
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(
-                      '${giftLabel(score.gift)}: ${score.normalizedScore}% alignment'),
-                ),
-            ],
+        for (final result in results)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _SavedResultCard(
+              title: result.title,
+              createdAt: result.createdAt,
+              scores: result.scores,
+            ),
           ),
-        ),
       ],
     );
+  }
+}
+
+class _SavedResultCard extends StatelessWidget {
+  const _SavedResultCard({
+    required this.title,
+    required this.scores,
+    this.createdAt,
+  });
+
+  final String title;
+  final DateTime? createdAt;
+  final List<GiftScore> scores;
+
+  @override
+  Widget build(BuildContext context) {
+    return InfoCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: Theme.of(context).textTheme.titleLarge),
+          if (createdAt != null) ...[
+            const SizedBox(height: 4),
+            Text(_dateLabel(createdAt!)),
+          ],
+          const SizedBox(height: 12),
+          for (final score in scores.take(7))
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                  '${giftLabel(score.gift)}: ${score.normalizedScore}% alignment'),
+            ),
+        ],
+      ),
+    );
+  }
+
+  String _dateLabel(DateTime value) {
+    final local = value.toLocal();
+    return 'Saved ${local.month}/${local.day}/${local.year}';
   }
 }
 

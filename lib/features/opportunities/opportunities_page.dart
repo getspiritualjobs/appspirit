@@ -301,13 +301,16 @@ class _JobSearchPanel extends StatelessWidget {
             },
           ),
           const SizedBox(height: 12),
-          const Wrap(
+          Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
-              Chip(label: Text('Adzuna ready')),
-              Chip(label: Text('USAJOBS ready')),
-              Chip(label: Text('Source links preserved')),
+              if (result?.providers.contains('adzuna') ?? false)
+                const Chip(label: Text('Adzuna live')),
+              if (result?.providers.contains('usajobs') ?? false)
+                const Chip(label: Text('USAJOBS live')),
+              if (live) const Chip(label: Text('Source links preserved')),
+              if (!live) const Chip(label: Text('Demo listings')),
             ],
           ),
         ],

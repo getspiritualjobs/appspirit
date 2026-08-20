@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../data/assessment_repository.dart';
 import '../data/billing_service.dart';
+import '../data/saved_data_repository.dart';
 import '../data/seed_data.dart';
 import 'models.dart';
 import 'scoring.dart';
@@ -15,10 +16,12 @@ class GiftPathState extends ChangeNotifier {
   UserPreference preference = const UserPreference();
   final List<CareerMatch> savedCareers = [];
   final List<JobListing> savedJobs = [];
+  List<SavedGiftResult> savedResults = const [];
   List<GiftScore> savedResult = const [];
   bool hasActiveSubscription = false;
   String? latestAssessmentId;
   String? assessmentSaveError;
+  String? savedDataError;
 
   bool get isComplete => responses.length == assessmentQuestions.length;
   bool get hasResults => giftScores.isNotEmpty;
@@ -42,19 +45,26 @@ class GiftPathState extends ChangeNotifier {
         responses: responses,
         giftScores: giftScores,
       );
+      await refreshSavedData();
     } catch (error) {
       assessmentSaveError = error.toString();
     }
     notifyListeners();
   }
 
-  void updatePreference(UserPreference next) {
+  Future<void> updatePreference(UserPreference next) async {
     preference = next;
     if (giftScores.isNotEmpty) {
       careerMatches = matchCareers(
           careers: careers, giftScores: giftScores, preference: preference);
     }
     notifyListeners();
+    try {
+      await SavedDataRepository().savePreference(next);
+    } catch (error) {
+      savedDataError = error.toString();
+      notifyListeners();
+    }
   }
 
   void saveCurrentResult() {
@@ -63,26 +73,52 @@ class GiftPathState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleSavedCareer(CareerMatch match) {
+  Future<void> toggleSavedCareer(CareerMatch match) async {
     final index =
         savedCareers.indexWhere((item) => item.career.id == match.career.id);
     if (index >= 0) {
       savedCareers.removeAt(index);
+      notifyListeners();
+      try {
+        await SavedDataRepository().removeCareer(match.career);
+      } catch (error) {
+        savedDataError = error.toString();
+        notifyListeners();
+      }
     } else {
       savedCareers.add(match);
+      notifyListeners();
+      try {
+        await SavedDataRepository().saveCareer(match);
+      } catch (error) {
+        savedDataError = error.toString();
+        notifyListeners();
+      }
     }
-    notifyListeners();
   }
 
-  void toggleSavedJob(JobListing job) {
+  Future<void> toggleSavedJob(JobListing job) async {
     final index = savedJobs.indexWhere(
         (item) => item.id == job.id && item.provider == job.provider);
     if (index >= 0) {
       savedJobs.removeAt(index);
+      notifyListeners();
+      try {
+        await SavedDataRepository().removeJob(job);
+      } catch (error) {
+        savedDataError = error.toString();
+        notifyListeners();
+      }
     } else {
       savedJobs.add(job);
+      notifyListeners();
+      try {
+        await SavedDataRepository().saveJob(job);
+      } catch (error) {
+        savedDataError = error.toString();
+        notifyListeners();
+      }
     }
-    notifyListeners();
   }
 
   bool isCareerSaved(Career career) =>
@@ -102,5 +138,26 @@ class GiftPathState extends ChangeNotifier {
       hasActiveSubscription = active;
       notifyListeners();
     }
+  }
+
+  Future<void> refreshSavedData() async {
+    try {
+      final snapshot = await SavedDataRepository().fetchSnapshot();
+      savedResults = snapshot.results;
+      savedCareers
+        ..clear()
+        ..addAll(snapshot.careers);
+      savedJobs
+        ..clear()
+        ..addAll(snapshot.jobs);
+      preference = snapshot.preference;
+      if (snapshot.results.isNotEmpty) {
+        savedResult = List.unmodifiable(snapshot.results.first.scores);
+      }
+      savedDataError = null;
+    } catch (error) {
+      savedDataError = error.toString();
+    }
+    notifyListeners();
   }
 }

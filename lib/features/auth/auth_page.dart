@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/app_state.dart';
 import '../../core/env.dart';
 import '../../widgets/brand_mark.dart';
 import '../../widgets/responsive.dart';
@@ -221,6 +222,8 @@ class _AuthPageState extends State<AuthPage> {
         await auth.signInWithPassword(
             email: trimmedEmail, password: enteredPassword);
       }
+      await appState.refreshSavedData();
+      await appState.refreshSubscription();
       setState(() => message =
           create ? 'Check your email to confirm your account.' : 'Signed in.');
     } on AuthException catch (error) {
@@ -272,6 +275,7 @@ class _AuthPageState extends State<AuthPage> {
       await Supabase.instance.client.auth.updateUser(
         UserAttributes(password: newPassword),
       );
+      await appState.refreshSavedData();
       resetPassword.clear();
       setState(() {
         resetPasswordMode = false;
@@ -292,12 +296,17 @@ class _AuthPageState extends State<AuthPage> {
     try {
       final auth = Supabase.instance.client.auth;
       if (auth.currentUser?.isAnonymous ?? false) {
-        await auth.signOut();
+        await auth.linkIdentity(
+          OAuthProvider.google,
+          redirectTo: '${Uri.base.origin}/auth',
+        );
+        return;
+      } else {
+        await auth.signInWithOAuth(
+          OAuthProvider.google,
+          redirectTo: '${Uri.base.origin}/auth',
+        );
       }
-      await auth.signInWithOAuth(
-        OAuthProvider.google,
-        redirectTo: Uri.base.origin,
-      );
     } on AuthException catch (error) {
       setState(() => message = error.message);
     } finally {
@@ -312,6 +321,7 @@ class _AuthPageState extends State<AuthPage> {
     });
     try {
       await Supabase.instance.client.auth.signInAnonymously();
+      await appState.refreshSavedData();
       setState(() => message =
           'Guest mode is on. Create an account later to save across devices.');
     } on AuthException catch (error) {

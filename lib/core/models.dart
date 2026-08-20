@@ -72,6 +72,22 @@ class GiftScore {
   final int normalizedScore;
 }
 
+class SavedGiftResult {
+  const SavedGiftResult({
+    required this.id,
+    required this.assessmentId,
+    required this.title,
+    required this.createdAt,
+    required this.scores,
+  });
+
+  final String id;
+  final String assessmentId;
+  final String title;
+  final DateTime createdAt;
+  final List<GiftScore> scores;
+}
+
 class Career {
   const Career({
     required this.id,

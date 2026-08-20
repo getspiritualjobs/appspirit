@@ -9,52 +9,71 @@ The product intentionally avoids claims like "God wants you to become..." or "th
 - Flutter web app scaffold with routes for Home, Assessment, Results, Careers, Opportunities, Saved, About, and Account.
 - Local deterministic scoring with 56 weighted questions and the seven Romans 12 gifts.
 - Structured career matching with 100+ seeded careers in `lib/data/seed_data.dart`.
-- Demo job cards so Opportunities works before external APIs are configured.
-- Supabase schema and Edge Function starter for future persistence and live job APIs.
+- Supabase Auth with email/password, Google sign-in, anonymous guest sessions, password reset, and private saved data.
+- Supabase persistence for completed assessments, all question responses, gift scores, saved results, saved careers, saved jobs, and search preferences.
+- Supabase Edge Functions for live job search through Adzuna and USAJOBS, with demo fallback when providers return no matches.
+- Stripe Checkout subscriptions with `$7.77/month` and `$77.77/year` plans, one free matched job, and webhook-driven subscription state.
+- Cloudflare Pages deployment for `giftpath.app`.
 - No orders, no followers, no social feed.
 
 ## Prerequisites
 
-Flutter is not currently installed on this machine. Install Flutter first:
+This repo uses a local Flutter SDK at:
 
 ```bash
-brew install --cask flutter
-flutter doctor
+/Users/sethswanson/.local/flutter-sdk/flutter/bin/flutter
 ```
 
-Then run:
+Run locally:
 
 ```bash
-flutter pub get
-flutter run -d chrome
+/Users/sethswanson/.local/flutter-sdk/flutter/bin/flutter pub get
+/Users/sethswanson/.local/flutter-sdk/flutter/bin/flutter run -d chrome --dart-define-from-file=.env.local
 ```
 
-With Supabase later:
+## Supabase
 
-```bash
-flutter run -d chrome \
-  --dart-define=SUPABASE_URL="https://YOUR_PROJECT.supabase.co" \
-  --dart-define=SUPABASE_ANON_KEY="YOUR_ANON_KEY"
+Project URL:
+
+```text
+https://nigdwvzpmgngsygkbfgd.supabase.co
 ```
 
-## Supabase Later
-
-When you create the Supabase account/project:
+Core setup:
 
 1. Enable Email Auth.
 2. Configure Google OAuth in Supabase Auth providers.
-3. Apply migrations in `supabase/migrations`.
-4. Deploy `supabase/functions/search-jobs`.
-5. Set Edge Function secrets:
+3. Enable Anonymous Auth.
+4. Add redirect URLs for local and production:
+   - `http://localhost:*`
+   - `http://localhost:*/auth`
+   - `https://giftpath.app`
+   - `https://giftpath.app/auth`
+   - `https://*.giftpath.pages.dev`
+   - `https://*.giftpath.pages.dev/auth`
+5. Apply migrations in `supabase/migrations`.
+6. Deploy Edge Functions.
+7. Set Edge Function secrets.
+
+Useful commands:
+
+```bash
+NPM_CONFIG_CACHE=/tmp/giftpath-npm-cache npx --yes supabase@latest db push --project-ref nigdwvzpmgngsygkbfgd
+NPM_CONFIG_CACHE=/tmp/giftpath-npm-cache npx --yes supabase@latest functions deploy search-jobs --project-ref nigdwvzpmgngsygkbfgd
+NPM_CONFIG_CACHE=/tmp/giftpath-npm-cache npx --yes supabase@latest functions deploy create-checkout-session --project-ref nigdwvzpmgngsygkbfgd
+NPM_CONFIG_CACHE=/tmp/giftpath-npm-cache npx --yes supabase@latest functions deploy stripe-webhook --project-ref nigdwvzpmgngsygkbfgd
+```
+
+Job API secrets:
 
 ```bash
 supabase secrets set ADZUNA_APP_ID=...
 supabase secrets set ADZUNA_APP_KEY=...
 supabase secrets set USAJOBS_API_KEY=...
-supabase secrets set USAJOBS_USER_AGENT=you@example.com
+supabase secrets set USAJOBS_USER_AGENT=get.spiritual.jobs@gmail.com
 ```
 
-The Flutter app works without Supabase by using in-memory local state and demo jobs.
+Configure Supabase SMTP before real users so verification and password reset emails come from a GiftPath-controlled sender instead of a generic Supabase sender.
 
 ## Stripe Subscriptions
 
@@ -65,7 +84,7 @@ Create subscription prices in Stripe:
 - Monthly: `$7.77` recurring monthly
 - Yearly: `$77.77` recurring yearly
 
-The helper script creates the older single-price test product; for V1, set both plan-specific price IDs from the Stripe Dashboard or Stripe API.
+The helper script creates an older single-price test product. V1 uses both plan-specific price IDs from the Stripe Dashboard or Stripe API.
 
 ```bash
 export STRIPE_SECRET_KEY=sk_test_...
@@ -94,7 +113,17 @@ Configure the Stripe webhook endpoint to:
 https://nigdwvzpmgngsygkbfgd.supabase.co/functions/v1/stripe-webhook
 ```
 
-Listen for `checkout.session.completed`. The app shows one matched job for free after the quiz and gates the rest behind a subscription checkout.
+Listen for:
+
+- `checkout.session.completed`
+- `customer.subscription.created`
+- `customer.subscription.updated`
+- `customer.subscription.deleted`
+- `invoice.payment_failed`
+
+The app shows one matched job for free after the quiz and gates the rest behind a subscription checkout.
+
+Production cutover requires separate live Stripe products/prices, live webhook secret, and live Supabase secrets.
 
 ## Cloudflare Pages
 
@@ -104,7 +133,7 @@ Recommended build settings:
 - Build command: `flutter build web --release --dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY --dart-define=STRIPE_PUBLISHABLE_KEY=$STRIPE_PUBLISHABLE_KEY`
 - Build output directory: `build/web`
 
-Cloudflare needs Flutter available in the build image. The simplest path is a GitHub Action that builds Flutter web and publishes the artifact, or configuring Cloudflare with a build image that installs Flutter before the build command.
+Cloudflare needs Flutter available in the build image. Current deploys use the local direct deploy script below.
 
 ### Direct Cloudflare Deploy
 

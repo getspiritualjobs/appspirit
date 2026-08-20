@@ -36,9 +36,11 @@ Deno.serve(async (req) => {
       searchAdzuna(titles, body),
       searchUsaJobs(titles, body),
     ]);
+    const jobs = dedupeJobs([...adzuna, ...usajobs]).slice(0, 50);
+    const providers = [...new Set(jobs.map((job) => job.provider))];
 
     return Response.json(
-      { jobs: [...adzuna, ...usajobs].slice(0, 50), demo: adzuna.length + usajobs.length === 0 },
+      { jobs, providers, demo: jobs.length === 0 },
       { headers: corsHeaders },
     );
   } catch (error) {
@@ -51,8 +53,6 @@ async function searchAdzuna(titles: string[], req: SearchRequest): Promise<Norma
   const appKey = Deno.env.get("ADZUNA_APP_KEY");
   if (!appId || !appKey) return [];
 
-  const query = encodeURIComponent(titles.slice(0, 3).join(" OR "));
-  const where = encodeURIComponent(req.location || "United States");
   const params = new URLSearchParams({
     app_id: appId,
     app_key: appKey,
@@ -76,7 +76,7 @@ async function searchAdzuna(titles: string[], req: SearchRequest): Promise<Norma
     title: String(job.title ?? ""),
     company: String(job.company?.display_name ?? ""),
     location: String(job.location?.display_name ?? ""),
-    description: String(job.description ?? ""),
+    description: cleanDescription(job.description),
     salaryMin: typeof job.salary_min === "number" ? Math.round(job.salary_min) : null,
     salaryMax: typeof job.salary_max === "number" ? Math.round(job.salary_max) : null,
     employmentType: String(job.contract_time ?? "Not specified"),
@@ -113,7 +113,7 @@ async function searchUsaJobs(titles: string[], req: SearchRequest): Promise<Norm
       title: String(descriptor.PositionTitle ?? ""),
       company: String(descriptor.OrganizationName ?? ""),
       location: String(descriptor.PositionLocationDisplay ?? ""),
-      description: String(descriptor.UserArea?.Details?.JobSummary ?? ""),
+      description: cleanDescription(descriptor.UserArea?.Details?.JobSummary),
       salaryMin: Number.isFinite(Number(remuneration.MinimumRange)) ? Math.round(Number(remuneration.MinimumRange)) : null,
       salaryMax: Number.isFinite(Number(remuneration.MaximumRange)) ? Math.round(Number(remuneration.MaximumRange)) : null,
       employmentType: String(descriptor.PositionSchedule?.[0]?.Name ?? "Not specified"),
@@ -122,4 +122,25 @@ async function searchUsaJobs(titles: string[], req: SearchRequest): Promise<Norm
       applicationUrl: String(descriptor.PositionURI ?? ""),
     };
   });
+}
+
+function dedupeJobs(jobs: NormalizedJob[]) {
+  const seen = new Set<string>();
+  const unique: NormalizedJob[] = [];
+  for (const job of jobs) {
+    const key = `${job.provider}:${job.id || job.title}:${job.company}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(job);
+  }
+  return unique;
+}
+
+function cleanDescription(value: unknown) {
+  return String(value ?? "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
 }

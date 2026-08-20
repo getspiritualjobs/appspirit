@@ -17,6 +17,7 @@ class _BillingSuccessPageState extends State<BillingSuccessPage> {
   void initState() {
     super.initState();
     appState.activateSubscription();
+    appState.refreshSubscription();
   }
 
   @override
