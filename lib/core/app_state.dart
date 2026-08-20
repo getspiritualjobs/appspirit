@@ -27,6 +27,32 @@ class GiftPathState extends ChangeNotifier {
   bool get hasResults => giftScores.isNotEmpty;
   List<GiftScore> get topThree => giftScores.take(3).toList();
 
+  void loadDemoAssessment() {
+    responses
+      ..clear()
+      ..addEntries(assessmentQuestions.map((question) {
+        final teachingWeight = question.weights
+            .where((weight) => weight.gift == GiftKey.teaching)
+            .fold<double>(0, (sum, weight) => sum + weight.weight);
+        final encouragementWeight = question.weights
+            .where((weight) => weight.gift == GiftKey.encouragement)
+            .fold<double>(0, (sum, weight) => sum + weight.weight);
+        final servingWeight = question.weights
+            .where((weight) => weight.gift == GiftKey.serving)
+            .fold<double>(0, (sum, weight) => sum + weight.weight);
+        final response =
+            teachingWeight + encouragementWeight + servingWeight > 0 ? 5 : 3;
+        return MapEntry(question.id, response);
+      }));
+    giftScores = scoreAssessment(assessmentQuestions, responses);
+    careerMatches = matchCareers(
+        careers: careers, giftScores: giftScores, preference: preference);
+    savedResult = List.unmodifiable(giftScores);
+    assessmentSaveError = null;
+    savedDataError = null;
+    notifyListeners();
+  }
+
   void answer(String questionId, int value) {
     responses[questionId] = value;
     notifyListeners();

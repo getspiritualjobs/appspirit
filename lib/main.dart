@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -21,5 +22,15 @@ Future<void> main() async {
     });
   }
 
-  runApp(const GiftPathApp());
+  String? initialLocation;
+  if (kDebugMode && Uri.base.queryParameters['demo'] == 'results') {
+    appState.loadDemoAssessment();
+    if (Uri.base.queryParameters['go'] == 'opportunities') {
+      initialLocation = '/opportunities';
+    } else if (Uri.base.queryParameters['go'] == 'results') {
+      initialLocation = '/results';
+    }
+  }
+
+  runApp(GiftPathApp(initialLocation: initialLocation));
 }

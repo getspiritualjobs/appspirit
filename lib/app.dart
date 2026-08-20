@@ -14,11 +14,14 @@ import 'features/saved/saved_page.dart';
 import 'widgets/app_shell.dart';
 
 class GiftPathApp extends StatelessWidget {
-  const GiftPathApp({super.key});
+  const GiftPathApp({this.initialLocation, super.key});
+
+  final String? initialLocation;
 
   @override
   Widget build(BuildContext context) {
     final router = GoRouter(
+      initialLocation: initialLocation,
       routes: [
         ShellRoute(
           builder: (context, state, child) => AppShell(child: child),
