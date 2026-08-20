@@ -15,6 +15,7 @@ class AssessmentPage extends StatefulWidget {
 
 class _AssessmentPageState extends State<AssessmentPage> {
   var index = 0;
+  var saving = false;
 
   AssessmentQuestion get question => assessmentQuestions[index];
 
@@ -74,11 +75,15 @@ class _AssessmentPageState extends State<AssessmentPage> {
                     if (missing >= 0) setState(() => index = missing);
                   },
                   onFinish: complete
-                      ? () {
-                          appState.completeAssessment();
-                          context.go('/results');
+                      ? () async {
+                          setState(() => saving = true);
+                          await appState.completeAssessment();
+                          if (!mounted) return;
+                          setState(() => saving = false);
+                          GoRouter.of(this.context).go('/results');
                         }
                       : null,
+                  saving: saving,
                 ),
                 const SizedBox(height: 22),
                 _QuestionMap(
@@ -246,6 +251,7 @@ class _AssessmentControls extends StatelessWidget {
     required this.onNext,
     required this.onReviewMissing,
     required this.onFinish,
+    required this.saving,
   });
 
   final int index;
@@ -254,7 +260,8 @@ class _AssessmentControls extends StatelessWidget {
   final VoidCallback? onBack;
   final VoidCallback? onNext;
   final VoidCallback onReviewMissing;
-  final VoidCallback? onFinish;
+  final Future<void> Function()? onFinish;
+  final bool saving;
 
   @override
   Widget build(BuildContext context) {
@@ -268,9 +275,15 @@ class _AssessmentControls extends StatelessWidget {
         const Spacer(),
         if (complete)
           FilledButton.icon(
-              onPressed: onFinish,
-              icon: const Icon(Icons.auto_awesome),
-              label: const Text('Reveal My Gifts'))
+              onPressed: saving ? null : onFinish,
+              icon: saving
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.auto_awesome),
+              label: Text(saving ? 'Saving Results' : 'Reveal My Gifts'))
         else if (isLast)
           OutlinedButton.icon(
               onPressed: onReviewMissing,

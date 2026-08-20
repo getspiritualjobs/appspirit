@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../data/assessment_repository.dart';
 import '../data/billing_service.dart';
 import '../data/seed_data.dart';
 import 'models.dart';
@@ -16,6 +17,8 @@ class GiftPathState extends ChangeNotifier {
   final List<JobListing> savedJobs = [];
   List<GiftScore> savedResult = const [];
   bool hasActiveSubscription = false;
+  String? latestAssessmentId;
+  String? assessmentSaveError;
 
   bool get isComplete => responses.length == assessmentQuestions.length;
   bool get hasResults => giftScores.isNotEmpty;
@@ -26,10 +29,22 @@ class GiftPathState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void completeAssessment() {
+  Future<void> completeAssessment() async {
     giftScores = scoreAssessment(assessmentQuestions, responses);
     careerMatches = matchCareers(
         careers: careers, giftScores: giftScores, preference: preference);
+    savedResult = List.unmodifiable(giftScores);
+    assessmentSaveError = null;
+    notifyListeners();
+
+    try {
+      latestAssessmentId = await AssessmentRepository().saveCompletedAssessment(
+        responses: responses,
+        giftScores: giftScores,
+      );
+    } catch (error) {
+      assessmentSaveError = error.toString();
+    }
     notifyListeners();
   }
 
