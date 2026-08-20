@@ -5,7 +5,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/app_state.dart';
 import '../../core/models.dart';
 import '../../core/theme.dart';
-import '../../data/billing_service.dart';
 import '../../data/job_search_service.dart';
 import '../../widgets/brand_components.dart';
 import '../../widgets/brand_mark.dart';
@@ -151,7 +150,7 @@ class _UpgradeCard extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 6),
                   const Text(
-                    'Subscribe after your assessment to see the full matched list, save jobs, and keep searching from your strongest career paths.',
+                    'Open the full matching screen to compare plans and continue when you are ready.',
                   ),
                   const SizedBox(height: 14),
                   Wrap(
@@ -160,16 +159,9 @@ class _UpgradeCard extends StatelessWidget {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       FilledButton.icon(
-                        onPressed: () =>
-                            _openCheckout(context, BillingPlan.monthly),
-                        icon: const Icon(Icons.credit_card),
-                        label: const Text('\$7.77 / month'),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed: () =>
-                            _openCheckout(context, BillingPlan.yearly),
-                        icon: const Icon(Icons.savings_outlined),
-                        label: const Text('\$77.77 / year'),
+                        onPressed: () => context.go('/subscribe'),
+                        icon: const Icon(Icons.lock_open_outlined),
+                        label: const Text('Unlock Full List'),
                       ),
                       const BrandEyebrow('One matched job is free'),
                     ],
@@ -181,26 +173,6 @@ class _UpgradeCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Future<void> _openCheckout(BuildContext context, BillingPlan plan) async {
-    final result = await BillingService().createCheckoutSession(plan: plan);
-    if (!context.mounted) return;
-
-    if (!result.isSuccess) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result.error ?? 'Stripe checkout is unavailable.'),
-          action: SnackBarAction(
-            label: 'Account',
-            onPressed: () => context.go('/auth'),
-          ),
-        ),
-      );
-      return;
-    }
-
-    await launchUrl(Uri.parse(result.url!), webOnlyWindowName: '_self');
   }
 }
 

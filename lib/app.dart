@@ -6,6 +6,7 @@ import 'features/about/about_page.dart';
 import 'features/assessment/assessment_page.dart';
 import 'features/auth/auth_page.dart';
 import 'features/billing/billing_success_page.dart';
+import 'features/billing/subscribe_page.dart';
 import 'features/careers/careers_page.dart';
 import 'features/home/home_page.dart';
 import 'features/opportunities/opportunities_page.dart';
@@ -38,6 +39,8 @@ class GiftPathApp extends StatelessWidget {
             GoRoute(path: '/saved', builder: (_, __) => const SavedPage()),
             GoRoute(path: '/about', builder: (_, __) => const AboutPage()),
             GoRoute(path: '/auth', builder: (_, __) => const AuthPage()),
+            GoRoute(
+                path: '/subscribe', builder: (_, __) => const SubscribePage()),
             GoRoute(
                 path: '/billing/success',
                 builder: (_, __) => const BillingSuccessPage()),

@@ -46,7 +46,7 @@ class BillingService {
         body: {
           'billingInterval': plan.apiValue,
           'successUrl': '$origin/billing/success',
-          'cancelUrl': '$origin/opportunities',
+          'cancelUrl': '$origin/subscribe',
         },
       );
       final data = response.data;

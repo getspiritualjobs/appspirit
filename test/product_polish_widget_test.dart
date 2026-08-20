@@ -5,6 +5,7 @@ import 'package:spiritual_gifts_career_discovery/core/models.dart';
 import 'package:spiritual_gifts_career_discovery/core/theme.dart';
 import 'package:spiritual_gifts_career_discovery/data/seed_data.dart';
 import 'package:spiritual_gifts_career_discovery/features/assessment/assessment_page.dart';
+import 'package:spiritual_gifts_career_discovery/features/billing/subscribe_page.dart';
 import 'package:spiritual_gifts_career_discovery/features/opportunities/opportunities_page.dart';
 import 'package:spiritual_gifts_career_discovery/features/results/results_page.dart';
 import 'package:spiritual_gifts_career_discovery/widgets/brand_components.dart';
@@ -56,7 +57,7 @@ void main() {
     expect(find.text('Teaching'), findsWidgets);
   });
 
-  testWidgets('opportunities paywall shows monthly and yearly choices',
+  testWidgets('opportunities paywall opens without showing plan prices',
       (WidgetTester tester) async {
     appState.giftScores = const [
       GiftScore(gift: GiftKey.teaching, rawScore: 5, normalizedScore: 94),
@@ -74,6 +75,16 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('MATCHED OPPORTUNITIES'), findsOneWidget);
+    expect(find.text('Unlock Full List'), findsOneWidget);
+    expect(find.textContaining(r'$7.77'), findsNothing);
+    expect(find.textContaining(r'$77.77'), findsNothing);
+  });
+
+  testWidgets('subscribe screen shows monthly and yearly choices',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(_shell(const SubscribePage()));
+
+    expect(find.text('FULL ACCESS'), findsOneWidget);
     expect(find.textContaining(r'$7.77'), findsOneWidget);
     expect(find.textContaining(r'$77.77'), findsOneWidget);
   });
