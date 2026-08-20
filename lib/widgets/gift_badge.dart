@@ -15,8 +15,8 @@ class GiftBadge extends StatelessWidget {
       avatar: Icon(_icon(gift), size: dense ? 15 : 17),
       label: Text(giftLabel(gift)),
       visualDensity: dense ? VisualDensity.compact : VisualDensity.standard,
-      backgroundColor: _color(gift).withOpacity(.12),
-      side: BorderSide(color: _color(gift).withOpacity(.20)),
+      backgroundColor: _color(gift).withValues(alpha: .12),
+      side: BorderSide(color: _color(gift).withValues(alpha: .20)),
       labelStyle: TextStyle(fontWeight: FontWeight.w700, color: _color(gift)),
     );
   }

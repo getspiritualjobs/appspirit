@@ -34,11 +34,17 @@ class _AssessmentPageState extends State<AssessmentPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Spiritual Gifts Assessment', style: Theme.of(context).textTheme.displayMedium),
+                Text('Spiritual Gifts Assessment',
+                    style: Theme.of(context).textTheme.displayMedium),
                 const SizedBox(height: 8),
-                const Text('Respond honestly. This is a tool for reflection, not a verdict about your calling or spiritual maturity.'),
+                const Text(
+                    'Respond honestly. This is a tool for reflection, not a verdict about your calling or spiritual maturity.'),
                 const SizedBox(height: 22),
-                _ProgressHeader(index: index, answered: answered, complete: complete, progress: progress),
+                _ProgressHeader(
+                    index: index,
+                    answered: answered,
+                    complete: complete,
+                    progress: progress),
                 const SizedBox(height: 18),
                 _QuestionPanel(
                   question: question,
@@ -46,7 +52,8 @@ class _AssessmentPageState extends State<AssessmentPage> {
                   onAnswer: (value) {
                     appState.answer(question.id, value);
                     if (index < assessmentQuestions.length - 1) {
-                      Future<void>.delayed(const Duration(milliseconds: 180), () {
+                      Future<void>.delayed(const Duration(milliseconds: 180),
+                          () {
                         if (mounted) setState(() => index += 1);
                       });
                     }
@@ -58,9 +65,12 @@ class _AssessmentPageState extends State<AssessmentPage> {
                   complete: complete,
                   response: response,
                   onBack: index == 0 ? null : () => setState(() => index -= 1),
-                  onNext: index == assessmentQuestions.length - 1 ? null : () => setState(() => index += 1),
+                  onNext: index == assessmentQuestions.length - 1
+                      ? null
+                      : () => setState(() => index += 1),
                   onReviewMissing: () {
-                    final missing = assessmentQuestions.indexWhere((item) => !appState.responses.containsKey(item.id));
+                    final missing = assessmentQuestions.indexWhere(
+                        (item) => !appState.responses.containsKey(item.id));
                     if (missing >= 0) setState(() => index = missing);
                   },
                   onFinish: complete
@@ -71,7 +81,9 @@ class _AssessmentPageState extends State<AssessmentPage> {
                       : null,
                 ),
                 const SizedBox(height: 22),
-                _QuestionMap(currentIndex: index, onSelect: (next) => setState(() => index = next)),
+                _QuestionMap(
+                    currentIndex: index,
+                    onSelect: (next) => setState(() => index = next)),
               ],
             ),
           ),
@@ -82,7 +94,11 @@ class _AssessmentPageState extends State<AssessmentPage> {
 }
 
 class _ProgressHeader extends StatelessWidget {
-  const _ProgressHeader({required this.index, required this.answered, required this.complete, required this.progress});
+  const _ProgressHeader(
+      {required this.index,
+      required this.answered,
+      required this.complete,
+      required this.progress});
 
   final int index;
   final int answered;
@@ -98,10 +114,15 @@ class _ProgressHeader extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text('Question ${index + 1} of ${assessmentQuestions.length}', style: const TextStyle(fontWeight: FontWeight.w900))),
+              Expanded(
+                  child: Text(
+                      'Question ${index + 1} of ${assessmentQuestions.length}',
+                      style: const TextStyle(fontWeight: FontWeight.w900))),
               Text(
                 complete ? 'Ready for results' : '$answered answered',
-                style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w800),
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w800),
               ),
             ],
           ),
@@ -114,7 +135,8 @@ class _ProgressHeader extends StatelessWidget {
 }
 
 class _QuestionPanel extends StatelessWidget {
-  const _QuestionPanel({required this.question, required this.response, required this.onAnswer});
+  const _QuestionPanel(
+      {required this.question, required this.response, required this.onAnswer});
 
   final AssessmentQuestion question;
   final int? response;
@@ -127,7 +149,11 @@ class _QuestionPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(question.text, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontSize: 30)),
+          Text(question.text,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineMedium
+                  ?.copyWith(fontSize: 30)),
           const SizedBox(height: 20),
           for (final option in const [
             (1, 'Not like me'),
@@ -138,7 +164,11 @@ class _QuestionPanel extends StatelessWidget {
           ])
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
-              child: _AnswerOption(number: option.$1, label: option.$2, selected: response == option.$1, onTap: () => onAnswer(option.$1)),
+              child: _AnswerOption(
+                  number: option.$1,
+                  label: option.$2,
+                  selected: response == option.$1,
+                  onTap: () => onAnswer(option.$1)),
             ),
         ],
       ),
@@ -147,7 +177,11 @@ class _QuestionPanel extends StatelessWidget {
 }
 
 class _AnswerOption extends StatelessWidget {
-  const _AnswerOption({required this.number, required this.label, required this.selected, required this.onTap});
+  const _AnswerOption(
+      {required this.number,
+      required this.label,
+      required this.selected,
+      required this.onTap});
 
   final int number;
   final String label;
@@ -165,9 +199,14 @@ class _AnswerOption extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: selected ? scheme.primary.withOpacity(.10) : Colors.white,
+          color:
+              selected ? scheme.primary.withValues(alpha: .10) : Colors.white,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: selected ? scheme.primary : scheme.primary.withOpacity(.14), width: selected ? 2 : 1),
+          border: Border.all(
+              color: selected
+                  ? scheme.primary
+                  : scheme.primary.withValues(alpha: .14),
+              width: selected ? 2 : 1),
         ),
         child: Row(
           children: [
@@ -178,12 +217,18 @@ class _AnswerOption extends StatelessWidget {
               decoration: BoxDecoration(
                 color: selected ? scheme.primary : scheme.surface,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: scheme.primary.withOpacity(.18)),
+                border:
+                    Border.all(color: scheme.primary.withValues(alpha: .18)),
               ),
-              child: Text('$number', style: TextStyle(color: selected ? Colors.white : scheme.primary, fontWeight: FontWeight.w900)),
+              child: Text('$number',
+                  style: TextStyle(
+                      color: selected ? Colors.white : scheme.primary,
+                      fontWeight: FontWeight.w900)),
             ),
             const SizedBox(width: 12),
-            Expanded(child: Text(label, style: const TextStyle(fontWeight: FontWeight.w800))),
+            Expanded(
+                child: Text(label,
+                    style: const TextStyle(fontWeight: FontWeight.w800))),
             if (selected) Icon(Icons.check_circle, color: scheme.primary),
           ],
         ),
@@ -216,14 +261,26 @@ class _AssessmentControls extends StatelessWidget {
     final isLast = index == assessmentQuestions.length - 1;
     return Row(
       children: [
-        OutlinedButton.icon(onPressed: onBack, icon: const Icon(Icons.arrow_back), label: const Text('Back')),
+        OutlinedButton.icon(
+            onPressed: onBack,
+            icon: const Icon(Icons.arrow_back),
+            label: const Text('Back')),
         const Spacer(),
         if (complete)
-          FilledButton.icon(onPressed: onFinish, icon: const Icon(Icons.auto_awesome), label: const Text('Reveal My Gifts'))
+          FilledButton.icon(
+              onPressed: onFinish,
+              icon: const Icon(Icons.auto_awesome),
+              label: const Text('Reveal My Gifts'))
         else if (isLast)
-          OutlinedButton.icon(onPressed: onReviewMissing, icon: const Icon(Icons.rate_review_outlined), label: const Text('Review Missing'))
+          OutlinedButton.icon(
+              onPressed: onReviewMissing,
+              icon: const Icon(Icons.rate_review_outlined),
+              label: const Text('Review Missing'))
         else
-          FilledButton.icon(onPressed: onNext, icon: const Icon(Icons.arrow_forward), label: Text(response == null ? 'Skip for Now' : 'Next')),
+          FilledButton.icon(
+              onPressed: onNext,
+              icon: const Icon(Icons.arrow_forward),
+              label: Text(response == null ? 'Skip for Now' : 'Next')),
       ],
     );
   }
@@ -255,15 +312,21 @@ class _QuestionMap extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: i == currentIndex
                       ? scheme.primary
-                      : appState.responses.containsKey(assessmentQuestions[i].id)
-                          ? scheme.primary.withOpacity(.16)
+                      : appState.responses
+                              .containsKey(assessmentQuestions[i].id)
+                          ? scheme.primary.withValues(alpha: .16)
                           : Colors.white,
                   borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: scheme.primary.withOpacity(.16)),
+                  border:
+                      Border.all(color: scheme.primary.withValues(alpha: .16)),
                 ),
                 child: Text(
                   '${i + 1}',
-                  style: TextStyle(fontSize: 11, color: i == currentIndex ? Colors.white : scheme.onSurface, fontWeight: FontWeight.w800),
+                  style: TextStyle(
+                      fontSize: 11,
+                      color:
+                          i == currentIndex ? Colors.white : scheme.onSurface,
+                      fontWeight: FontWeight.w800),
                 ),
               ),
             ),

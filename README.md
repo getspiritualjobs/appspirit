@@ -56,12 +56,46 @@ supabase secrets set USAJOBS_USER_AGENT=you@example.com
 
 The Flutter app works without Supabase by using in-memory local state and demo jobs.
 
+## Stripe Subscriptions
+
+GiftPath uses Supabase Edge Functions to create Stripe Checkout Sessions. The Flutter client never receives the Stripe secret key.
+
+Create the subscription product and monthly default price:
+
+```bash
+export STRIPE_SECRET_KEY=sk_test_...
+bash tooling/stripe_create_subscription_product.sh
+```
+
+Copy the returned `default_price` value, then set Edge Function secrets:
+
+```bash
+supabase secrets set STRIPE_SECRET_KEY=sk_test_...
+supabase secrets set STRIPE_PRICE_ID=price_...
+supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+Deploy the billing functions:
+
+```bash
+supabase functions deploy create-checkout-session
+supabase functions deploy stripe-webhook
+```
+
+Configure the Stripe webhook endpoint to:
+
+```text
+https://nigdwvzpmgngsygkbfgd.supabase.co/functions/v1/stripe-webhook
+```
+
+Listen for `checkout.session.completed`. The app shows one matched job for free after the quiz and gates the rest behind a subscription checkout.
+
 ## Cloudflare Pages
 
 Recommended build settings:
 
 - Framework preset: None
-- Build command: `flutter build web --release --dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY`
+- Build command: `flutter build web --release --dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY --dart-define=STRIPE_PUBLISHABLE_KEY=$STRIPE_PUBLISHABLE_KEY`
 - Build output directory: `build/web`
 
 Cloudflare needs Flutter available in the build image. The simplest path is a GitHub Action that builds Flutter web and publishes the artifact, or configuring Cloudflare with a build image that installs Flutter before the build command.
@@ -77,6 +111,7 @@ CLOUDFLARE_ACCOUNT_ID=efe98345b3630bd0df0f8142c5c0fb7c
 CLOUDFLARE_API_TOKEN=...
 CLOUDFLARE_PAGES_PROJECT=giftpath
 CLOUDFLARE_DOMAIN=giftpath.app
+STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
 Then run:

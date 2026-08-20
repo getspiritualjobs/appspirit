@@ -21,8 +21,11 @@ class ResultsPage extends StatelessWidget {
             child: EmptyState(
               icon: Icons.auto_awesome,
               title: 'Your results are waiting',
-              body: 'Complete the assessment to see your strongest gift alignments and career matches.',
-              action: FilledButton(onPressed: () => context.go('/assessment'), child: const Text('Start Assessment')),
+              body:
+                  'Complete the assessment to see your strongest gift alignments and career matches.',
+              action: FilledButton(
+                  onPressed: () => context.go('/assessment'),
+                  child: const Text('Start Assessment')),
             ),
           );
         }
@@ -33,9 +36,11 @@ class ResultsPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Assessment Complete', style: Theme.of(context).textTheme.displayMedium),
+                Text('Assessment Complete',
+                    style: Theme.of(context).textTheme.displayMedium),
                 const SizedBox(height: 8),
-                const Text("Here's how your gifts showed up. Your results are one lens for reflection in work, church, relationships, and community."),
+                const Text(
+                    "Here's how your gifts showed up. Your results are one lens for reflection in work, church, relationships, and community."),
                 const SizedBox(height: 22),
                 LayoutBuilder(
                   builder: (context, constraints) {
@@ -65,6 +70,11 @@ class ResultsPage extends StatelessWidget {
                       icon: const Icon(Icons.work_outline),
                       label: const Text('See where your gifts could take you'),
                     ),
+                    FilledButton.tonalIcon(
+                      onPressed: () => context.go('/opportunities'),
+                      icon: const Icon(Icons.open_in_new),
+                      label: const Text('View My Free Job Match'),
+                    ),
                     OutlinedButton.icon(
                       onPressed: appState.saveCurrentResult,
                       icon: const Icon(Icons.bookmark_add_outlined),
@@ -73,7 +83,8 @@ class ResultsPage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 28),
-                Text('All Gift Alignments', style: Theme.of(context).textTheme.headlineMedium),
+                Text('All Gift Alignments',
+                    style: Theme.of(context).textTheme.headlineMedium),
                 const SizedBox(height: 12),
                 for (final score in appState.giftScores) _ScoreRow(score),
               ],
@@ -100,11 +111,15 @@ class _TopGiftCard extends StatelessWidget {
           GiftBadge(score.gift),
           const SizedBox(height: 16),
           Text(gift.name, style: Theme.of(context).textTheme.headlineMedium),
-          Text('${score.normalizedScore}% alignment', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w900)),
+          Text('${score.normalizedScore}% alignment',
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.w900)),
           const SizedBox(height: 12),
           Text(gift.shortDescription),
           const Spacer(),
-          Text(gift.scripture, style: const TextStyle(fontWeight: FontWeight.w700)),
+          Text(gift.scripture,
+              style: const TextStyle(fontWeight: FontWeight.w700)),
         ],
       ),
     );
@@ -129,13 +144,21 @@ class _ShareCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('My top spiritual gift alignments', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w700)),
+            const Text('My top spiritual gift alignments',
+                style: TextStyle(
+                    color: Colors.white70, fontWeight: FontWeight.w700)),
             const SizedBox(height: 12),
-            Wrap(spacing: 10, runSpacing: 10, children: [for (final score in top) GiftBadge(score.gift)]),
+            Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [for (final score in top) GiftBadge(score.gift)]),
             const SizedBox(height: 18),
             const Text(
               'Discover how you are gifted. Explore where those gifts could take you.',
-              style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900),
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900),
             ),
           ],
         ),
@@ -155,8 +178,13 @@ class _ScoreRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
-          SizedBox(width: 150, child: Text(giftLabel(score.gift), style: const TextStyle(fontWeight: FontWeight.w800))),
-          Expanded(child: LinearProgressIndicator(value: score.normalizedScore / 100, minHeight: 8)),
+          SizedBox(
+              width: 150,
+              child: Text(giftLabel(score.gift),
+                  style: const TextStyle(fontWeight: FontWeight.w800))),
+          Expanded(
+              child: LinearProgressIndicator(
+                  value: score.normalizedScore / 100, minHeight: 8)),
           const SizedBox(width: 12),
           Text('${score.normalizedScore}%'),
         ],

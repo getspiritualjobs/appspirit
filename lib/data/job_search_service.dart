@@ -27,7 +27,11 @@ class JobSearchService {
     String? employmentType,
   }) async {
     final titles = careerMatches.isEmpty
-        ? ['Learning and Development Specialist', 'Career Coach', 'Nonprofit Program Manager']
+        ? [
+            'Learning and Development Specialist',
+            'Career Coach',
+            'Nonprofit Program Manager'
+          ]
         : careerMatches.take(5).map((match) => match.career.title).toList();
 
     if (!Env.hasSupabase) {
@@ -46,7 +50,8 @@ class JobSearchService {
           if (location.trim().isNotEmpty) 'location': location.trim(),
           'remote': remoteOnly,
           if (salaryMin != null) 'salaryMin': salaryMin,
-          if (employmentType != null && employmentType.isNotEmpty) 'employmentType': employmentType,
+          if (employmentType != null && employmentType.isNotEmpty)
+            'employmentType': employmentType,
         },
       );
 
@@ -55,7 +60,8 @@ class JobSearchService {
         return JobSearchResult(
           jobs: demoJobs,
           source: JobSearchSource.demo,
-          message: 'Demo jobs are showing because the job API returned an unexpected response.',
+          message:
+              'Demo jobs are showing because the job API returned an unexpected response.',
         );
       }
 
@@ -64,7 +70,8 @@ class JobSearchService {
         return JobSearchResult(
           jobs: demoJobs,
           source: JobSearchSource.demo,
-          message: 'Demo jobs are showing until Adzuna or USAJOBS credentials are added to Supabase.',
+          message:
+              'Demo jobs are showing until Adzuna or USAJOBS credentials are added to Supabase.',
         );
       }
 
@@ -77,18 +84,22 @@ class JobSearchService {
       return JobSearchResult(
         jobs: jobs.isEmpty ? demoJobs : jobs,
         source: jobs.isEmpty ? JobSearchSource.demo : JobSearchSource.live,
-        message: jobs.isEmpty ? 'No live jobs matched those filters, so demo jobs are showing.' : null,
+        message: jobs.isEmpty
+            ? 'No live jobs matched those filters, so demo jobs are showing.'
+            : null,
       );
     } catch (error) {
       return JobSearchResult(
         jobs: demoJobs,
         source: JobSearchSource.demo,
-        message: 'Demo jobs are showing because the live job search is not deployed yet.',
+        message:
+            'Demo jobs are showing because the live job search is not deployed yet.',
       );
     }
   }
 
-  JobListing _fromJson(Map<String, dynamic> json, List<CareerMatch> careerMatches) {
+  JobListing _fromJson(
+      Map<String, dynamic> json, List<CareerMatch> careerMatches) {
     final title = _asString(json['title']);
     return JobListing(
       id: _asString(json['id'], fallback: title),
@@ -96,12 +107,15 @@ class JobSearchService {
       title: title,
       company: _asString(json['company'], fallback: 'Unknown company'),
       location: _asString(json['location'], fallback: 'Location not listed'),
-      description: _asString(json['description'], fallback: 'No description provided.'),
+      description:
+          _asString(json['description'], fallback: 'No description provided.'),
       salaryMin: _asInt(json['salaryMin']),
       salaryMax: _asInt(json['salaryMax']),
-      employmentType: _asString(json['employmentType'], fallback: 'Not specified'),
+      employmentType:
+          _asString(json['employmentType'], fallback: 'Not specified'),
       remote: json['remote'] == true,
-      postedDate: DateTime.tryParse(_asString(json['postedDate'])) ?? DateTime.now(),
+      postedDate:
+          DateTime.tryParse(_asString(json['postedDate'])) ?? DateTime.now(),
       applicationUrl: _asString(json['applicationUrl']),
       matchScore: _estimateJobMatch(title, careerMatches),
     );

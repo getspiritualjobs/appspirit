@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/app_state.dart';
 import '../../core/models.dart';
+import '../../data/billing_service.dart';
 import '../../data/job_search_service.dart';
+import '../../widgets/brand_mark.dart';
 import '../../widgets/responsive.dart';
 
 class OpportunitiesPage extends StatefulWidget {
@@ -23,6 +26,7 @@ class _OpportunitiesPageState extends State<OpportunitiesPage> {
   @override
   void initState() {
     super.initState();
+    appState.refreshSubscription();
     _search();
   }
 
@@ -51,19 +55,43 @@ class _OpportunitiesPageState extends State<OpportunitiesPage> {
     return AnimatedBuilder(
       animation: appState,
       builder: (context, _) {
-        final titles = appState.careerMatches.take(5).map((match) => match.career.title).join(', ');
+        if (!appState.hasResults) {
+          return PageBand(
+            child: EmptyState(
+              icon: Icons.assignment_outlined,
+              title: 'Take the assessment first',
+              body:
+                  'Your free opportunity and premium job matches unlock after GiftPath has your gift and career profile.',
+              action: FilledButton(
+                onPressed: () => context.go('/assessment'),
+                child: const Text('Start Assessment'),
+              ),
+            ),
+          );
+        }
+
+        final titles = appState.careerMatches
+            .take(5)
+            .map((match) => match.career.title)
+            .join(', ');
         final jobs = result?.jobs ?? const <JobListing>[];
+        final visibleJobs =
+            appState.hasActiveSubscription ? jobs : jobs.take(1).toList();
+        final lockedCount = appState.hasActiveSubscription
+            ? 0
+            : jobs.length - visibleJobs.length;
         return SingleChildScrollView(
           child: PageBand(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Opportunities for You', style: Theme.of(context).textTheme.displayMedium),
+                Text('Opportunities for You',
+                    style: Theme.of(context).textTheme.displayMedium),
                 const SizedBox(height: 8),
                 Text(
-                  appState.hasResults
-                      ? 'Searches can be generated from your highest-ranked careers: $titles.'
-                      : 'Demo opportunities are shown until you complete the assessment and configure job API credentials.',
+                  appState.hasActiveSubscription
+                      ? 'Searches are generated from your highest-ranked careers: $titles.'
+                      : 'Your first opportunity is free. Upgrade to view the rest of your matched job list.',
                 ),
                 const SizedBox(height: 18),
                 _JobSearchPanel(
@@ -71,7 +99,8 @@ class _OpportunitiesPageState extends State<OpportunitiesPage> {
                   remoteOnly: remoteOnly,
                   loading: loading,
                   result: result,
-                  onRemoteChanged: (value) => setState(() => remoteOnly = value),
+                  onRemoteChanged: (value) =>
+                      setState(() => remoteOnly = value),
                   onSearch: _search,
                 ),
                 const SizedBox(height: 20),
@@ -82,14 +111,85 @@ class _OpportunitiesPageState extends State<OpportunitiesPage> {
                       child: CircularProgressIndicator(),
                     ),
                   )
-                else
-                  for (final job in jobs) _JobCard(job: job),
+                else ...[
+                  for (final job in visibleJobs) _JobCard(job: job),
+                  if (lockedCount > 0) _UpgradeCard(lockedCount: lockedCount),
+                ],
               ],
             ),
           ),
         );
       },
     );
+  }
+}
+
+class _UpgradeCard extends StatelessWidget {
+  const _UpgradeCard({required this.lockedCount});
+
+  final int lockedCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: InfoCard(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const IconBadge(Icons.lock_open_outlined, size: 46),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Unlock $lockedCount more matched jobs',
+                      style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Subscribe after your assessment to view every opportunity, save jobs, and keep searching from your career matches.',
+                  ),
+                  const SizedBox(height: 14),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      FilledButton.icon(
+                        onPressed: () => _openCheckout(context),
+                        icon: const Icon(Icons.credit_card),
+                        label: const Text('Unlock All Jobs'),
+                      ),
+                      const Text('One matched job is free.'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openCheckout(BuildContext context) async {
+    final result = await BillingService().createCheckoutSession();
+    if (!context.mounted) return;
+
+    if (!result.isSuccess) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.error ?? 'Stripe checkout is unavailable.'),
+          action: SnackBarAction(
+            label: 'Account',
+            onPressed: () => context.go('/auth'),
+          ),
+        ),
+      );
+      return;
+    }
+
+    await launchUrl(Uri.parse(result.url!), webOnlyWindowName: '_self');
   }
 }
 
@@ -119,15 +219,22 @@ class _JobSearchPanel extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text('Live job search', style: Theme.of(context).textTheme.titleLarge)),
+              Expanded(
+                  child: Text('Live job search',
+                      style: Theme.of(context).textTheme.titleLarge)),
               Chip(
-                avatar: Icon(live ? Icons.cloud_done_outlined : Icons.data_object_outlined, size: 16),
+                avatar: Icon(
+                    live
+                        ? Icons.cloud_done_outlined
+                        : Icons.data_object_outlined,
+                    size: 16),
                 label: Text(live ? 'Live API' : 'Demo fallback'),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Text(result?.message ?? 'Searches are generated from your highest-ranked career matches and routed through Supabase Edge Functions.'),
+          Text(result?.message ??
+              'Searches are generated from your highest-ranked career matches and routed through Supabase Edge Functions.'),
           const SizedBox(height: 12),
           LayoutBuilder(
             builder: (context, constraints) {
@@ -154,7 +261,10 @@ class _JobSearchPanel extends StatelessWidget {
                 FilledButton.icon(
                   onPressed: loading ? null : onSearch,
                   icon: loading
-                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2))
                       : const Icon(Icons.search),
                   label: const Text('Search Jobs'),
                 ),
@@ -165,7 +275,10 @@ class _JobSearchPanel extends StatelessWidget {
                       children: [
                         controls[0],
                         const SizedBox(height: 10),
-                        Wrap(spacing: 10, runSpacing: 10, children: [controls[1], controls[2]]),
+                        Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: [controls[1], controls[2]]),
                       ],
                     )
                   : Row(
@@ -181,10 +294,10 @@ class _JobSearchPanel extends StatelessWidget {
             },
           ),
           const SizedBox(height: 12),
-          Wrap(
+          const Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: const [
+            children: [
               Chip(label: Text('Adzuna ready')),
               Chip(label: Text('USAJOBS ready')),
               Chip(label: Text('Source links preserved')),
@@ -217,12 +330,16 @@ class _JobCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(job.title, style: Theme.of(context).textTheme.titleLarge),
+                      Text(job.title,
+                          style: Theme.of(context).textTheme.titleLarge),
                       Text('${job.company} · ${job.location}'),
                     ],
                   ),
                 ),
-                Text('${job.matchScore}% Match', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w900)),
+                Text('${job.matchScore}% Match',
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w900)),
               ],
             ),
             const SizedBox(height: 10),
@@ -230,14 +347,18 @@ class _JobCard extends StatelessWidget {
             const SizedBox(height: 10),
             Text(job.description),
             const SizedBox(height: 10),
-            Text('Source: ${job.provider}', style: const TextStyle(fontWeight: FontWeight.w700)),
+            Text('Source: ${job.provider}',
+                style: const TextStyle(fontWeight: FontWeight.w700)),
             const SizedBox(height: 14),
             Wrap(
               spacing: 10,
               runSpacing: 10,
               children: [
                 FilledButton.icon(
-                  onPressed: job.applicationUrl.isEmpty ? null : () => launchUrl(Uri.parse(job.applicationUrl), webOnlyWindowName: '_blank'),
+                  onPressed: job.applicationUrl.isEmpty
+                      ? null
+                      : () => launchUrl(Uri.parse(job.applicationUrl),
+                          webOnlyWindowName: '_blank'),
                   icon: const Icon(Icons.open_in_new),
                   label: const Text('View Job'),
                 ),
@@ -255,9 +376,15 @@ class _JobCard extends StatelessWidget {
   }
 
   String _salaryText(JobListing job) {
-    if (job.salaryMin == null && job.salaryMax == null) return job.employmentType;
-    if (job.salaryMax == null) return '\$${job.salaryMin! ~/ 1000}k+ · ${job.employmentType}';
-    if (job.salaryMin == null) return 'Up to \$${job.salaryMax! ~/ 1000}k · ${job.employmentType}';
+    if (job.salaryMin == null && job.salaryMax == null) {
+      return job.employmentType;
+    }
+    if (job.salaryMax == null) {
+      return '\$${job.salaryMin! ~/ 1000}k+ · ${job.employmentType}';
+    }
+    if (job.salaryMin == null) {
+      return 'Up to \$${job.salaryMax! ~/ 1000}k · ${job.employmentType}';
+    }
     return '\$${job.salaryMin! ~/ 1000}k-\$${job.salaryMax! ~/ 1000}k · ${job.employmentType}';
   }
 }

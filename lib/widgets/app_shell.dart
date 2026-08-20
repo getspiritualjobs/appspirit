@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'brand_mark.dart';
+
 class AppShell extends StatelessWidget {
   const AppShell({required this.child, super.key});
 
@@ -26,27 +28,22 @@ class AppShell extends StatelessWidget {
       appBar: AppBar(
         title: InkWell(
           onTap: () => context.go('/'),
-          child: Row(
+          child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(Icons.auto_awesome, color: Colors.white, size: 19),
-              ),
-              const SizedBox(width: 10),
-              const Text('GiftPath', style: TextStyle(fontWeight: FontWeight.w800)),
+              GiftPathMark(),
+              SizedBox(width: 10),
+              Text('GiftPath', style: TextStyle(fontWeight: FontWeight.w800)),
             ],
           ),
         ),
         actions: isWide
             ? [
                 for (final item in nav.skip(1))
-                  _NavButton(label: item.$1, path: item.$2, selected: location == item.$2),
+                  _NavButton(
+                      label: item.$1,
+                      path: item.$2,
+                      selected: location == item.$2),
                 Padding(
                   padding: const EdgeInsets.only(right: 16),
                   child: OutlinedButton.icon(
@@ -64,7 +61,9 @@ class AppShell extends StatelessWidget {
               child: SafeArea(
                 child: ListView(
                   children: [
-                    const ListTile(title: Text('GiftPath', style: TextStyle(fontWeight: FontWeight.w800))),
+                    const ListTile(
+                        title: Text('GiftPath',
+                            style: TextStyle(fontWeight: FontWeight.w800))),
                     for (final item in nav)
                       ListTile(
                         title: Text(item.$1),
@@ -92,7 +91,8 @@ class AppShell extends StatelessWidget {
 }
 
 class _NavButton extends StatelessWidget {
-  const _NavButton({required this.label, required this.path, required this.selected});
+  const _NavButton(
+      {required this.label, required this.path, required this.selected});
 
   final String label;
   final String path;
@@ -100,15 +100,19 @@ class _NavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return TextButton(
       onPressed: () => context.go(path),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-          color: selected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface,
-        ),
+      style: TextButton.styleFrom(
+        backgroundColor:
+            selected ? scheme.primary.withValues(alpha: .09) : null,
+        foregroundColor: selected ? scheme.primary : scheme.onSurface,
+        minimumSize: const Size(44, 40),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
       ),
+      child: Text(label,
+          style: TextStyle(
+              fontWeight: selected ? FontWeight.w800 : FontWeight.w600)),
     );
   }
 }

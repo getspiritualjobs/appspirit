@@ -1,4 +1,12 @@
-enum GiftKey { prophecy, serving, teaching, encouragement, giving, leadership, mercy }
+enum GiftKey {
+  prophecy,
+  serving,
+  teaching,
+  encouragement,
+  giving,
+  leadership,
+  mercy
+}
 
 class SpiritualGift {
   const SpiritualGift({

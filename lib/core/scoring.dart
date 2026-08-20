@@ -17,7 +17,8 @@ List<GiftScore> scoreAssessment(
       final weighted = value * weight.weight;
       raw[weight.gift] = raw[weight.gift]! + weighted;
       minPossible[weight.gift] = minPossible[weight.gift]! + weight.weight;
-      maxPossible[weight.gift] = maxPossible[weight.gift]! + (5 * weight.weight);
+      maxPossible[weight.gift] =
+          maxPossible[weight.gift]! + (5 * weight.weight);
     }
   }
 
@@ -25,7 +26,8 @@ List<GiftScore> scoreAssessment(
     final min = minPossible[gift]!;
     final max = maxPossible[gift]!;
     final score = raw[gift]!;
-    final normalized = max == min ? 0 : (((score - min) / (max - min)) * 100).round();
+    final normalized =
+        max == min ? 0 : (((score - min) / (max - min)) * 100).round();
     return GiftScore(
       gift: gift,
       rawScore: score,
@@ -41,7 +43,9 @@ List<CareerMatch> matchCareers({
   UserPreference preference = const UserPreference(),
   int limit = 20,
 }) {
-  final scoreMap = {for (final score in giftScores) score.gift: score.normalizedScore};
+  final scoreMap = {
+    for (final score in giftScores) score.gift: score.normalizedScore
+  };
 
   final matches = careers.map((career) {
     var weightedScore = 0.0;
@@ -52,11 +56,13 @@ List<CareerMatch> matchCareers({
     }
     var finalScore = totalWeight == 0 ? 0.0 : weightedScore / totalWeight;
 
-    final interestOverlap = career.interests.where(preference.interests.contains).length;
+    final interestOverlap =
+        career.interests.where(preference.interests.contains).length;
     final valueOverlap = career.values.where(preference.values.contains).length;
     finalScore += interestOverlap * 2.5;
     finalScore += valueOverlap * 2.0;
-    if (preference.salaryMin != null && career.salaryHigh >= preference.salaryMin!) {
+    if (preference.salaryMin != null &&
+        career.salaryHigh >= preference.salaryMin!) {
       finalScore += 2.0;
     }
 
@@ -68,7 +74,8 @@ List<CareerMatch> matchCareers({
       });
 
     final top = strongest.take(3).map((entry) => entry.key).toList();
-    final reason = 'Your ${giftLabel(top.first)} and ${giftLabel(top.length > 1 ? top[1] : top.first)} scores align with work centered on ${career.description.toLowerCase()}';
+    final reason =
+        'Your ${giftLabel(top.first)} and ${giftLabel(top.length > 1 ? top[1] : top.first)} scores align with work centered on ${career.description.toLowerCase()}';
 
     return CareerMatch(
       career: career,

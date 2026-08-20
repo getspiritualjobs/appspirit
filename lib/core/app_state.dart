@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../data/billing_service.dart';
 import '../data/seed_data.dart';
 import 'models.dart';
 import 'scoring.dart';
@@ -14,6 +15,7 @@ class GiftPathState extends ChangeNotifier {
   final List<CareerMatch> savedCareers = [];
   final List<JobListing> savedJobs = [];
   List<GiftScore> savedResult = const [];
+  bool hasActiveSubscription = false;
 
   bool get isComplete => responses.length == assessmentQuestions.length;
   bool get hasResults => giftScores.isNotEmpty;
@@ -26,14 +28,16 @@ class GiftPathState extends ChangeNotifier {
 
   void completeAssessment() {
     giftScores = scoreAssessment(assessmentQuestions, responses);
-    careerMatches = matchCareers(careers: careers, giftScores: giftScores, preference: preference);
+    careerMatches = matchCareers(
+        careers: careers, giftScores: giftScores, preference: preference);
     notifyListeners();
   }
 
   void updatePreference(UserPreference next) {
     preference = next;
     if (giftScores.isNotEmpty) {
-      careerMatches = matchCareers(careers: careers, giftScores: giftScores, preference: preference);
+      careerMatches = matchCareers(
+          careers: careers, giftScores: giftScores, preference: preference);
     }
     notifyListeners();
   }
@@ -45,7 +49,8 @@ class GiftPathState extends ChangeNotifier {
   }
 
   void toggleSavedCareer(CareerMatch match) {
-    final index = savedCareers.indexWhere((item) => item.career.id == match.career.id);
+    final index =
+        savedCareers.indexWhere((item) => item.career.id == match.career.id);
     if (index >= 0) {
       savedCareers.removeAt(index);
     } else {
@@ -55,7 +60,8 @@ class GiftPathState extends ChangeNotifier {
   }
 
   void toggleSavedJob(JobListing job) {
-    final index = savedJobs.indexWhere((item) => item.id == job.id && item.provider == job.provider);
+    final index = savedJobs.indexWhere(
+        (item) => item.id == job.id && item.provider == job.provider);
     if (index >= 0) {
       savedJobs.removeAt(index);
     } else {
@@ -64,7 +70,22 @@ class GiftPathState extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool isCareerSaved(Career career) => savedCareers.any((item) => item.career.id == career.id);
+  bool isCareerSaved(Career career) =>
+      savedCareers.any((item) => item.career.id == career.id);
 
-  bool isJobSaved(JobListing job) => savedJobs.any((item) => item.id == job.id && item.provider == job.provider);
+  bool isJobSaved(JobListing job) => savedJobs
+      .any((item) => item.id == job.id && item.provider == job.provider);
+
+  void activateSubscription() {
+    hasActiveSubscription = true;
+    notifyListeners();
+  }
+
+  Future<void> refreshSubscription() async {
+    final active = await BillingService().hasActiveSubscription();
+    if (active != hasActiveSubscription) {
+      hasActiveSubscription = active;
+      notifyListeners();
+    }
+  }
 }

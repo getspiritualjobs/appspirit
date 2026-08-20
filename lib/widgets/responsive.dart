@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'brand_mark.dart';
+
 class PageBand extends StatelessWidget {
-  const PageBand({required this.child, this.maxWidth = 1120, this.padding, super.key});
+  const PageBand(
+      {required this.child, this.maxWidth = 1120, this.padding, super.key});
 
   final Widget child;
   final double maxWidth;
@@ -13,7 +16,8 @@ class PageBand extends StatelessWidget {
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: Padding(
-          padding: padding ?? const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
+          padding: padding ??
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
           child: child,
         ),
       ),
@@ -22,7 +26,10 @@ class PageBand extends StatelessWidget {
 }
 
 class InfoCard extends StatelessWidget {
-  const InfoCard({required this.child, this.padding = const EdgeInsets.all(22), super.key});
+  const InfoCard(
+      {required this.child,
+      this.padding = const EdgeInsets.all(22),
+      super.key});
 
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -30,6 +37,7 @@ class InfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: Padding(padding: padding, child: child),
     );
   }
@@ -55,9 +63,11 @@ class EmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 42, color: Theme.of(context).colorScheme.primary),
+          IconBadge(icon, size: 48),
           const SizedBox(height: 12),
-          Text(title, style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.center),
+          Text(title,
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center),
           const SizedBox(height: 8),
           Text(body, textAlign: TextAlign.center),
           const SizedBox(height: 18),
