@@ -66,26 +66,35 @@ class DashedPathProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = total <= 1 ? 1.0 : (currentIndex + 1) / total;
+    final answeredProgress =
+        total <= 0 ? 0.0 : answered.clamp(0, total) / total;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: 42,
+          height: 34,
           width: double.infinity,
-          child: CustomPaint(
-            painter: _DashedPathPainter(
-              progress: progress.clamp(0, 1),
-              color: BrandTokens.forest,
-              accent: BrandTokens.gold,
-            ),
+          child: TweenAnimationBuilder<double>(
+            tween: Tween<double>(end: answeredProgress),
+            duration: const Duration(milliseconds: 280),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, _) {
+              return CustomPaint(
+                painter: _DashedPathPainter(
+                  progress: value.clamp(0, 1),
+                  color: BrandTokens.forest,
+                  accent: BrandTokens.gold,
+                ),
+              );
+            },
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         Text(
           '$answered of $total answered',
           style: const TextStyle(
             color: BrandTokens.forest,
+            fontSize: 14,
             fontWeight: FontWeight.w800,
           ),
         ),
