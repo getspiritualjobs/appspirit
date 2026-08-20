@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/theme.dart';
 import 'brand_mark.dart';
 
 class AppShell extends StatelessWidget {
@@ -54,9 +55,24 @@ class AppShell extends StatelessWidget {
               child: SafeArea(
                 child: ListView(
                   children: [
-                    const ListTile(
-                      title: GiftPathLogo(),
-                      subtitle: Text('Discover your gifts. Find your path.'),
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(18, 18, 18, 14),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          GiftPathLogo(markSize: 32),
+                          SizedBox(height: 10),
+                          Text(
+                            'DISCOVER YOUR GIFTS. FIND YOUR PATH.',
+                            style: TextStyle(
+                              color: BrandTokens.gold,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     for (final item in nav)
                       ListTile(
