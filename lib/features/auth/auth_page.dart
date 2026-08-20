@@ -22,6 +22,7 @@ class _AuthPageState extends State<AuthPage> {
   StreamSubscription<AuthState>? authSubscription;
   bool createMode = true;
   bool loading = false;
+  bool forgotPasswordMode = false;
   bool resetPasswordMode = false;
   String message = '';
 
@@ -75,6 +76,18 @@ class _AuthPageState extends State<AuthPage> {
               const SizedBox(height: 18),
               if (!Env.hasSupabase)
                 const _SetupNotice()
+              else if (forgotPasswordMode)
+                _ForgotPasswordPanel(
+                  controller: email,
+                  loading: loading,
+                  message: message,
+                  onBack: () => setState(() {
+                    forgotPasswordMode = false;
+                    createMode = false;
+                    message = '';
+                  }),
+                  onSubmit: _sendPasswordReset,
+                )
               else if (isRealAccount)
                 if (resetPasswordMode)
                   _ResetPasswordPanel(
@@ -120,24 +133,15 @@ class _AuthPageState extends State<AuthPage> {
                   const SizedBox(height: 8),
                   Align(
                     alignment: Alignment.centerRight,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(6),
-                      onTap: loading ? null : _sendPasswordReset,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 2, vertical: 6),
-                        child: Text(
-                          'Forgot password?',
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelLarge
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.w800,
-                                decoration: TextDecoration.underline,
-                              ),
-                        ),
-                      ),
+                    child: TextButton.icon(
+                      onPressed: loading
+                          ? null
+                          : () => setState(() {
+                                forgotPasswordMode = true;
+                                message = '';
+                              }),
+                      icon: const Icon(Icons.lock_reset, size: 18),
+                      label: const Text('Forgot password?'),
                     ),
                   ),
                 ],
@@ -463,6 +467,89 @@ class _AccountPanel extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(child: Text('Signed in as $email')),
             OutlinedButton(onPressed: onSignOut, child: const Text('Sign Out')),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ForgotPasswordPanel extends StatelessWidget {
+  const _ForgotPasswordPanel({
+    required this.controller,
+    required this.loading,
+    required this.message,
+    required this.onBack,
+    required this.onSubmit,
+  });
+
+  final TextEditingController controller;
+  final bool loading;
+  final String message;
+  final VoidCallback onBack;
+  final Future<void> Function() onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+          color: Color(0xFFE7F0EA),
+          borderRadius: BorderRadius.all(Radius.circular(8))),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const IconBadge(Icons.lock_reset, size: 38),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Reset your password',
+                          style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 4),
+                      const Text(
+                          'Enter your email and GiftPath will send a secure reset link.'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: controller,
+              enabled: !loading,
+              keyboardType: TextInputType.emailAddress,
+              autofillHints: const [AutofillHints.email],
+              decoration: const InputDecoration(labelText: 'Email'),
+              onSubmitted: (_) => loading ? null : onSubmit(),
+            ),
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                FilledButton.icon(
+                  onPressed: loading ? null : onSubmit,
+                  icon: const Icon(Icons.mail_outline, size: 18),
+                  label: Text(loading ? 'Sending...' : 'Send Reset Link'),
+                ),
+                TextButton.icon(
+                  onPressed: loading ? null : onBack,
+                  icon: const Icon(Icons.arrow_back, size: 18),
+                  label: const Text('Back to Sign In'),
+                ),
+              ],
+            ),
+            if (message.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(message, style: TextStyle(color: scheme.primary)),
+            ],
           ],
         ),
       ),
