@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 ThemeData buildGiftPathTheme() {
-  const seed = Color(0xFF2D5A4A);
+  const seed = Color(0xFF1E3025);
+  const gold = Color(0xFFB7882E);
   final scheme = ColorScheme.fromSeed(
     seedColor: seed,
     brightness: Brightness.light,
     primary: seed,
-    secondary: const Color(0xFFB86B4B),
-    tertiary: const Color(0xFF4D6F9F),
+    secondary: gold,
+    tertiary: const Color(0xFF6E7F68),
     surface: const Color(0xFFFFFCF7),
   );
 
@@ -26,7 +27,7 @@ ThemeData buildGiftPathTheme() {
   return ThemeData(
     colorScheme: scheme,
     textTheme: textTheme,
-    scaffoldBackgroundColor: const Color(0xFFF8F5EF),
+    scaffoldBackgroundColor: const Color(0xFFF6F0E6),
     appBarTheme: AppBarTheme(
       elevation: 0,
       scrolledUnderElevation: 0,

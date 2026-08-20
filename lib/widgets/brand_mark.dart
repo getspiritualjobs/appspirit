@@ -1,30 +1,126 @@
 import 'package:flutter/material.dart';
 
 class GiftPathMark extends StatelessWidget {
-  const GiftPathMark({this.size = 34, super.key});
+  const GiftPathMark({this.size = 34, this.showBackground = true, super.key});
 
   final double size;
+  final bool showBackground;
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    Widget mark(double markSize) => SizedBox(
+          width: markSize,
+          height: markSize,
+          child: CustomPaint(
+            painter: _GiftPathMarkPainter(
+              color: showBackground ? Colors.white : scheme.primary,
+              pathColor: showBackground ? scheme.primary : scheme.surface,
+            ),
+          ),
+        );
+
+    if (!showBackground) return mark(size);
+
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
-        borderRadius: BorderRadius.circular(size * .24),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: .16),
-            offset: const Offset(0, 6),
-            blurRadius: 16,
-          ),
-        ],
+        color: scheme.primary,
+        borderRadius: BorderRadius.circular(size * .22),
       ),
       child: SizedBox(
         width: size,
         height: size,
-        child: Icon(Icons.auto_awesome, color: Colors.white, size: size * .56),
+        child: Padding(
+          padding: EdgeInsets.all(size * .14),
+          child: mark(size * .72),
+        ),
       ),
     );
+  }
+}
+
+class GiftPathLogo extends StatelessWidget {
+  const GiftPathLogo({this.markSize = 34, this.compact = false, super.key});
+
+  final double markSize;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GiftPathMark(size: markSize),
+        SizedBox(width: compact ? 8 : 10),
+        Text(
+          'GiftPath',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: scheme.onSurface,
+                fontWeight: FontWeight.w900,
+                fontSize: compact ? 20 : 22,
+              ),
+        ),
+      ],
+    );
+  }
+}
+
+class _GiftPathMarkPainter extends CustomPainter {
+  const _GiftPathMarkPainter({required this.color, required this.pathColor});
+
+  final Color color;
+  final Color pathColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final s = size.shortestSide;
+    final radius = Radius.circular(s * .035);
+    final paint = Paint()..color = color;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(s * .39, s * .10, s * .22, s * .80),
+        radius,
+      ),
+      paint,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(s * .12, s * .32, s * .76, s * .24),
+        radius,
+      ),
+      paint,
+    );
+
+    final path = Path()
+      ..moveTo(s * .46, s * .92)
+      ..cubicTo(s * .34, s * .70, s * .33, s * .47, s * .50, s * .38)
+      ..cubicTo(s * .58, s * .34, s * .66, s * .30, s * .76, s * .24);
+
+    final dashPaint = Paint()
+      ..color = pathColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = s * .08
+      ..strokeCap = StrokeCap.butt;
+    for (final metric in path.computeMetrics()) {
+      var distance = 0.0;
+      final dash = s * .11;
+      final gap = s * .075;
+      while (distance < metric.length) {
+        canvas.drawPath(
+          metric.extractPath(
+              distance, (distance + dash).clamp(0, metric.length)),
+          dashPaint,
+        );
+        distance += dash + gap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _GiftPathMarkPainter oldDelegate) {
+    return color != oldDelegate.color || pathColor != oldDelegate.pathColor;
   }
 }
 

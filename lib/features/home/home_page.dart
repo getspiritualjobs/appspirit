@@ -16,7 +16,7 @@ class HomePage extends StatelessWidget {
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFFFCF7), Color(0xFFE7F0EA)],
+                colors: [Color(0xFFFFFCF7), Color(0xFFEDE4D4)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -29,11 +29,11 @@ class HomePage extends StatelessWidget {
                   final heroText = Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Discover your gifts. Explore your calling.',
+                      Text('Discover your gifts. Find your path.',
                           style: theme.textTheme.displayLarge),
                       const SizedBox(height: 18),
                       Text(
-                        'Take a Scripture-informed spiritual gifts assessment and discover careers and opportunities where your gifts may thrive.',
+                        'Take a Scripture-informed spiritual gifts assessment and explore careers and opportunities where your gifts may thrive.',
                         style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w500, height: 1.45),
                       ),
@@ -236,7 +236,7 @@ class _PathPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF2D5A4A).withValues(alpha: .16)
+      ..color = const Color(0xFF1E3025).withValues(alpha: .16)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4;
     final path = Path()

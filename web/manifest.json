@@ -1,9 +1,33 @@
 {
-  "name": "Spiritual Gifts Career Discovery",
+  "name": "GiftPath",
   "short_name": "GiftPath",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#F8F5EF",
-  "theme_color": "#2D5A4A",
-  "description": "A Scripture-informed spiritual gifts and career discovery app."
+  "background_color": "#F6F0E6",
+  "theme_color": "#1E3025",
+  "description": "Discover your gifts. Find your path.",
+  "icons": [
+    {
+      "src": "icons/Icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/Icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/Icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/Icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
 }

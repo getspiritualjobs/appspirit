@@ -28,14 +28,7 @@ class AppShell extends StatelessWidget {
       appBar: AppBar(
         title: InkWell(
           onTap: () => context.go('/'),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              GiftPathMark(),
-              SizedBox(width: 10),
-              Text('GiftPath', style: TextStyle(fontWeight: FontWeight.w800)),
-            ],
-          ),
+          child: const GiftPathLogo(compact: true),
         ),
         actions: isWide
             ? [
@@ -62,8 +55,9 @@ class AppShell extends StatelessWidget {
                 child: ListView(
                   children: [
                     const ListTile(
-                        title: Text('GiftPath',
-                            style: TextStyle(fontWeight: FontWeight.w800))),
+                      title: GiftPathLogo(),
+                      subtitle: Text('Discover your gifts. Find your path.'),
+                    ),
                     for (final item in nav)
                       ListTile(
                         title: Text(item.$1),
