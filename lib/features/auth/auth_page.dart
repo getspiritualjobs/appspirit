@@ -115,6 +115,30 @@ class _AuthPageState extends State<AuthPage> {
                   decoration: InputDecoration(
                       labelText: createMode ? 'Create a password' : 'Password'),
                 ),
+                if (!createMode) ...[
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(6),
+                      onTap: loading ? null : _sendPasswordReset,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 2, vertical: 6),
+                        child: Text(
+                          'Forgot password?',
+                          style:
+                              Theme.of(context).textTheme.labelLarge?.copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    fontWeight: FontWeight.w800,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 14),
                 FilledButton(
                   onPressed:
@@ -125,17 +149,6 @@ class _AuthPageState extends State<AuthPage> {
                           ? 'Create Account'
                           : 'Sign In'),
                 ),
-                if (!createMode) ...[
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton.icon(
-                      onPressed: loading ? null : _sendPasswordReset,
-                      icon: const Icon(Icons.lock_reset, size: 18),
-                      label: const Text('Forgot password?'),
-                    ),
-                  ),
-                ],
                 const SizedBox(height: 10),
                 OutlinedButton(
                   onPressed: loading ? null : _google,
