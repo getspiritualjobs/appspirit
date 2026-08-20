@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/app_state.dart';
 import '../../core/models.dart';
+import '../../core/theme.dart';
 import '../../data/seed_data.dart';
 import '../../widgets/brand_components.dart';
 import '../../widgets/responsive.dart';
@@ -152,11 +153,15 @@ class _QuestionPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(question.text,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineMedium
-                  ?.copyWith(fontSize: 30)),
+          Text(
+            question.text,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: BrandTokens.ink,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  height: 1.24,
+                ),
+          ),
           const SizedBox(height: 20),
           for (final option in const [
             (1, 'Not like me'),
