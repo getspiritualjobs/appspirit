@@ -12,8 +12,19 @@ class BillingCheckoutResult {
   bool get isSuccess => url != null;
 }
 
+enum BillingPlan {
+  monthly('monthly'),
+  yearly('yearly');
+
+  const BillingPlan(this.apiValue);
+
+  final String apiValue;
+}
+
 class BillingService {
-  Future<BillingCheckoutResult> createCheckoutSession() async {
+  Future<BillingCheckoutResult> createCheckoutSession({
+    BillingPlan plan = BillingPlan.monthly,
+  }) async {
     if (!Env.hasSupabase) {
       return const BillingCheckoutResult.failure(
         'Supabase must be configured before checkout can start.',
@@ -33,6 +44,7 @@ class BillingService {
       final response = await Supabase.instance.client.functions.invoke(
         'create-checkout-session',
         body: {
+          'billingInterval': plan.apiValue,
           'successUrl': '$origin/billing/success',
           'cancelUrl': '$origin/opportunities',
         },

@@ -60,18 +60,24 @@ The Flutter app works without Supabase by using in-memory local state and demo j
 
 GiftPath uses Supabase Edge Functions to create Stripe Checkout Sessions. The Flutter client never receives the Stripe secret key.
 
-Create the subscription product and monthly default price:
+Create subscription prices in Stripe:
+
+- Monthly: `$7.77` recurring monthly
+- Yearly: `$77.77` recurring yearly
+
+The helper script creates the older single-price test product; for V1, set both plan-specific price IDs from the Stripe Dashboard or Stripe API.
 
 ```bash
 export STRIPE_SECRET_KEY=sk_test_...
 bash tooling/stripe_create_subscription_product.sh
 ```
 
-Copy the returned `default_price` value, then set Edge Function secrets:
+Set Edge Function secrets:
 
 ```bash
 supabase secrets set STRIPE_SECRET_KEY=sk_test_...
-supabase secrets set STRIPE_PRICE_ID=price_...
+supabase secrets set STRIPE_MONTHLY_PRICE_ID=price_...
+supabase secrets set STRIPE_YEARLY_PRICE_ID=price_...
 supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 

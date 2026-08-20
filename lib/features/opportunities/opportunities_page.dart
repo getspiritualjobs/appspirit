@@ -156,9 +156,16 @@ class _UpgradeCard extends StatelessWidget {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       FilledButton.icon(
-                        onPressed: () => _openCheckout(context),
+                        onPressed: () =>
+                            _openCheckout(context, BillingPlan.monthly),
                         icon: const Icon(Icons.credit_card),
-                        label: const Text('Unlock All Jobs'),
+                        label: const Text('\$7.77 / month'),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () =>
+                            _openCheckout(context, BillingPlan.yearly),
+                        icon: const Icon(Icons.savings_outlined),
+                        label: const Text('\$77.77 / year'),
                       ),
                       const Text('One matched job is free.'),
                     ],
@@ -172,8 +179,8 @@ class _UpgradeCard extends StatelessWidget {
     );
   }
 
-  Future<void> _openCheckout(BuildContext context) async {
-    final result = await BillingService().createCheckoutSession();
+  Future<void> _openCheckout(BuildContext context, BillingPlan plan) async {
+    final result = await BillingService().createCheckoutSession(plan: plan);
     if (!context.mounted) return;
 
     if (!result.isSuccess) {

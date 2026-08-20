@@ -9,6 +9,7 @@ const corsHeaders = {
 };
 
 type CheckoutBody = {
+  billingInterval?: "monthly" | "yearly";
   successUrl?: string;
   cancelUrl?: string;
 };
@@ -23,11 +24,11 @@ Deno.serve(async (req) => {
 
   try {
     const stripeSecretKey = mustGetEnv("STRIPE_SECRET_KEY");
-    const priceId = mustGetEnv("STRIPE_PRICE_ID");
     const supabaseUrl = mustGetEnv("SUPABASE_URL");
     const serviceRoleKey = mustGetEnv("SUPABASE_SERVICE_ROLE_KEY");
     const origin = req.headers.get("origin") ?? "https://giftpath.app";
     const body = (await req.json().catch(() => ({}))) as CheckoutBody;
+    const priceId = getPriceId(body.billingInterval);
 
     const authHeader = req.headers.get("authorization");
     if (!authHeader) return json({ error: "Sign in before checkout." }, 401);
@@ -137,6 +138,17 @@ async function stripeRequest(
     throw new Error(data?.error?.message ?? "Stripe request failed.");
   }
   return data;
+}
+
+function getPriceId(interval: CheckoutBody["billingInterval"]) {
+  if (interval === "yearly") {
+    return mustGetEnv("STRIPE_YEARLY_PRICE_ID");
+  }
+
+  return (
+    Deno.env.get("STRIPE_MONTHLY_PRICE_ID") ??
+    mustGetEnv("STRIPE_PRICE_ID")
+  );
 }
 
 function mustGetEnv(name: string) {
