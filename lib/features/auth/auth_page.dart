@@ -127,13 +127,14 @@ class _AuthPageState extends State<AuthPage> {
                             horizontal: 2, vertical: 6),
                         child: Text(
                           'Forgot password?',
-                          style:
-                              Theme.of(context).textTheme.labelLarge?.copyWith(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    fontWeight: FontWeight.w800,
-                                    decoration: TextDecoration.underline,
-                                  ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelLarge
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w800,
+                                decoration: TextDecoration.underline,
+                              ),
                         ),
                       ),
                     ),
