@@ -49,10 +49,11 @@ class GiftPathLogo extends StatelessWidget {
         SizedBox(width: compact ? 8 : 10),
         Text(
           'GiftPath',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 color: scheme.onSurface,
-                fontWeight: FontWeight.w900,
-                fontSize: compact ? 20 : 22,
+                fontWeight: FontWeight.w700,
+                fontSize: compact ? 24 : 28,
+                height: 1,
               ),
         ),
       ],

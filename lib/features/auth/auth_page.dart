@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/app_state.dart';
 import '../../core/env.dart';
+import '../../widgets/brand_components.dart';
 import '../../widgets/brand_mark.dart';
 import '../../widgets/responsive.dart';
 
@@ -68,11 +69,13 @@ class _AuthPageState extends State<AuthPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const BrandEyebrow('Private saving'),
+              const SizedBox(height: 10),
               Text('Save your results and opportunities',
                   style: Theme.of(context).textTheme.headlineMedium),
               const SizedBox(height: 8),
               const Text(
-                  'Account creation is optional and only needed when you want saved results, careers, jobs, and search preferences to persist across devices.'),
+                  'Create an account when you want your results, career matches, saved jobs, and search preferences to follow you across devices.'),
               const SizedBox(height: 18),
               if (!Env.hasSupabase)
                 const _SetupNotice()
@@ -425,23 +428,11 @@ class _GuestPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const DecoratedBox(
-      decoration: BoxDecoration(
-          color: Color(0xFFFFF7E8),
-          borderRadius: BorderRadius.all(Radius.circular(8))),
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            IconBadge(Icons.person_outline, size: 38),
-            SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                  'You are using GiftPath as a guest. You can take the assessment now, but create an account to keep saved results across devices.'),
-            ),
-          ],
-        ),
+    return const BrandNotice(
+      icon: Icons.person_outline,
+      accent: true,
+      child: Text(
+        'Guest mode lets you take the assessment now. Create an account when you want to keep saved results across devices.',
       ),
     );
   }
@@ -455,20 +446,13 @@ class _AccountPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-          color: Color(0xFFE7F0EA),
-          borderRadius: BorderRadius.all(Radius.circular(8))),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            const IconBadge(Icons.check_circle_outline, size: 38),
-            const SizedBox(width: 12),
-            Expanded(child: Text('Signed in as $email')),
-            OutlinedButton(onPressed: onSignOut, child: const Text('Sign Out')),
-          ],
-        ),
+    return BrandNotice(
+      icon: Icons.check_circle_outline,
+      child: Row(
+        children: [
+          Expanded(child: Text('Signed in as $email')),
+          OutlinedButton(onPressed: onSignOut, child: const Text('Sign Out')),
+        ],
       ),
     );
   }
@@ -492,66 +476,47 @@ class _ForgotPasswordPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-          color: Color(0xFFE7F0EA),
-          borderRadius: BorderRadius.all(Radius.circular(8))),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const IconBadge(Icons.lock_reset, size: 38),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Reset your password',
-                          style: Theme.of(context).textTheme.titleMedium),
-                      const SizedBox(height: 4),
-                      const Text(
-                          'Enter your email and GiftPath will send a secure reset link.'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: controller,
-              enabled: !loading,
-              keyboardType: TextInputType.emailAddress,
-              autofillHints: const [AutofillHints.email],
-              decoration: const InputDecoration(labelText: 'Email'),
-              onSubmitted: (_) => loading ? null : onSubmit(),
-            ),
-            const SizedBox(height: 14),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                FilledButton.icon(
-                  onPressed: loading ? null : onSubmit,
-                  icon: const Icon(Icons.mail_outline, size: 18),
-                  label: Text(loading ? 'Sending...' : 'Send Reset Link'),
-                ),
-                TextButton.icon(
-                  onPressed: loading ? null : onBack,
-                  icon: const Icon(Icons.arrow_back, size: 18),
-                  label: const Text('Back to Sign In'),
-                ),
-              ],
-            ),
-            if (message.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(message, style: TextStyle(color: scheme.primary)),
+    return BrandNotice(
+      icon: Icons.lock_reset,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Reset your password',
+              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 4),
+          const Text(
+              'Enter your email and GiftPath will send a secure reset link.'),
+          const SizedBox(height: 14),
+          TextField(
+            controller: controller,
+            enabled: !loading,
+            keyboardType: TextInputType.emailAddress,
+            autofillHints: const [AutofillHints.email],
+            decoration: const InputDecoration(labelText: 'Email'),
+            onSubmitted: (_) => loading ? null : onSubmit(),
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              FilledButton.icon(
+                onPressed: loading ? null : onSubmit,
+                icon: const Icon(Icons.mail_outline, size: 18),
+                label: Text(loading ? 'Sending...' : 'Send Reset Link'),
+              ),
+              TextButton.icon(
+                onPressed: loading ? null : onBack,
+                icon: const Icon(Icons.arrow_back, size: 18),
+                label: const Text('Back to Sign In'),
+              ),
             ],
+          ),
+          if (message.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(message, style: TextStyle(color: scheme.primary)),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -573,46 +538,32 @@ class _ResetPasswordPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-          color: Color(0xFFE7F0EA),
-          borderRadius: BorderRadius.all(Radius.circular(8))),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const IconBadge(Icons.lock_reset, size: 38),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text('Set a new password',
-                      style: Theme.of(context).textTheme.titleMedium),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: controller,
-              enabled: !loading,
-              obscureText: true,
-              autofillHints: const [AutofillHints.newPassword],
-              decoration: const InputDecoration(labelText: 'New password'),
-            ),
-            const SizedBox(height: 14),
-            FilledButton.icon(
-              onPressed: loading ? null : onSubmit,
-              icon: const Icon(Icons.check_circle_outline, size: 18),
-              label: Text(loading ? 'Updating...' : 'Update Password'),
-            ),
-            if (message.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(message, style: TextStyle(color: scheme.primary)),
-            ],
+    return BrandNotice(
+      icon: Icons.lock_reset,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Set a new password',
+              style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 14),
+          TextField(
+            controller: controller,
+            enabled: !loading,
+            obscureText: true,
+            autofillHints: const [AutofillHints.newPassword],
+            decoration: const InputDecoration(labelText: 'New password'),
+          ),
+          const SizedBox(height: 14),
+          FilledButton.icon(
+            onPressed: loading ? null : onSubmit,
+            icon: const Icon(Icons.check_circle_outline, size: 18),
+            label: Text(loading ? 'Updating...' : 'Update Password'),
+          ),
+          if (message.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(message, style: TextStyle(color: scheme.primary)),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -623,14 +574,10 @@ class _SetupNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const DecoratedBox(
-      decoration: BoxDecoration(
-          color: Color(0xFFE7F0EA),
-          borderRadius: BorderRadius.all(Radius.circular(8))),
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Text(
-            'Supabase is not configured yet. Run Flutter with --dart-define=SUPABASE_URL=... and --dart-define=SUPABASE_ANON_KEY=... after creating your Supabase project.'),
+    return const BrandNotice(
+      icon: Icons.settings_outlined,
+      child: Text(
+        'Supabase is not configured yet. Run Flutter with --dart-define=SUPABASE_URL=... and --dart-define=SUPABASE_ANON_KEY=... after creating your Supabase project.',
       ),
     );
   }

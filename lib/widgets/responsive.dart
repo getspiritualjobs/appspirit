@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../core/theme.dart';
+import 'brand_components.dart';
 import 'brand_mark.dart';
 
 class PageBand extends StatelessWidget {
@@ -38,7 +40,13 @@ class InfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       clipBehavior: Clip.antiAlias,
-      child: Padding(padding: padding, child: child),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: BrandTokens.surface,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(padding: padding, child: child),
+      ),
     );
   }
 }
@@ -65,6 +73,8 @@ class EmptyState extends StatelessWidget {
         children: [
           IconBadge(icon, size: 48),
           const SizedBox(height: 12),
+          const BrandEyebrow('Start here'),
+          const SizedBox(height: 8),
           Text(title,
               style: Theme.of(context).textTheme.titleLarge,
               textAlign: TextAlign.center),

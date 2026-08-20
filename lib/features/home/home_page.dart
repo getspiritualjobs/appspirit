@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/theme.dart';
+import '../../widgets/brand_components.dart';
 import '../../widgets/brand_mark.dart';
 import '../../widgets/responsive.dart';
 
@@ -14,26 +16,22 @@ class HomePage extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFFFFFCF7), Color(0xFFEDE4D4)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
+            decoration: const BoxDecoration(color: BrandTokens.cream),
             child: PageBand(
-              padding: const EdgeInsets.fromLTRB(20, 52, 20, 36),
+              padding: const EdgeInsets.fromLTRB(20, 56, 20, 36),
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final wide = constraints.maxWidth > 760;
                   final heroText = Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const BrandEyebrow('Scripture-informed assessment'),
+                      const SizedBox(height: 14),
                       Text('Discover your gifts. Find your path.',
                           style: theme.textTheme.displayLarge),
                       const SizedBox(height: 18),
                       Text(
-                        'Take a Scripture-informed spiritual gifts assessment and explore careers and opportunities where your gifts may thrive.',
+                        'Answer one thoughtful question at a time, then see how your Romans 12 gift profile connects to careers, next steps, and real opportunities.',
                         style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w500, height: 1.45),
                       ),
@@ -78,6 +76,10 @@ class HomePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const BrandDivider(),
+                const SizedBox(height: 32),
+                const BrandEyebrow('From reflection to action'),
+                const SizedBox(height: 10),
                 Text('A reflective path from giftedness to next steps',
                     style: theme.textTheme.headlineMedium),
                 const SizedBox(height: 18),
@@ -88,22 +90,32 @@ class HomePage extends StatelessWidget {
                         : constraints.maxWidth > 560
                             ? 2
                             : 1;
-                    return GridView.count(
-                      crossAxisCount: columns,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      crossAxisSpacing: 14,
-                      mainAxisSpacing: 14,
-                      childAspectRatio: columns == 1 ? 3.6 : 1.35,
-                      children: const [
-                        _JourneyStep('01', 'Discover',
-                            'Take the spiritual gifts assessment.'),
-                        _JourneyStep('02', 'Understand',
-                            'See your strongest gifts and what they mean.'),
-                        _JourneyStep('03', 'Explore',
-                            'Discover careers aligned with how you are gifted.'),
-                        _JourneyStep('04', 'Act',
-                            'Explore real opportunities where you can put gifts to work.'),
+                    return Stack(
+                      children: [
+                        if (columns == 4)
+                          const Positioned.fill(
+                            top: 30,
+                            bottom: 42,
+                            child: DashedPathConnector(),
+                          ),
+                        GridView.count(
+                          crossAxisCount: columns,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          crossAxisSpacing: 14,
+                          mainAxisSpacing: 14,
+                          childAspectRatio: columns == 1 ? 3.4 : 1.28,
+                          children: const [
+                            _JourneyStep('01', 'Discover',
+                                'Take the spiritual gifts assessment without rushing the answer.'),
+                            _JourneyStep('02', 'Understand',
+                                'See the gifts that rose to the top and the language behind them.'),
+                            _JourneyStep('03', 'Explore',
+                                'Compare career paths through the full pattern of your scores.'),
+                            _JourneyStep('04', 'Act',
+                                'Open one free job match, then save the paths worth revisiting.'),
+                          ],
+                        ),
                       ],
                     );
                   },
@@ -147,7 +159,9 @@ class _HeroVisual extends StatelessWidget {
                 top: 30,
                 left: 28,
                 child: _MiniCard(
-                    icon: Icons.auto_awesome, label: 'Teaching', value: '94%')),
+                    icon: Icons.menu_book_outlined,
+                    label: 'Teaching',
+                    value: '94%')),
             Positioned(
                 top: 132,
                 right: 26,
@@ -217,9 +231,10 @@ class _JourneyStep extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(number,
-              style: TextStyle(
-                  color: Theme.of(context).colorScheme.secondary,
-                  fontWeight: FontWeight.w900)),
+              style: const TextStyle(
+                  color: BrandTokens.gold,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.4)),
           const SizedBox(height: 8),
           Text(title, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 6),
@@ -236,7 +251,7 @@ class _PathPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF1E3025).withValues(alpha: .16)
+      ..color = BrandTokens.forest.withValues(alpha: .16)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4;
     final path = Path()

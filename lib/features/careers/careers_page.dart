@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/app_state.dart';
 import '../../core/models.dart';
+import '../../core/theme.dart';
+import '../../widgets/brand_components.dart';
 import '../../widgets/gift_badge.dart';
 import '../../widgets/responsive.dart';
 
@@ -33,16 +35,21 @@ class CareersPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const BrandEyebrow('Career discovery'),
+                const SizedBox(height: 10),
                 Text('Careers for Your Gifts',
                     style: Theme.of(context).textTheme.displayMedium),
                 const SizedBox(height: 8),
                 const Text(
-                    'These recommendations use your full gift profile plus optional interests and work preferences.'),
+                    'These matches use your full gift profile, then adjust when you add interests and work preferences.'),
                 const SizedBox(height: 18),
                 _PreferencePanel(),
                 const SizedBox(height: 20),
-                for (final match in appState.careerMatches.take(20))
-                  _CareerCard(match: match),
+                for (var i = 0; i < appState.careerMatches.take(20).length; i++)
+                  _CareerCard(
+                    match: appState.careerMatches[i],
+                    topMatch: i == 0,
+                  ),
               ],
             ),
           ),
@@ -136,9 +143,10 @@ class _PreferencePanelState extends State<_PreferencePanel> {
 }
 
 class _CareerCard extends StatelessWidget {
-  const _CareerCard({required this.match});
+  const _CareerCard({required this.match, required this.topMatch});
 
   final CareerMatch match;
+  final bool topMatch;
 
   @override
   Widget build(BuildContext context) {
@@ -157,6 +165,10 @@ class _CareerCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (topMatch) ...[
+                        const BrandEyebrow('Top match'),
+                        const SizedBox(height: 6),
+                      ],
                       Text(career.title,
                           style: Theme.of(context).textTheme.titleLarge),
                       Text(career.category),
@@ -165,7 +177,7 @@ class _CareerCard extends StatelessWidget {
                 ),
                 Text('${match.score}% Match',
                     style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
+                        color: topMatch ? BrandTokens.gold : BrandTokens.forest,
                         fontWeight: FontWeight.w900)),
               ],
             ),

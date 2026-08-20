@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/models.dart';
 import '../core/scoring.dart';
+import '../core/theme.dart';
 
 class GiftBadge extends StatelessWidget {
   const GiftBadge(this.gift, {this.dense = false, super.key});
@@ -15,23 +16,14 @@ class GiftBadge extends StatelessWidget {
       avatar: Icon(_icon(gift), size: dense ? 15 : 17),
       label: Text(giftLabel(gift)),
       visualDensity: dense ? VisualDensity.compact : VisualDensity.standard,
-      backgroundColor: _color(gift).withValues(alpha: .12),
-      side: BorderSide(color: _color(gift).withValues(alpha: .20)),
-      labelStyle: TextStyle(fontWeight: FontWeight.w700, color: _color(gift)),
+      backgroundColor: BrandTokens.forest.withValues(alpha: .08),
+      side: BorderSide(color: BrandTokens.forest.withValues(alpha: .18)),
+      labelStyle: const TextStyle(
+        fontWeight: FontWeight.w800,
+        color: BrandTokens.forest,
+      ),
     );
   }
-}
-
-Color _color(GiftKey gift) {
-  return switch (gift) {
-    GiftKey.prophecy => const Color(0xFF7B3F61),
-    GiftKey.serving => const Color(0xFF2D6A6A),
-    GiftKey.teaching => const Color(0xFF315D9F),
-    GiftKey.encouragement => const Color(0xFFB75E3E),
-    GiftKey.giving => const Color(0xFF7A6A2A),
-    GiftKey.leadership => const Color(0xFF2D5A4A),
-    GiftKey.mercy => const Color(0xFF8B5278),
-  };
 }
 
 IconData _icon(GiftKey gift) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../widgets/brand_components.dart';
 import '../../widgets/responsive.dart';
 
 class AboutPage extends StatelessWidget {
@@ -13,11 +14,15 @@ class AboutPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const BrandEyebrow('How GiftPath works'),
+            const SizedBox(height: 10),
             Text('About the Assessment',
                 style: Theme.of(context).textTheme.displayMedium),
             const SizedBox(height: 12),
             const Text(
                 "This tool helps Christians reflect on spiritual gifts and explore possible vocational connections. It is educational and reflective, not a claim to determine God's will."),
+            const SizedBox(height: 18),
+            const BrandDivider(),
             const SizedBox(height: 18),
             const _Section(
               title: 'Biblical foundation',

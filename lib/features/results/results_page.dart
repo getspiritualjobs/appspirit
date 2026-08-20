@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../core/app_state.dart';
 import '../../core/models.dart';
 import '../../core/scoring.dart';
+import '../../core/theme.dart';
 import '../../data/seed_data.dart';
+import '../../widgets/brand_components.dart';
 import '../../widgets/gift_badge.dart';
 import '../../widgets/responsive.dart';
 
@@ -36,11 +38,13 @@ class ResultsPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const BrandEyebrow('Your gift profile'),
+                const SizedBox(height: 10),
                 Text('Assessment Complete',
                     style: Theme.of(context).textTheme.displayMedium),
                 const SizedBox(height: 8),
                 const Text(
-                    "Here's how your gifts showed up. Your results are one lens for reflection in work, church, relationships, and community."),
+                    'Here is the pattern your answers formed. Use it as a starting point for reflection, conversation, service, and next steps.'),
                 const SizedBox(height: 22),
                 LayoutBuilder(
                   builder: (context, constraints) {
@@ -53,11 +57,14 @@ class ResultsPage extends StatelessWidget {
                       mainAxisSpacing: 14,
                       childAspectRatio: columns == 1 ? 2.2 : .92,
                       children: [
-                        for (final score in top) _TopGiftCard(score: score),
+                        for (var i = 0; i < top.length; i++)
+                          _TopGiftCard(score: top[i], topReveal: i == 0),
                       ],
                     );
                   },
                 ),
+                const SizedBox(height: 22),
+                const BrandDivider(),
                 const SizedBox(height: 22),
                 _ShareCard(top: top),
                 const SizedBox(height: 22),
@@ -97,9 +104,10 @@ class ResultsPage extends StatelessWidget {
 }
 
 class _TopGiftCard extends StatelessWidget {
-  const _TopGiftCard({required this.score});
+  const _TopGiftCard({required this.score, required this.topReveal});
 
   final GiftScore score;
+  final bool topReveal;
 
   @override
   Widget build(BuildContext context) {
@@ -108,12 +116,15 @@ class _TopGiftCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GiftBadge(score.gift),
+          if (topReveal)
+            const BrandEyebrow('Top gift reveal')
+          else
+            GiftBadge(score.gift),
           const SizedBox(height: 16),
           Text(gift.name, style: Theme.of(context).textTheme.headlineMedium),
           Text('${score.normalizedScore}% alignment',
               style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: topReveal ? BrandTokens.gold : BrandTokens.forest,
                   fontWeight: FontWeight.w900)),
           const SizedBox(height: 12),
           Text(gift.shortDescription),
@@ -138,7 +149,7 @@ class _ShareCard extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
-          color: const Color(0xFF203D35),
+          color: BrandTokens.forest,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(

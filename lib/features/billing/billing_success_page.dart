@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/app_state.dart';
+import '../../widgets/brand_components.dart';
 import '../../widgets/brand_mark.dart';
 import '../../widgets/responsive.dart';
 
@@ -30,6 +31,8 @@ class _BillingSuccessPageState extends State<BillingSuccessPage> {
           children: [
             const IconBadge(Icons.check_circle_outline, size: 48),
             const SizedBox(height: 16),
+            const BrandEyebrow('Full access unlocked'),
+            const SizedBox(height: 8),
             Text('Subscription active',
                 style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 8),

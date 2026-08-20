@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/app_state.dart';
 import '../../core/models.dart';
 import '../../data/seed_data.dart';
+import '../../widgets/brand_components.dart';
 import '../../widgets/responsive.dart';
 
 class AssessmentPage extends StatefulWidget {
@@ -27,25 +28,22 @@ class _AssessmentPageState extends State<AssessmentPage> {
         final answered = appState.responses.length;
         final complete = answered == assessmentQuestions.length;
         final response = appState.responses[question.id];
-        final progress = (index + 1) / assessmentQuestions.length;
-
         return SingleChildScrollView(
           child: PageBand(
             maxWidth: 820,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const BrandEyebrow('One question at a time'),
+                const SizedBox(height: 10),
                 Text('Spiritual Gifts Assessment',
                     style: Theme.of(context).textTheme.displayMedium),
                 const SizedBox(height: 8),
                 const Text(
-                    'Respond honestly. This is a tool for reflection, not a verdict about your calling or spiritual maturity.'),
+                    'Respond honestly and without overthinking. GiftPath is a reflective tool, not a verdict about your calling or spiritual maturity.'),
                 const SizedBox(height: 22),
                 _ProgressHeader(
-                    index: index,
-                    answered: answered,
-                    complete: complete,
-                    progress: progress),
+                    index: index, answered: answered, complete: complete),
                 const SizedBox(height: 18),
                 _QuestionPanel(
                   question: question,
@@ -100,15 +98,11 @@ class _AssessmentPageState extends State<AssessmentPage> {
 
 class _ProgressHeader extends StatelessWidget {
   const _ProgressHeader(
-      {required this.index,
-      required this.answered,
-      required this.complete,
-      required this.progress});
+      {required this.index, required this.answered, required this.complete});
 
   final int index;
   final int answered;
   final bool complete;
-  final double progress;
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +126,11 @@ class _ProgressHeader extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          LinearProgressIndicator(value: progress, minHeight: 9),
+          DashedPathProgress(
+            total: assessmentQuestions.length,
+            currentIndex: index,
+            answered: answered,
+          ),
         ],
       ),
     );
@@ -309,9 +307,10 @@ class _QuestionMap extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Wrap(
-      spacing: 6,
-      runSpacing: 6,
+      spacing: 8,
+      runSpacing: 8,
       children: [
+        const BrandEyebrow('Question trail'),
         for (var i = 0; i < assessmentQuestions.length; i++)
           Tooltip(
             message: 'Question ${i + 1}',
@@ -319,17 +318,17 @@ class _QuestionMap extends StatelessWidget {
               onTap: () => onSelect(i),
               borderRadius: BorderRadius.circular(6),
               child: Container(
-                width: 28,
-                height: 28,
+                width: 30,
+                height: 24,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: i == currentIndex
                       ? scheme.primary
                       : appState.responses
                               .containsKey(assessmentQuestions[i].id)
-                          ? scheme.primary.withValues(alpha: .16)
+                          ? scheme.primary.withValues(alpha: .10)
                           : Colors.white,
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(999),
                   border:
                       Border.all(color: scheme.primary.withValues(alpha: .16)),
                 ),

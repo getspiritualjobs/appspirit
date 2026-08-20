@@ -4,8 +4,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/app_state.dart';
 import '../../core/models.dart';
+import '../../core/theme.dart';
 import '../../data/billing_service.dart';
 import '../../data/job_search_service.dart';
+import '../../widgets/brand_components.dart';
 import '../../widgets/brand_mark.dart';
 import '../../widgets/responsive.dart';
 
@@ -85,6 +87,8 @@ class _OpportunitiesPageState extends State<OpportunitiesPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const BrandEyebrow('Matched opportunities'),
+                const SizedBox(height: 10),
                 Text('Opportunities for You',
                     style: Theme.of(context).textTheme.displayMedium),
                 const SizedBox(height: 8),
@@ -147,7 +151,7 @@ class _UpgradeCard extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 6),
                   const Text(
-                    'Subscribe after your assessment to view every opportunity, save jobs, and keep searching from your career matches.',
+                    'Subscribe after your assessment to see the full matched list, save jobs, and keep searching from your strongest career paths.',
                   ),
                   const SizedBox(height: 14),
                   Wrap(
@@ -167,7 +171,7 @@ class _UpgradeCard extends StatelessWidget {
                         icon: const Icon(Icons.savings_outlined),
                         label: const Text('\$77.77 / year'),
                       ),
-                      const Text('One matched job is free.'),
+                      const BrandEyebrow('One matched job is free'),
                     ],
                   ),
                 ],
@@ -241,7 +245,7 @@ class _JobSearchPanel extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(result?.message ??
-              'Searches are generated from your highest-ranked career matches and routed through Supabase Edge Functions.'),
+              'Searches use your highest-ranked career matches and run through Supabase so API keys stay off the client.'),
           const SizedBox(height: 12),
           LayoutBuilder(
             builder: (context, constraints) {
@@ -340,6 +344,10 @@ class _JobCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (job.matchScore >= 90) ...[
+                        const BrandEyebrow('Top match'),
+                        const SizedBox(height: 6),
+                      ],
                       Text(job.title,
                           style: Theme.of(context).textTheme.titleLarge),
                       Text('${job.company} · ${job.location}'),
@@ -348,7 +356,9 @@ class _JobCard extends StatelessWidget {
                 ),
                 Text('${job.matchScore}% Match',
                     style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
+                        color: job.matchScore >= 90
+                            ? BrandTokens.gold
+                            : BrandTokens.forest,
                         fontWeight: FontWeight.w900)),
               ],
             ),

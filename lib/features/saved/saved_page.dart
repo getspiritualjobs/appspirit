@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/app_state.dart';
 import '../../core/models.dart';
 import '../../core/scoring.dart';
+import '../../widgets/brand_components.dart';
 import '../../widgets/responsive.dart';
 
 class SavedPage extends StatefulWidget {
@@ -32,11 +33,13 @@ class _SavedPageState extends State<SavedPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const BrandEyebrow('Private library'),
+                  const SizedBox(height: 10),
                   Text('Saved',
                       style: Theme.of(context).textTheme.displayMedium),
                   const SizedBox(height: 8),
                   const Text(
-                      'Saved results, career matches, and jobs are private to your account. Sign in to keep them across devices.'),
+                      'Keep the results, career paths, and jobs you want to revisit. Saved items stay private to your account.'),
                   if (appState.savedDataError != null) ...[
                     const SizedBox(height: 8),
                     Text(
@@ -81,7 +84,8 @@ class _SavedResults extends StatelessWidget {
         child: EmptyState(
           icon: Icons.auto_awesome,
           title: 'No saved result yet',
-          body: 'Save your result after finishing the assessment.',
+          body:
+              'Finish the assessment, then save the profile you want to keep.',
           action: FilledButton(
               onPressed: () => context.go('/results'),
               child: const Text('View Results')),
@@ -162,7 +166,7 @@ class _SavedCareers extends StatelessWidget {
         child: EmptyState(
           icon: Icons.work_outline,
           title: 'No saved careers yet',
-          body: 'Save career matches you want to revisit.',
+          body: 'Save the career matches that feel worth a second look.',
           action: FilledButton(
               onPressed: () => context.go('/careers'),
               child: const Text('Browse Careers')),
@@ -203,7 +207,8 @@ class _SavedJobs extends StatelessWidget {
         child: EmptyState(
           icon: Icons.search,
           title: 'No saved jobs yet',
-          body: 'Save jobs from the Opportunities page.',
+          body:
+              'Save open roles from the Opportunities page as you compare next steps.',
           action: FilledButton(
               onPressed: () => context.go('/opportunities'),
               child: const Text('See Opportunities')),
