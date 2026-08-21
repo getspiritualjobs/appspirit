@@ -140,92 +140,108 @@ class _HeroVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
-      height: 390,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned(
-            left: 6,
-            right: 24,
-            top: 72,
-            height: 190,
-            child: DashedPathConnector(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 430;
+        return SizedBox(
+          height: compact ? 430 : 390,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned(
+                left: compact ? 18 : 6,
+                right: compact ? 18 : 24,
+                top: compact ? 58 : 64,
+                height: compact ? 260 : 210,
+                child: const DashedPathConnector(),
+              ),
+              Positioned(
+                left: compact ? 0 : 10,
+                top: compact ? 10 : 6,
+                child: const _PathStop(
+                  number: '01',
+                  title: 'Quiz',
+                  body: 'Answer one honest prompt at a time.',
+                ),
+              ),
+              Positioned(
+                right: compact ? 0 : 16,
+                top: compact ? 100 : 78,
+                child: const _PathStop(
+                  number: '02',
+                  title: 'Gifts',
+                  body: 'See the pattern that rises to the top.',
+                ),
+              ),
+              Positioned(
+                left: compact ? 0 : 34,
+                bottom: compact ? 92 : 50,
+                child: const _PathStop(
+                  number: '03',
+                  title: 'Aligned jobs',
+                  body: 'Compare roles through your gift profile.',
+                ),
+              ),
+              Positioned(
+                right: compact ? 0 : 4,
+                bottom: compact ? 2 : 10,
+                child: const _PathStop(
+                  number: '04',
+                  title: 'Fulfillment',
+                  body: 'Choose a next step you can actually take.',
+                  accent: true,
+                ),
+              ),
+              Positioned(
+                left: compact ? 132 : 170,
+                top: compact ? 202 : 172,
+                child: GiftPathMark(size: compact ? 46 : 54),
+              ),
+            ],
           ),
-          Positioned(
-            top: 6,
-            right: 10,
-            child: _ReflectionNote(),
-          ),
-          Positioned(
-            left: 0,
-            bottom: 28,
-            child: _MatchNote(),
-          ),
-          Positioned(
-            left: 52,
-            top: 36,
-            child: GiftPathMark(size: 54),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
 
-class _ReflectionNote extends StatelessWidget {
-  const _ReflectionNote();
+class _PathStop extends StatelessWidget {
+  const _PathStop({
+    required this.number,
+    required this.title,
+    required this.body,
+    this.accent = false,
+  });
+
+  final String number;
+  final String title;
+  final String body;
+  final bool accent;
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
         child: SizedBox(
-          width: 250,
+          width: 178,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const BrandEyebrow('Sample result'),
-              const SizedBox(height: 12),
-              Text('Teaching rises first.',
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text(number,
+                  style: TextStyle(
+                    color: accent ? BrandTokens.gold : BrandTokens.forest,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                  )),
               const SizedBox(height: 8),
-              const Text(
-                  'You tend to clarify ideas, organize truth, and help people name what they are learning.'),
+              Text(title, style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 6),
+              Text(body),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MatchNote extends StatelessWidget {
-  const _MatchNote();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('92%',
-                style: TextStyle(
-                    color: BrandTokens.forest,
-                    fontSize: 40,
-                    fontWeight: FontWeight.w900,
-                    height: 1)),
-            const SizedBox(height: 6),
-            Text('career-path alignment',
-                style: Theme.of(context).textTheme.labelLarge),
-            const SizedBox(height: 8),
-            const Text('One matched job is free to open.'),
-          ],
         ),
       ),
     );
