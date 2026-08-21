@@ -197,40 +197,43 @@ class _AnswerOption extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
-      hoverColor: scheme.primary.withValues(alpha: .04),
       borderRadius: BorderRadius.circular(8),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 140),
         width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color:
-              selected ? scheme.primary.withValues(alpha: .09) : Colors.white,
+              selected ? scheme.primary.withValues(alpha: .10) : Colors.white,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: scheme.primary.withValues(alpha: .14)),
+          border: Border.all(
+              color: selected
+                  ? scheme.primary
+                  : scheme.primary.withValues(alpha: .14),
+              width: selected ? 2 : 1),
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Row(
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 140),
-                width: selected ? 5 : 2,
-                height: 52,
-                color: selected
-                    ? scheme.primary
-                    : scheme.primary.withValues(alpha: .18),
+        child: Row(
+          children: [
+            Container(
+              width: 18,
+              height: 18,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: selected ? scheme.primary : scheme.surface,
+                shape: BoxShape.circle,
+                border:
+                    Border.all(color: scheme.primary.withValues(alpha: .42)),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                  child: Text(label,
-                      style: TextStyle(
-                          color:
-                              selected ? BrandTokens.forest : BrandTokens.ink,
-                          fontWeight: FontWeight.w800))),
-              if (selected) Icon(Icons.check_circle, color: scheme.primary),
-              const SizedBox(width: 14),
-            ],
-          ),
+              child: selected
+                  ? const Icon(Icons.check, size: 13, color: Colors.white)
+                  : null,
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+                child: Text(label,
+                    style: const TextStyle(fontWeight: FontWeight.w800))),
+            if (selected) Icon(Icons.check_circle, color: scheme.primary),
+          ],
         ),
       ),
     );

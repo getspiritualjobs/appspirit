@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/theme.dart';
 import 'brand_components.dart';
+import 'brand_mark.dart';
 
 class PageBand extends StatelessWidget {
   const PageBand(
@@ -70,7 +71,7 @@ class EmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 42, color: BrandTokens.forest),
+          IconBadge(icon, size: 48),
           const SizedBox(height: 12),
           const BrandEyebrow('Start here'),
           const SizedBox(height: 8),

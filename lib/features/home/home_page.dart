@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/theme.dart';
 import '../../widgets/brand_components.dart';
+import '../../widgets/brand_mark.dart';
 import '../../widgets/responsive.dart';
 
 class HomePage extends StatelessWidget {
@@ -139,84 +140,91 @@ class _HeroVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1.0,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: .78),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-              color:
-                  Theme.of(context).colorScheme.primary.withValues(alpha: .12)),
-        ),
-        child: const Stack(
-          children: [
-            Positioned.fill(
-              left: 18,
-              right: 18,
-              top: 66,
-              bottom: 70,
-              child: DashedPathConnector(),
-            ),
-            Positioned(
-                top: 34,
-                left: 28,
-                child: _MiniCard(
-                    icon: Icons.menu_book_outlined,
-                    label: 'Teaching',
-                    value: '94%')),
-            Positioned(
-                top: 126,
-                right: 26,
-                child: _MiniCard(
-                    icon: Icons.favorite_border,
-                    label: 'Encouragement',
-                    value: '88%')),
-            Positioned(
-                bottom: 34,
-                left: 42,
-                child: _MiniCard(
-                    icon: Icons.work_outline,
-                    label: 'Career Match',
-                    value: '92%')),
-          ],
+    return const SizedBox(
+      height: 390,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            left: 6,
+            right: 24,
+            top: 72,
+            height: 190,
+            child: DashedPathConnector(),
+          ),
+          Positioned(
+            top: 6,
+            right: 10,
+            child: _ReflectionNote(),
+          ),
+          Positioned(
+            left: 0,
+            bottom: 28,
+            child: _MatchNote(),
+          ),
+          Positioned(
+            left: 52,
+            top: 36,
+            child: GiftPathMark(size: 54),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReflectionNote extends StatelessWidget {
+  const _ReflectionNote();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+        child: SizedBox(
+          width: 250,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const BrandEyebrow('Sample result'),
+              const SizedBox(height: 12),
+              Text('Teaching rises first.',
+                  style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 8),
+              const Text(
+                  'You tend to clarify ideas, organize truth, and help people name what they are learning.'),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _MiniCard extends StatelessWidget {
-  const _MiniCard(
-      {required this.icon, required this.label, required this.value});
-
-  final IconData icon;
-  final String label;
-  final String value;
+class _MatchNote extends StatelessWidget {
+  const _MatchNote();
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: BrandTokens.forest, size: 28),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(label,
-                    style: const TextStyle(fontWeight: FontWeight.w800)),
-                Text(value,
-                    style: const TextStyle(
-                        color: BrandTokens.forest,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900)),
-              ],
-            ),
+            const Text('92%',
+                style: TextStyle(
+                    color: BrandTokens.forest,
+                    fontSize: 40,
+                    fontWeight: FontWeight.w900,
+                    height: 1)),
+            const SizedBox(height: 6),
+            Text('career-path alignment',
+                style: Theme.of(context).textTheme.labelLarge),
+            const SizedBox(height: 8),
+            const Text('One matched job is free to open.'),
           ],
         ),
       ),

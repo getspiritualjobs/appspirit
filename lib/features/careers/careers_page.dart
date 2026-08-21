@@ -177,7 +177,10 @@ class _CareerCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                _MatchScore(score: match.score, topMatch: topMatch),
+                Text('${match.score}% Match',
+                    style: TextStyle(
+                        color: topMatch ? BrandTokens.gold : BrandTokens.forest,
+                        fontWeight: FontWeight.w900)),
               ],
             ),
             const SizedBox(height: 10),
@@ -212,37 +215,6 @@ class _CareerCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _MatchScore extends StatelessWidget {
-  const _MatchScore({required this.score, required this.topMatch});
-
-  final int score;
-  final bool topMatch;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = topMatch ? BrandTokens.gold : BrandTokens.forest;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text('$score%',
-            style: TextStyle(
-              color: color,
-              fontSize: 30,
-              fontWeight: FontWeight.w900,
-              height: 1,
-            )),
-        const SizedBox(height: 3),
-        const Text('Match',
-            style: TextStyle(
-              color: BrandTokens.ink,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            )),
-      ],
     );
   }
 }

@@ -326,8 +326,12 @@ class _JobCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                _JobMatchScore(
-                    score: job.matchScore, topMatch: job.matchScore >= 90),
+                Text('${job.matchScore}% Match',
+                    style: TextStyle(
+                        color: job.matchScore >= 90
+                            ? BrandTokens.gold
+                            : BrandTokens.forest,
+                        fontWeight: FontWeight.w900)),
               ],
             ),
             const SizedBox(height: 10),
@@ -374,36 +378,5 @@ class _JobCard extends StatelessWidget {
       return 'Up to \$${job.salaryMax! ~/ 1000}k · ${job.employmentType}';
     }
     return '\$${job.salaryMin! ~/ 1000}k-\$${job.salaryMax! ~/ 1000}k · ${job.employmentType}';
-  }
-}
-
-class _JobMatchScore extends StatelessWidget {
-  const _JobMatchScore({required this.score, required this.topMatch});
-
-  final int score;
-  final bool topMatch;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = topMatch ? BrandTokens.gold : BrandTokens.forest;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text('$score%',
-            style: TextStyle(
-              color: color,
-              fontSize: 30,
-              fontWeight: FontWeight.w900,
-              height: 1,
-            )),
-        const SizedBox(height: 3),
-        const Text('Match',
-            style: TextStyle(
-              color: BrandTokens.ink,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            )),
-      ],
-    );
   }
 }
