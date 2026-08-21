@@ -79,7 +79,8 @@ class _AssessmentPageState extends State<AssessmentPage> {
                           await appState.completeAssessment();
                           if (!mounted) return;
                           setState(() => saving = false);
-                          GoRouter.of(this.context).go('/results');
+                          GoRouter.of(this.context)
+                              .go('/auth?returnTo=/results');
                         }
                       : null,
                   saving: saving,

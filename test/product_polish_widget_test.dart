@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:spiritual_gifts_career_discovery/core/app_state.dart';
 import 'package:spiritual_gifts_career_discovery/core/models.dart';
 import 'package:spiritual_gifts_career_discovery/core/theme.dart';
 import 'package:spiritual_gifts_career_discovery/data/seed_data.dart';
 import 'package:spiritual_gifts_career_discovery/features/assessment/assessment_page.dart';
+import 'package:spiritual_gifts_career_discovery/features/auth/auth_page.dart';
 import 'package:spiritual_gifts_career_discovery/features/billing/subscribe_page.dart';
 import 'package:spiritual_gifts_career_discovery/features/opportunities/opportunities_page.dart';
 import 'package:spiritual_gifts_career_discovery/features/results/results_page.dart';
@@ -40,6 +42,49 @@ void main() {
     expect(find.text('Question 1 of 56'), findsOneWidget);
     expect(find.text('QUESTION TRAIL'), findsOneWidget);
     expect(find.text('0 of 56 answered'), findsOneWidget);
+  });
+
+  testWidgets('auth return flow frames sign up before results',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp.router(
+      theme: buildGiftPathTheme(),
+      routerConfig: _routerFor('/auth'),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Create an account to view your results'), findsNothing);
+
+    await tester.pumpWidget(MaterialApp.router(
+      theme: buildGiftPathTheme(),
+      routerConfig: _routerFor('/auth?returnTo=/results'),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Create an account to view your results'), findsOneWidget);
+    expect(
+      find.text(
+          'Your assessment is complete. Sign up, sign in, or continue as a guest to see your gift profile and career matches.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('completed assessment routes through account step before results',
+      (WidgetTester tester) async {
+    for (final question in assessmentQuestions) {
+      appState.answer(question.id, 4);
+    }
+
+    await tester.pumpWidget(MaterialApp.router(
+      theme: buildGiftPathTheme(),
+      routerConfig: _routerFor('/assessment'),
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('Reveal My Gifts'));
+    await tester.tap(find.text('Reveal My Gifts'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Create an account to view your results'), findsOneWidget);
   });
 
   testWidgets('results gives the top gift a reveal treatment',
@@ -94,6 +139,24 @@ Widget _shell(Widget child) {
   return MaterialApp(
     theme: buildGiftPathTheme(),
     home: Scaffold(body: SingleChildScrollView(child: child)),
+  );
+}
+
+GoRouter _routerFor(String initialLocation) {
+  return GoRouter(
+    initialLocation: initialLocation,
+    routes: [
+      GoRoute(
+        path: '/assessment',
+        builder: (_, __) => const Scaffold(body: AssessmentPage()),
+      ),
+      GoRoute(
+          path: '/auth', builder: (_, __) => const Scaffold(body: AuthPage())),
+      GoRoute(
+        path: '/results',
+        builder: (_, __) => const Scaffold(body: Text('Results')),
+      ),
+    ],
   );
 }
 
