@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme.dart';
@@ -10,129 +11,75 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return SingleChildScrollView(
-      child: Column(
-        children: [
-          Container(
-            decoration: const BoxDecoration(color: BrandTokens.cream),
-            child: PageBand(
-              padding: const EdgeInsets.fromLTRB(20, 56, 20, 36),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final wide = constraints.maxWidth > 760;
-                  final heroText = Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const BrandEyebrow('Scripture-informed assessment'),
-                      const SizedBox(height: 14),
-                      Text('Your gifts were given for a reason.',
-                          style: theme.textTheme.displayLarge),
-                      const SizedBox(height: 18),
-                      Text(
-                        'Take the assessment and see where they lead. Free to start, seven minutes to your first result.',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w500, height: 1.45),
+      child: Container(
+        decoration: const BoxDecoration(color: BrandTokens.cream),
+        child: PageBand(
+          padding: const EdgeInsets.fromLTRB(20, 48, 20, 64),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxWidth < 620;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const BrandEyebrow('Scripture-informed assessment'),
+                  const SizedBox(height: 16),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 980),
+                    child: Text(
+                      'Your gifts were given for a reason.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        color: BrandTokens.ink,
+                        fontSize: compact ? 48 : 88,
+                        fontWeight: FontWeight.w900,
+                        height: .95,
                       ),
-                      const SizedBox(height: 26),
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: [
-                          FilledButton.icon(
-                            onPressed: () => context.go('/assessment'),
-                            icon: const Icon(Icons.arrow_forward),
-                            label: const Text('Discover My Gifts'),
-                            style: FilledButton.styleFrom(
-                              backgroundColor: BrandTokens.gold,
-                              foregroundColor: BrandTokens.forest,
-                            ),
-                          ),
-                          OutlinedButton.icon(
-                            onPressed: () => context.go('/about'),
-                            icon: const Icon(Icons.info_outline),
-                            label: const Text('How It Works'),
-                          ),
-                        ],
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 760),
+                    child: Text(
+                      'Take the assessment and see where they lead. Free to start, seven minutes to your first result.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        color: BrandTokens.ink,
+                        fontSize: compact ? 19 : 24,
+                        fontWeight: FontWeight.w700,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 34),
+                  const _HeroVisual(),
+                  const SizedBox(height: 30),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 14,
+                    runSpacing: 12,
+                    children: [
+                      FilledButton.icon(
+                        onPressed: () => context.go('/assessment'),
+                        icon: const Icon(Icons.arrow_forward),
+                        label: const Text('Discover My Gifts'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: BrandTokens.gold,
+                          foregroundColor: BrandTokens.forest,
+                        ),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () => context.go('/about'),
+                        icon: const Icon(Icons.info_outline),
+                        label: const Text('How It Works'),
                       ),
                     ],
-                  );
-                  const visual = _HeroVisual();
-                  return wide
-                      ? Row(children: [
-                          Expanded(flex: 6, child: heroText),
-                          const SizedBox(width: 36),
-                          const Expanded(flex: 5, child: visual)
-                        ])
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                              heroText,
-                              const SizedBox(height: 28),
-                              visual
-                            ]);
-                },
-              ),
-            ),
-          ),
-          PageBand(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const BrandDivider(),
-                const SizedBox(height: 32),
-                const BrandEyebrow('From reflection to action'),
-                const SizedBox(height: 10),
-                Text('A reflective path from giftedness to next steps',
-                    style: theme.textTheme.headlineMedium),
-                const SizedBox(height: 18),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final columns = constraints.maxWidth > 860
-                        ? 4
-                        : constraints.maxWidth > 560
-                            ? 2
-                            : 1;
-                    return Stack(
-                      children: [
-                        if (columns == 4)
-                          const Positioned.fill(
-                            top: 30,
-                            bottom: 42,
-                            child: DashedPathConnector(),
-                          ),
-                        GridView.count(
-                          crossAxisCount: columns,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          crossAxisSpacing: 14,
-                          mainAxisSpacing: 14,
-                          childAspectRatio: columns == 1 ? 3.4 : 1.28,
-                          children: const [
-                            _JourneyStep('01', 'Discover',
-                                'Take the spiritual gifts assessment without rushing the answer.'),
-                            _JourneyStep('02', 'Understand',
-                                'See the gifts that rose to the top and the language behind them.'),
-                            _JourneyStep('03', 'Explore',
-                                'Compare career paths through the full pattern of your scores.'),
-                            _JourneyStep('04', 'Act',
-                                'Open one free job match, then save the paths worth revisiting.'),
-                          ],
-                        ),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(height: 26),
-                const InfoCard(
-                  child: Text(
-                    'Spiritual gifts extend beyond occupation. Your results are designed to help you reflect on how your gifts may show up in work, church, relationships, family, volunteering, and community.',
                   ),
-                ),
-              ],
-            ),
+                ],
+              );
+            },
           ),
-        ],
+        ),
       ),
     );
   }
@@ -145,26 +92,26 @@ class _HeroVisual extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxWidth < 430;
+        final compact = constraints.maxWidth < 620;
+        final labelWidth = compact ? 118.0 : 230.0;
         return AspectRatio(
-          aspectRatio: compact ? .92 : 1.02,
+          aspectRatio: compact ? .70 : 2.18,
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: BrandTokens.forest,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(compact ? 22 : 34),
               boxShadow: [
                 BoxShadow(
                   color: BrandTokens.ink.withValues(alpha: .14),
-                  blurRadius: 28,
-                  offset: const Offset(0, 18),
+                  blurRadius: 36,
+                  offset: const Offset(0, 22),
                 ),
               ],
             ),
             child: LayoutBuilder(
               builder: (context, size) {
-                final w = size.maxWidth;
-                final h = size.maxHeight;
-                final points = _heroPathPoints(Size(w, h));
+                final panelSize = Size(size.maxWidth, size.maxHeight);
+                final points = _heroPathPoints(panelSize);
                 return Stack(
                   children: [
                     const Positioned.fill(
@@ -172,42 +119,58 @@ class _HeroVisual extends StatelessWidget {
                     _PositionedPathStop(
                       point: points[0],
                       offset: compact
-                          ? const Offset(-34, 34)
-                          : const Offset(-46, 38),
-                      child: const _PathStop(
+                          ? const Offset(-26, 34)
+                          : const Offset(-70, 44),
+                      panelSize: panelSize,
+                      width: labelWidth,
+                      child: _PathStop(
                         title: 'Quiz',
                         body: 'Seven quiet minutes.',
+                        width: labelWidth,
+                        compact: compact,
                       ),
                     ),
                     _PositionedPathStop(
                       point: points[1],
                       offset: compact
-                          ? const Offset(-44, 34)
-                          : const Offset(-46, 38),
-                      child: const _PathStop(
+                          ? const Offset(-56, 36)
+                          : const Offset(-82, 44),
+                      panelSize: panelSize,
+                      width: labelWidth,
+                      child: _PathStop(
                         title: 'Gifts',
                         body: 'What rises to the top.',
+                        width: labelWidth,
+                        compact: compact,
                       ),
                     ),
                     _PositionedPathStop(
                       point: points[2],
                       offset: compact
-                          ? const Offset(-112, -104)
-                          : const Offset(-122, -110),
-                      child: const _PathStop(
+                          ? const Offset(-92, -98)
+                          : const Offset(-104, -128),
+                      panelSize: panelSize,
+                      width: labelWidth,
+                      child: _PathStop(
                         title: 'Aligned jobs',
                         body: 'Work that fits the pattern.',
+                        width: labelWidth,
+                        compact: compact,
                       ),
                     ),
                     _PositionedPathStop(
                       point: points[3],
                       offset: compact
-                          ? const Offset(-100, 36)
-                          : const Offset(-126, 42),
-                      child: const _PathStop(
+                          ? const Offset(-84, 34)
+                          : const Offset(30, 42),
+                      panelSize: panelSize,
+                      width: labelWidth,
+                      child: _PathStop(
                         title: 'Fulfillment',
                         body: 'A next step with purpose.',
                         accent: true,
+                        width: labelWidth,
+                        compact: compact,
                       ),
                     ),
                   ],
@@ -225,18 +188,25 @@ class _PositionedPathStop extends StatelessWidget {
   const _PositionedPathStop({
     required this.point,
     required this.offset,
+    required this.panelSize,
+    required this.width,
     required this.child,
   });
 
   final Offset point;
   final Offset offset;
+  final Size panelSize;
+  final double width;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
+    final left =
+        (point.dx + offset.dx).clamp(24.0, panelSize.width - width - 24);
+    final top = (point.dy + offset.dy).clamp(24.0, panelSize.height - 96);
     return Positioned(
-      left: point.dx + offset.dx,
-      top: point.dy + offset.dy,
+      left: left,
+      top: top,
       child: child,
     );
   }
@@ -246,33 +216,37 @@ class _PathStop extends StatelessWidget {
   const _PathStop({
     required this.title,
     required this.body,
+    required this.width,
+    required this.compact,
     this.accent = false,
   });
 
   final String title;
   final String body;
+  final double width;
+  final bool compact;
   final bool accent;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 142,
+      width: width,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: BrandTokens.cream,
-                    fontSize: 23,
-                    fontWeight: FontWeight.w900,
-                    height: 1.02,
-                  )),
+              style: GoogleFonts.inter(
+                color: BrandTokens.cream,
+                fontSize: compact ? 21 : 38,
+                fontWeight: FontWeight.w900,
+                height: 1.02,
+              )),
           const SizedBox(height: 5),
           Text(body,
-              style: const TextStyle(
-                color: Color(0xFFE4DBC7),
-                fontSize: 13,
+              style: GoogleFonts.inter(
+                color: const Color(0xFFE4DBC7),
+                fontSize: compact ? 12 : 18,
                 fontWeight: FontWeight.w600,
                 height: 1.25,
               )),
@@ -299,11 +273,11 @@ class _HeroPathPainter extends CustomPainter {
     final points = _heroPathPoints(size);
     final path = Path()
       ..moveTo(points[0].dx, points[0].dy)
-      ..cubicTo(size.width * .23, size.height * .33, size.width * .32,
+      ..cubicTo(size.width * .22, size.height * .25, size.width * .29,
           size.height * .76, points[1].dx, points[1].dy)
-      ..cubicTo(size.width * .51, size.height * .58, size.width * .52,
+      ..cubicTo(size.width * .47, size.height * .63, size.width * .49,
           size.height * .36, points[2].dx, points[2].dy)
-      ..cubicTo(size.width * .74, size.height * .20, size.width * .90,
+      ..cubicTo(size.width * .72, size.height * .18, size.width * .89,
           size.height * .30, points[3].dx, points[3].dy);
 
     final shadow = Paint()
@@ -322,15 +296,18 @@ class _HeroPathPainter extends CustomPainter {
 
     for (var i = 0; i < points.length; i++) {
       final point = points[i];
-      canvas.drawCircle(
-          point, 19, Paint()..color = BrandTokens.gold.withValues(alpha: .16));
-      canvas.drawCircle(point, 13.5, Paint()..color = BrandTokens.gold);
+      final large = size.width > 760;
+      final haloRadius = large ? 27.0 : 19.0;
+      final nodeRadius = large ? 18.0 : 13.5;
+      canvas.drawCircle(point, haloRadius,
+          Paint()..color = BrandTokens.gold.withValues(alpha: .16));
+      canvas.drawCircle(point, nodeRadius, Paint()..color = BrandTokens.gold);
       final number = TextPainter(
         text: TextSpan(
           text: '${i + 1}',
-          style: const TextStyle(
+          style: TextStyle(
             color: BrandTokens.forest,
-            fontSize: 13,
+            fontSize: large ? 18 : 13,
             fontWeight: FontWeight.w900,
             height: 1,
           ),
@@ -362,38 +339,19 @@ class _HeroPathPainter extends CustomPainter {
 }
 
 List<Offset> _heroPathPoints(Size size) {
-  return [
-    Offset(size.width * .15, size.height * .59),
-    Offset(size.width * .43, size.height * .69),
-    Offset(size.width * .66, size.height * .40),
-    Offset(size.width * .88, size.height * .59),
-  ];
-}
-
-class _JourneyStep extends StatelessWidget {
-  const _JourneyStep(this.number, this.title, this.body);
-
-  final String number;
-  final String title;
-  final String body;
-
-  @override
-  Widget build(BuildContext context) {
-    return InfoCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(number,
-              style: const TextStyle(
-                  color: BrandTokens.gold,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.4)),
-          const SizedBox(height: 8),
-          Text(title, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 6),
-          Text(body),
-        ],
-      ),
-    );
+  if (size.width < 620) {
+    return [
+      Offset(size.width * .14, size.height * .56),
+      Offset(size.width * .37, size.height * .66),
+      Offset(size.width * .62, size.height * .38),
+      Offset(size.width * .88, size.height * .54),
+    ];
   }
+
+  return [
+    Offset(size.width * .13, size.height * .60),
+    Offset(size.width * .38, size.height * .64),
+    Offset(size.width * .62, size.height * .38),
+    Offset(size.width * .87, size.height * .58),
+  ];
 }
