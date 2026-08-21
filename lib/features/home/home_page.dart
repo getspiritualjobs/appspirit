@@ -164,7 +164,6 @@ class _HeroVisual extends StatelessWidget {
                   left: compact ? 24 : 34,
                   top: compact ? 30 : 34,
                   child: const _PathStop(
-                    number: '01',
                     title: 'Quiz',
                     body: 'Seven quiet minutes.',
                   ),
@@ -173,7 +172,6 @@ class _HeroVisual extends StatelessWidget {
                   right: compact ? 24 : 38,
                   top: compact ? 108 : 78,
                   child: const _PathStop(
-                    number: '02',
                     title: 'Gifts',
                     body: 'What rises to the top.',
                   ),
@@ -182,7 +180,6 @@ class _HeroVisual extends StatelessWidget {
                   left: compact ? 28 : 54,
                   bottom: compact ? 108 : 82,
                   child: const _PathStop(
-                    number: '03',
                     title: 'Aligned jobs',
                     body: 'Work that fits the pattern.',
                   ),
@@ -191,7 +188,6 @@ class _HeroVisual extends StatelessWidget {
                   right: compact ? 24 : 34,
                   bottom: compact ? 28 : 34,
                   child: const _PathStop(
-                    number: '04',
                     title: 'Fulfillment',
                     body: 'A next step with purpose.',
                     accent: true,
@@ -208,13 +204,11 @@ class _HeroVisual extends StatelessWidget {
 
 class _PathStop extends StatelessWidget {
   const _PathStop({
-    required this.number,
     required this.title,
     required this.body,
     this.accent = false,
   });
 
-  final String number;
   final String title;
   final String body;
   final bool accent;
@@ -227,16 +221,6 @@ class _PathStop extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(number,
-              style: TextStyle(
-                color: accent
-                    ? BrandTokens.gold
-                    : BrandTokens.gold.withValues(alpha: .84),
-                fontSize: 12,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.3,
-              )),
-          const SizedBox(height: 7),
           Text(title,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: BrandTokens.cream,
@@ -293,18 +277,31 @@ class _HeroPathPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
     _drawDashes(canvas, path, track, 15, 11);
 
-    final gold = Paint()
-      ..color = BrandTokens.gold
-      ..style = PaintingStyle.fill;
-    for (final point in [
+    final points = [
       Offset(size.width * .12, size.height * .72),
       Offset(size.width * .43, size.height * .57),
       Offset(size.width * .62, size.height * .32),
       Offset(size.width * .90, size.height * .55),
-    ]) {
-      canvas.drawCircle(point, 5.5, gold);
+    ];
+    for (var i = 0; i < points.length; i++) {
+      final point = points[i];
       canvas.drawCircle(
-          point, 11, Paint()..color = BrandTokens.gold.withValues(alpha: .14));
+          point, 19, Paint()..color = BrandTokens.gold.withValues(alpha: .16));
+      canvas.drawCircle(point, 13.5, Paint()..color = BrandTokens.gold);
+      final number = TextPainter(
+        text: TextSpan(
+          text: '${i + 1}',
+          style: const TextStyle(
+            color: BrandTokens.forest,
+            fontSize: 13,
+            fontWeight: FontWeight.w900,
+            height: 1,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      number.paint(canvas,
+          Offset(point.dx - number.width / 2, point.dy - number.height / 2));
     }
   }
 
