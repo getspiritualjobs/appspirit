@@ -26,11 +26,11 @@ class HomePage extends StatelessWidget {
                     children: [
                       const BrandEyebrow('Scripture-informed assessment'),
                       const SizedBox(height: 14),
-                      Text('Discover your gifts. Find your path.',
+                      Text('Your gifts were given for a reason.',
                           style: theme.textTheme.displayLarge),
                       const SizedBox(height: 18),
                       Text(
-                        'Answer one thoughtful question at a time, then see how your Romans 12 gift profile connects to careers, next steps, and real opportunities.',
+                        'Take the assessment and see where they lead. Free to start, seven minutes to your first result.',
                         style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w500, height: 1.45),
                       ),
@@ -43,6 +43,10 @@ class HomePage extends StatelessWidget {
                             onPressed: () => context.go('/assessment'),
                             icon: const Icon(Icons.arrow_forward),
                             label: const Text('Discover My Gifts'),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: BrandTokens.gold,
+                              foregroundColor: BrandTokens.forest,
+                            ),
                           ),
                           OutlinedButton.icon(
                             onPressed: () => context.go('/about'),
@@ -143,7 +147,7 @@ class _HeroVisual extends StatelessWidget {
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 430;
         return AspectRatio(
-          aspectRatio: compact ? .92 : 1.08,
+          aspectRatio: compact ? .92 : 1.02,
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: BrandTokens.forest,
@@ -156,48 +160,84 @@ class _HeroVisual extends StatelessWidget {
                 ),
               ],
             ),
-            child: Stack(
-              children: [
-                const Positioned.fill(
-                    child: CustomPaint(painter: _HeroPathPainter())),
-                Positioned(
-                  left: compact ? 24 : 34,
-                  top: compact ? 30 : 34,
-                  child: const _PathStop(
-                    title: 'Quiz',
-                    body: 'Seven quiet minutes.',
-                  ),
-                ),
-                Positioned(
-                  right: compact ? 24 : 38,
-                  top: compact ? 108 : 78,
-                  child: const _PathStop(
-                    title: 'Gifts',
-                    body: 'What rises to the top.',
-                  ),
-                ),
-                Positioned(
-                  left: compact ? 28 : 54,
-                  bottom: compact ? 108 : 82,
-                  child: const _PathStop(
-                    title: 'Aligned jobs',
-                    body: 'Work that fits the pattern.',
-                  ),
-                ),
-                Positioned(
-                  right: compact ? 24 : 34,
-                  bottom: compact ? 28 : 34,
-                  child: const _PathStop(
-                    title: 'Fulfillment',
-                    body: 'A next step with purpose.',
-                    accent: true,
-                  ),
-                ),
-              ],
+            child: LayoutBuilder(
+              builder: (context, size) {
+                final w = size.maxWidth;
+                final h = size.maxHeight;
+                final points = _heroPathPoints(Size(w, h));
+                return Stack(
+                  children: [
+                    const Positioned.fill(
+                        child: CustomPaint(painter: _HeroPathPainter())),
+                    _PositionedPathStop(
+                      point: points[0],
+                      offset: compact
+                          ? const Offset(-34, 34)
+                          : const Offset(-46, 38),
+                      child: const _PathStop(
+                        title: 'Quiz',
+                        body: 'Seven quiet minutes.',
+                      ),
+                    ),
+                    _PositionedPathStop(
+                      point: points[1],
+                      offset: compact
+                          ? const Offset(-44, 34)
+                          : const Offset(-46, 38),
+                      child: const _PathStop(
+                        title: 'Gifts',
+                        body: 'What rises to the top.',
+                      ),
+                    ),
+                    _PositionedPathStop(
+                      point: points[2],
+                      offset: compact
+                          ? const Offset(-112, -104)
+                          : const Offset(-122, -110),
+                      child: const _PathStop(
+                        title: 'Aligned jobs',
+                        body: 'Work that fits the pattern.',
+                      ),
+                    ),
+                    _PositionedPathStop(
+                      point: points[3],
+                      offset: compact
+                          ? const Offset(-124, 36)
+                          : const Offset(-154, 42),
+                      child: const _PathStop(
+                        title: 'Fulfillment',
+                        body: 'A next step with purpose.',
+                        accent: true,
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         );
       },
+    );
+  }
+}
+
+class _PositionedPathStop extends StatelessWidget {
+  const _PositionedPathStop({
+    required this.point,
+    required this.offset,
+    required this.child,
+  });
+
+  final Offset point;
+  final Offset offset;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: point.dx + offset.dx,
+      top: point.dy + offset.dy,
+      child: child,
     );
   }
 }
@@ -224,7 +264,7 @@ class _PathStop extends StatelessWidget {
           Text(title,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: BrandTokens.cream,
-                    fontSize: 24,
+                    fontSize: 23,
                     fontWeight: FontWeight.w900,
                     height: 1.02,
                   )),
@@ -256,12 +296,15 @@ class _HeroPathPainter extends CustomPainter {
       }
     }
 
+    final points = _heroPathPoints(size);
     final path = Path()
-      ..moveTo(size.width * .12, size.height * .72)
-      ..cubicTo(size.width * .24, size.height * .30, size.width * .42,
-          size.height * .78, size.width * .54, size.height * .44)
-      ..cubicTo(size.width * .64, size.height * .18, size.width * .82,
-          size.height * .22, size.width * .90, size.height * .55);
+      ..moveTo(points[0].dx, points[0].dy)
+      ..cubicTo(size.width * .23, size.height * .33, size.width * .32,
+          size.height * .76, points[1].dx, points[1].dy)
+      ..cubicTo(size.width * .51, size.height * .58, size.width * .52,
+          size.height * .36, points[2].dx, points[2].dy)
+      ..cubicTo(size.width * .74, size.height * .20, size.width * .90,
+          size.height * .30, points[3].dx, points[3].dy);
 
     final shadow = Paint()
       ..color = BrandTokens.ink.withValues(alpha: .20)
@@ -273,16 +316,10 @@ class _HeroPathPainter extends CustomPainter {
     final track = Paint()
       ..color = BrandTokens.cream.withValues(alpha: .30)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 4
+      ..strokeWidth = 4.6
       ..strokeCap = StrokeCap.round;
-    _drawDashes(canvas, path, track, 15, 11);
+    _drawDashes(canvas, path, track, 18, 13);
 
-    final points = [
-      Offset(size.width * .12, size.height * .72),
-      Offset(size.width * .43, size.height * .57),
-      Offset(size.width * .62, size.height * .32),
-      Offset(size.width * .90, size.height * .55),
-    ];
     for (var i = 0; i < points.length; i++) {
       final point = points[i];
       canvas.drawCircle(
@@ -322,6 +359,15 @@ class _HeroPathPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+List<Offset> _heroPathPoints(Size size) {
+  return [
+    Offset(size.width * .15, size.height * .59),
+    Offset(size.width * .43, size.height * .69),
+    Offset(size.width * .66, size.height * .40),
+    Offset(size.width * .88, size.height * .59),
+  ];
 }
 
 class _JourneyStep extends StatelessWidget {
