@@ -18,6 +18,8 @@ class CareersPage extends StatelessWidget {
       builder: (context, _) {
         if (!appState.hasResults) {
           return PageBand(
+            maxWidth: 640,
+            padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
             child: EmptyState(
               icon: Icons.work_outline,
               title: 'Career matches start with your gift profile',
@@ -175,10 +177,7 @@ class _CareerCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Text('${match.score}% Match',
-                    style: TextStyle(
-                        color: topMatch ? BrandTokens.gold : BrandTokens.forest,
-                        fontWeight: FontWeight.w900)),
+                _MatchScore(score: match.score, topMatch: topMatch),
               ],
             ),
             const SizedBox(height: 10),
@@ -213,6 +212,37 @@ class _CareerCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _MatchScore extends StatelessWidget {
+  const _MatchScore({required this.score, required this.topMatch});
+
+  final int score;
+  final bool topMatch;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = topMatch ? BrandTokens.gold : BrandTokens.forest;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text('$score%',
+            style: TextStyle(
+              color: color,
+              fontSize: 30,
+              fontWeight: FontWeight.w900,
+              height: 1,
+            )),
+        const SizedBox(height: 3),
+        const Text('Match',
+            style: TextStyle(
+              color: BrandTokens.ink,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            )),
+      ],
     );
   }
 }

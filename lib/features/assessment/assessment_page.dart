@@ -174,7 +174,6 @@ class _QuestionPanel extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: _AnswerOption(
-                  number: option.$1,
                   label: option.$2,
                   selected: response == option.$1,
                   onTap: () => onAnswer(option.$1)),
@@ -187,12 +186,8 @@ class _QuestionPanel extends StatelessWidget {
 
 class _AnswerOption extends StatelessWidget {
   const _AnswerOption(
-      {required this.number,
-      required this.label,
-      required this.selected,
-      required this.onTap});
+      {required this.label, required this.selected, required this.onTap});
 
-  final int number;
   final String label;
   final bool selected;
   final VoidCallback onTap;
@@ -202,44 +197,40 @@ class _AnswerOption extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
+      hoverColor: scheme.primary.withValues(alpha: .04),
       borderRadius: BorderRadius.circular(8),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 140),
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color:
-              selected ? scheme.primary.withValues(alpha: .10) : Colors.white,
+              selected ? scheme.primary.withValues(alpha: .09) : Colors.white,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-              color: selected
-                  ? scheme.primary
-                  : scheme.primary.withValues(alpha: .14),
-              width: selected ? 2 : 1),
+          border: Border.all(color: scheme.primary.withValues(alpha: .14)),
         ),
-        child: Row(
-          children: [
-            Container(
-              width: 34,
-              height: 34,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: selected ? scheme.primary : scheme.surface,
-                borderRadius: BorderRadius.circular(8),
-                border:
-                    Border.all(color: scheme.primary.withValues(alpha: .18)),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Row(
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 140),
+                width: selected ? 5 : 2,
+                height: 52,
+                color: selected
+                    ? scheme.primary
+                    : scheme.primary.withValues(alpha: .18),
               ),
-              child: Text('$number',
-                  style: TextStyle(
-                      color: selected ? Colors.white : scheme.primary,
-                      fontWeight: FontWeight.w900)),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-                child: Text(label,
-                    style: const TextStyle(fontWeight: FontWeight.w800))),
-            if (selected) Icon(Icons.check_circle, color: scheme.primary),
-          ],
+              const SizedBox(width: 14),
+              Expanded(
+                  child: Text(label,
+                      style: TextStyle(
+                          color:
+                              selected ? BrandTokens.forest : BrandTokens.ink,
+                          fontWeight: FontWeight.w800))),
+              if (selected) Icon(Icons.check_circle, color: scheme.primary),
+              const SizedBox(width: 14),
+            ],
+          ),
         ),
       ),
     );

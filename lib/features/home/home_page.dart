@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/theme.dart';
 import '../../widgets/brand_components.dart';
-import '../../widgets/brand_mark.dart';
 import '../../widgets/responsive.dart';
 
 class HomePage extends StatelessWidget {
@@ -141,7 +140,7 @@ class _HeroVisual extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
-      aspectRatio: 1.08,
+      aspectRatio: 1.0,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: .78),
@@ -153,24 +152,28 @@ class _HeroVisual extends StatelessWidget {
         child: const Stack(
           children: [
             Positioned.fill(
-              child: CustomPaint(painter: _PathPainter()),
+              left: 18,
+              right: 18,
+              top: 66,
+              bottom: 70,
+              child: DashedPathConnector(),
             ),
             Positioned(
-                top: 30,
+                top: 34,
                 left: 28,
                 child: _MiniCard(
                     icon: Icons.menu_book_outlined,
                     label: 'Teaching',
                     value: '94%')),
             Positioned(
-                top: 132,
+                top: 126,
                 right: 26,
                 child: _MiniCard(
                     icon: Icons.favorite_border,
                     label: 'Encouragement',
                     value: '88%')),
             Positioned(
-                bottom: 30,
+                bottom: 34,
                 left: 42,
                 child: _MiniCard(
                     icon: Icons.work_outline,
@@ -199,15 +202,19 @@ class _MiniCard extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IconBadge(icon, size: 36),
-            const SizedBox(width: 10),
+            Icon(icon, color: BrandTokens.forest, size: 28),
+            const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(label,
                     style: const TextStyle(fontWeight: FontWeight.w800)),
-                Text(value),
+                Text(value,
+                    style: const TextStyle(
+                        color: BrandTokens.forest,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900)),
               ],
             ),
           ],
@@ -243,26 +250,4 @@ class _JourneyStep extends StatelessWidget {
       ),
     );
   }
-}
-
-class _PathPainter extends CustomPainter {
-  const _PathPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = BrandTokens.forest.withValues(alpha: .16)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4;
-    final path = Path()
-      ..moveTo(size.width * .18, size.height * .25)
-      ..cubicTo(size.width * .7, size.height * .15, size.width * .3,
-          size.height * .58, size.width * .78, size.height * .50)
-      ..cubicTo(size.width * .35, size.height * .66, size.width * .58,
-          size.height * .92, size.width * .22, size.height * .82);
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
