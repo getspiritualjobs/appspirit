@@ -202,8 +202,8 @@ class _HeroVisual extends StatelessWidget {
                     _PositionedPathStop(
                       point: points[3],
                       offset: compact
-                          ? const Offset(-124, 36)
-                          : const Offset(-154, 42),
+                          ? const Offset(-100, 36)
+                          : const Offset(-126, 42),
                       child: const _PathStop(
                         title: 'Fulfillment',
                         body: 'A next step with purpose.',
