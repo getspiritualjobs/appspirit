@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/theme.dart';
 import '../../widgets/brand_components.dart';
-import '../../widgets/brand_mark.dart';
 import '../../widgets/responsive.dart';
 
 class HomePage extends StatelessWidget {
@@ -143,61 +142,63 @@ class _HeroVisual extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 430;
-        return SizedBox(
-          height: compact ? 430 : 390,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned(
-                left: compact ? 18 : 6,
-                right: compact ? 18 : 24,
-                top: compact ? 58 : 64,
-                height: compact ? 260 : 210,
-                child: const DashedPathConnector(),
-              ),
-              Positioned(
-                left: compact ? 0 : 10,
-                top: compact ? 10 : 6,
-                child: const _PathStop(
-                  number: '01',
-                  title: 'Quiz',
-                  body: 'Answer one honest prompt at a time.',
+        return AspectRatio(
+          aspectRatio: compact ? .92 : 1.08,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: BrandTokens.forest,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: BrandTokens.ink.withValues(alpha: .14),
+                  blurRadius: 28,
+                  offset: const Offset(0, 18),
                 ),
-              ),
-              Positioned(
-                right: compact ? 0 : 16,
-                top: compact ? 100 : 78,
-                child: const _PathStop(
-                  number: '02',
-                  title: 'Gifts',
-                  body: 'See the pattern that rises to the top.',
+              ],
+            ),
+            child: Stack(
+              children: [
+                const Positioned.fill(
+                    child: CustomPaint(painter: _HeroPathPainter())),
+                Positioned(
+                  left: compact ? 24 : 34,
+                  top: compact ? 30 : 34,
+                  child: const _PathStop(
+                    number: '01',
+                    title: 'Quiz',
+                    body: 'Seven quiet minutes.',
+                  ),
                 ),
-              ),
-              Positioned(
-                left: compact ? 0 : 34,
-                bottom: compact ? 92 : 50,
-                child: const _PathStop(
-                  number: '03',
-                  title: 'Aligned jobs',
-                  body: 'Compare roles through your gift profile.',
+                Positioned(
+                  right: compact ? 24 : 38,
+                  top: compact ? 108 : 78,
+                  child: const _PathStop(
+                    number: '02',
+                    title: 'Gifts',
+                    body: 'What rises to the top.',
+                  ),
                 ),
-              ),
-              Positioned(
-                right: compact ? 0 : 4,
-                bottom: compact ? 2 : 10,
-                child: const _PathStop(
-                  number: '04',
-                  title: 'Fulfillment',
-                  body: 'Choose a next step you can actually take.',
-                  accent: true,
+                Positioned(
+                  left: compact ? 28 : 54,
+                  bottom: compact ? 108 : 82,
+                  child: const _PathStop(
+                    number: '03',
+                    title: 'Aligned jobs',
+                    body: 'Work that fits the pattern.',
+                  ),
                 ),
-              ),
-              Positioned(
-                left: compact ? 132 : 170,
-                top: compact ? 202 : 172,
-                child: GiftPathMark(size: compact ? 46 : 54),
-              ),
-            ],
+                Positioned(
+                  right: compact ? 24 : 34,
+                  bottom: compact ? 28 : 34,
+                  child: const _PathStop(
+                    number: '04',
+                    title: 'Fulfillment',
+                    body: 'A next step with purpose.',
+                    accent: true,
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -220,32 +221,110 @@ class _PathStop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-        child: SizedBox(
-          width: 178,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(number,
-                  style: TextStyle(
-                    color: accent ? BrandTokens.gold : BrandTokens.forest,
-                    fontSize: 12,
+    return SizedBox(
+      width: 142,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(number,
+              style: TextStyle(
+                color: accent
+                    ? BrandTokens.gold
+                    : BrandTokens.gold.withValues(alpha: .84),
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.3,
+              )),
+          const SizedBox(height: 7),
+          Text(title,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: BrandTokens.cream,
+                    fontSize: 24,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: 1.2,
+                    height: 1.02,
                   )),
-              const SizedBox(height: 8),
-              Text(title, style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 6),
-              Text(body),
-            ],
-          ),
-        ),
+          const SizedBox(height: 5),
+          Text(body,
+              style: const TextStyle(
+                color: Color(0xFFE4DBC7),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                height: 1.25,
+              )),
+        ],
       ),
     );
   }
+}
+
+class _HeroPathPainter extends CustomPainter {
+  const _HeroPathPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final dotPaint = Paint()
+      ..color = BrandTokens.cream.withValues(alpha: .055)
+      ..style = PaintingStyle.fill;
+    for (var y = 18.0; y < size.height; y += 28) {
+      for (var x = 20.0; x < size.width; x += 30) {
+        canvas.drawCircle(Offset(x, y), 1.15, dotPaint);
+      }
+    }
+
+    final path = Path()
+      ..moveTo(size.width * .12, size.height * .72)
+      ..cubicTo(size.width * .24, size.height * .30, size.width * .42,
+          size.height * .78, size.width * .54, size.height * .44)
+      ..cubicTo(size.width * .64, size.height * .18, size.width * .82,
+          size.height * .22, size.width * .90, size.height * .55);
+
+    final shadow = Paint()
+      ..color = BrandTokens.ink.withValues(alpha: .20)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 8
+      ..strokeCap = StrokeCap.round;
+    canvas.drawPath(path.shift(const Offset(0, 4)), shadow);
+
+    final track = Paint()
+      ..color = BrandTokens.cream.withValues(alpha: .30)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round;
+    _drawDashes(canvas, path, track, 15, 11);
+
+    final gold = Paint()
+      ..color = BrandTokens.gold
+      ..style = PaintingStyle.fill;
+    for (final point in [
+      Offset(size.width * .12, size.height * .72),
+      Offset(size.width * .43, size.height * .57),
+      Offset(size.width * .62, size.height * .32),
+      Offset(size.width * .90, size.height * .55),
+    ]) {
+      canvas.drawCircle(point, 5.5, gold);
+      canvas.drawCircle(
+          point, 11, Paint()..color = BrandTokens.gold.withValues(alpha: .14));
+    }
+  }
+
+  void _drawDashes(
+      Canvas canvas, Path path, Paint paint, double dash, double gap) {
+    for (final metric in path.computeMetrics()) {
+      var distance = 0.0;
+      while (distance < metric.length) {
+        canvas.drawPath(
+          metric.extractPath(
+              distance, (distance + dash).clamp(0, metric.length)),
+          paint,
+        );
+        distance += dash + gap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _JourneyStep extends StatelessWidget {
