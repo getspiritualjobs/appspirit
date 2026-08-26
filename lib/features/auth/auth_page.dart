@@ -47,7 +47,6 @@ class _AuthPageState extends State<AuthPage> {
     if (widget.resetPasswordOnly) {
       resetPasswordMode = true;
       createMode = false;
-      message = 'Choose a new password to finish resetting your account.';
     }
     if (Env.hasSupabase) {
       authSubscription =
@@ -57,7 +56,7 @@ class _AuthPageState extends State<AuthPage> {
           if (state.event == AuthChangeEvent.passwordRecovery) {
             resetPasswordMode = true;
             createMode = false;
-            message = 'Choose a new password to finish resetting your account.';
+            message = '';
           }
         });
       });
@@ -91,21 +90,29 @@ class _AuthPageState extends State<AuthPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const BrandEyebrow('Private saving'),
-              const SizedBox(height: 10),
+              if (!resettingPassword) ...[
+                const BrandEyebrow('Private saving'),
+                const SizedBox(height: 10),
+              ],
               Text(
-                  resettingPassword
-                      ? 'Reset your password'
-                      : returningToResults
-                          ? 'Your results are ready'
-                          : 'Save your results and opportunities',
-                  style: Theme.of(context).textTheme.headlineMedium),
-              const SizedBox(height: 8),
-              Text(resettingPassword
-                  ? 'Enter a new password for your GiftPath account. After it updates, you can sign in and keep going.'
-                  : returningToResults
-                      ? 'Create an account to keep your gift profile, sign in if you already have one, or continue as a guest on this device.'
-                      : 'Create an account when you want your results, career matches, saved jobs, and search preferences to follow you across devices.'),
+                resettingPassword
+                    ? 'Reset your password'
+                    : returningToResults
+                        ? 'Your results are ready'
+                        : 'Save your results and opportunities',
+                style: resettingPassword
+                    ? Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                        )
+                    : Theme.of(context).textTheme.headlineMedium,
+              ),
+              if (!resettingPassword) ...[
+                const SizedBox(height: 8),
+                Text(returningToResults
+                    ? 'Create an account to keep your gift profile, sign in if you already have one, or continue as a guest on this device.'
+                    : 'Create an account when you want your results, career matches, saved jobs, and search preferences to follow you across devices.'),
+              ],
               if (returningToResults && !resettingPassword) ...[
                 const SizedBox(height: 18),
                 const _ResultsHandoffTrail(),
@@ -189,8 +196,8 @@ class _AuthPageState extends State<AuthPage> {
                   child: Text(loading
                       ? 'Working...'
                       : createMode
-                          ? 'Create Account'
-                          : 'Sign In'),
+                          ? 'Create account'
+                          : 'Sign in'),
                 ),
                 const SizedBox(height: 10),
                 OutlinedButton(
@@ -543,7 +550,7 @@ class _AuthModeToggle extends StatelessWidget {
               onTap: () => onChanged(true),
             ),
             _AuthModeButton(
-              label: 'Sign In',
+              label: 'Sign in',
               selected: !createMode,
               enabled: enabled,
               onTap: () => onChanged(false),
@@ -689,12 +696,12 @@ class _ForgotPasswordPanel extends StatelessWidget {
               FilledButton.icon(
                 onPressed: loading ? null : onSubmit,
                 icon: const Icon(Icons.mail_outline, size: 18),
-                label: Text(loading ? 'Sending...' : 'Send Reset Link'),
+                label: Text(loading ? 'Sending...' : 'Send reset link'),
               ),
               TextButton.icon(
                 onPressed: loading ? null : onBack,
                 icon: const Icon(Icons.arrow_back, size: 18),
-                label: const Text('Back to Sign In'),
+                label: const Text('Back to sign in'),
               ),
             ],
           ),
@@ -724,33 +731,31 @@ class _ResetPasswordPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return BrandNotice(
-      icon: Icons.lock_reset,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Set a new password',
-              style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 14),
-          TextField(
-            controller: controller,
-            enabled: !loading,
-            obscureText: true,
-            autofillHints: const [AutofillHints.newPassword],
-            decoration: const InputDecoration(labelText: 'New password'),
-          ),
-          const SizedBox(height: 14),
-          FilledButton.icon(
-            onPressed: loading ? null : onSubmit,
-            icon: const Icon(Icons.check_circle_outline, size: 18),
-            label: Text(loading ? 'Updating...' : 'Update Password'),
-          ),
-          if (message.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Text(message, style: TextStyle(color: scheme.primary)),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Enter a new password for your GiftPath account.',
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        const SizedBox(height: 14),
+        TextField(
+          controller: controller,
+          enabled: !loading,
+          obscureText: true,
+          autofillHints: const [AutofillHints.newPassword],
+          decoration: const InputDecoration(labelText: 'New password'),
+        ),
+        const SizedBox(height: 14),
+        FilledButton(
+          onPressed: loading ? null : onSubmit,
+          child: Text(loading ? 'Updating...' : 'Update password'),
+        ),
+        if (message.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Text(message, style: TextStyle(color: scheme.primary)),
         ],
-      ),
+      ],
     );
   }
 }

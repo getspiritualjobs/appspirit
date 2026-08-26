@@ -77,7 +77,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Reset your password'), findsOneWidget);
-    expect(find.textContaining('Enter a new password'), findsOneWidget);
+    expect(find.text('PRIVATE SAVING'), findsNothing);
   });
 
   testWidgets('completed assessment routes through account step before results',
