@@ -11,33 +11,37 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final viewportHeight = MediaQuery.sizeOf(context).height;
     return SingleChildScrollView(
       child: Container(
         decoration: const BoxDecoration(color: BrandTokens.cream),
         child: PageBand(
-          padding: const EdgeInsets.fromLTRB(20, 48, 20, 64),
+          padding: const EdgeInsets.fromLTRB(20, 28, 20, 34),
           child: LayoutBuilder(
             builder: (context, constraints) {
               final compact = constraints.maxWidth < 620;
+              final heroHeight = compact
+                  ? (viewportHeight * .42).clamp(300.0, 430.0)
+                  : (viewportHeight * .44).clamp(320.0, 430.0);
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const BrandEyebrow('Scripture-informed assessment'),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 980),
+                    constraints: const BoxConstraints(maxWidth: 1040),
                     child: Text(
                       'Your gifts were given for a reason.',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         color: BrandTokens.ink,
-                        fontSize: compact ? 48 : 88,
+                        fontSize: compact ? 42 : 68,
                         fontWeight: FontWeight.w900,
-                        height: .95,
+                        height: .92,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 14),
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 760),
                     child: Text(
@@ -45,15 +49,19 @@ class HomePage extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         color: BrandTokens.ink,
-                        fontSize: compact ? 19 : 24,
+                        fontSize: compact ? 17 : 20,
                         fontWeight: FontWeight.w700,
-                        height: 1.35,
+                        height: 1.25,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 34),
-                  const _HeroVisual(),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 22),
+                  SizedBox(
+                    height: heroHeight,
+                    width: double.infinity,
+                    child: const _HeroVisual(),
+                  ),
+                  const SizedBox(height: 18),
                   Wrap(
                     alignment: WrapAlignment.center,
                     spacing: 14,
@@ -62,7 +70,7 @@ class HomePage extends StatelessWidget {
                       FilledButton.icon(
                         onPressed: () => context.go('/assessment'),
                         icon: const Icon(Icons.arrow_forward),
-                        label: const Text('Discover My Gifts'),
+                        label: const Text('Discover my gifts'),
                         style: FilledButton.styleFrom(
                           backgroundColor: BrandTokens.gold,
                           foregroundColor: BrandTokens.forest,
@@ -71,7 +79,7 @@ class HomePage extends StatelessWidget {
                       OutlinedButton.icon(
                         onPressed: () => context.go('/about'),
                         icon: const Icon(Icons.info_outline),
-                        label: const Text('How It Works'),
+                        label: const Text('How it works'),
                       ),
                     ],
                   ),
@@ -94,17 +102,16 @@ class _HeroVisual extends StatelessWidget {
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 620;
         final labelWidth = compact ? 118.0 : 230.0;
-        return AspectRatio(
-          aspectRatio: compact ? .70 : 2.18,
+        return SizedBox.expand(
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: BrandTokens.forest,
-              borderRadius: BorderRadius.circular(compact ? 22 : 34),
+              borderRadius: BorderRadius.circular(compact ? 18 : 28),
               boxShadow: [
                 BoxShadow(
                   color: BrandTokens.ink.withValues(alpha: .14),
-                  blurRadius: 36,
-                  offset: const Offset(0, 22),
+                  blurRadius: 28,
+                  offset: const Offset(0, 16),
                 ),
               ],
             ),
@@ -119,7 +126,7 @@ class _HeroVisual extends StatelessWidget {
                     _PositionedPathStop(
                       point: points[0],
                       offset: compact
-                          ? const Offset(-26, 34)
+                          ? const Offset(-30, -100)
                           : const Offset(-70, 44),
                       panelSize: panelSize,
                       width: labelWidth,
@@ -133,7 +140,7 @@ class _HeroVisual extends StatelessWidget {
                     _PositionedPathStop(
                       point: points[1],
                       offset: compact
-                          ? const Offset(-56, 36)
+                          ? const Offset(-8, 34)
                           : const Offset(-82, 44),
                       panelSize: panelSize,
                       width: labelWidth,
@@ -148,7 +155,7 @@ class _HeroVisual extends StatelessWidget {
                       point: points[2],
                       offset: compact
                           ? const Offset(-92, -98)
-                          : const Offset(-104, -128),
+                          : const Offset(42, -138),
                       panelSize: panelSize,
                       width: labelWidth,
                       child: _PathStop(

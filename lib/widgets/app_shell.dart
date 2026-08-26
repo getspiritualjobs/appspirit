@@ -27,9 +27,21 @@ class AppShell extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: isWide ? 72 : 62,
+        titleSpacing: isWide ? 28 : 16,
+        backgroundColor: BrandTokens.cream,
+        foregroundColor: BrandTokens.forest,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            height: 1,
+            color: BrandTokens.gold.withValues(alpha: .22),
+          ),
+        ),
         title: InkWell(
+          borderRadius: BorderRadius.circular(8),
           onTap: () => context.go('/'),
-          child: const GiftPathLogo(compact: true),
+          child: GiftPathLogo(markSize: isWide ? 30 : 26, compact: true),
         ),
         actions: isWide
             ? [
@@ -39,7 +51,7 @@ class AppShell extends StatelessWidget {
                       path: item.$2,
                       selected: location == item.$2),
                 Padding(
-                  padding: const EdgeInsets.only(right: 16),
+                  padding: const EdgeInsets.only(right: 28, left: 8),
                   child: OutlinedButton.icon(
                     onPressed: () => context.go('/auth'),
                     icon: const Icon(Icons.person_outline, size: 18),
@@ -115,13 +127,14 @@ class _NavButton extends StatelessWidget {
       onPressed: () => context.go(path),
       style: TextButton.styleFrom(
         backgroundColor:
-            selected ? scheme.primary.withValues(alpha: .09) : null,
+            selected ? BrandTokens.forest.withValues(alpha: .10) : null,
         foregroundColor: selected ? scheme.primary : scheme.onSurface,
-        minimumSize: const Size(44, 40),
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        minimumSize: const Size(40, 38),
+        padding: const EdgeInsets.symmetric(horizontal: 9),
       ),
       child: Text(label,
           style: TextStyle(
+              fontSize: 15,
               fontWeight: selected ? FontWeight.w800 : FontWeight.w600)),
     );
   }
