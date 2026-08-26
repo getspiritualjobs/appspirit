@@ -23,6 +23,7 @@ class GiftPathApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final router = GoRouter(
       initialLocation: initialLocation,
+      overridePlatformDefaultLocation: initialLocation != null,
       routes: [
         ShellRoute(
           builder: (context, state, child) => AppShell(child: child),
