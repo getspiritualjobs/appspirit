@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/app_state.dart';
 import '../../core/env.dart';
+import '../../core/theme.dart';
 import '../../widgets/brand_components.dart';
 import '../../widgets/brand_mark.dart';
 import '../../widgets/responsive.dart';
@@ -86,13 +87,17 @@ class _AuthPageState extends State<AuthPage> {
               const SizedBox(height: 10),
               Text(
                   returningToResults
-                      ? 'Create an account to view your results'
+                      ? 'Your results are ready'
                       : 'Save your results and opportunities',
                   style: Theme.of(context).textTheme.headlineMedium),
               const SizedBox(height: 8),
               Text(returningToResults
-                  ? 'Your assessment is complete. Sign up, sign in, or continue as a guest to see your gift profile and career matches.'
+                  ? 'Create an account to keep your gift profile, sign in if you already have one, or continue as a guest on this device.'
                   : 'Create an account when you want your results, career matches, saved jobs, and search preferences to follow you across devices.'),
+              if (returningToResults) ...[
+                const SizedBox(height: 18),
+                const _ResultsHandoffTrail(),
+              ],
               const SizedBox(height: 18),
               if (!Env.hasSupabase)
                 const _SetupNotice()
@@ -389,6 +394,99 @@ class _AuthPageState extends State<AuthPage> {
             scheme: Uri.base.scheme, host: Uri.base.host, port: Uri.base.port)
         .toString();
   }
+}
+
+class _ResultsHandoffTrail extends StatelessWidget {
+  const _ResultsHandoffTrail();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: BrandTokens.cream.withValues(alpha: .64),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: BrandTokens.gold.withValues(alpha: .24)),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.fromLTRB(16, 14, 16, 12),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 24,
+              width: double.infinity,
+              child: CustomPaint(painter: _ResultsHandoffPainter()),
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(child: _TrailLabel('Quiz complete', active: true)),
+                Expanded(child: _TrailLabel('Save choice', active: true)),
+                Expanded(child: _TrailLabel('Results')),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TrailLabel extends StatelessWidget {
+  const _TrailLabel(this.label, {this.active = false});
+
+  final String label;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        color: active ? BrandTokens.forest : BrandTokens.moss,
+        fontSize: 12,
+        fontWeight: FontWeight.w900,
+      ),
+    );
+  }
+}
+
+class _ResultsHandoffPainter extends CustomPainter {
+  const _ResultsHandoffPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final y = size.height / 2;
+    final path = Path()
+      ..moveTo(size.width * .08, y)
+      ..cubicTo(size.width * .25, y - 18, size.width * .37, y + 18,
+          size.width * .50, y)
+      ..cubicTo(size.width * .63, y - 18, size.width * .75, y + 18,
+          size.width * .92, y);
+    final paint = Paint()
+      ..color = BrandTokens.gold.withValues(alpha: .58)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+    for (final metric in path.computeMetrics()) {
+      var distance = 0.0;
+      while (distance < metric.length) {
+        canvas.drawPath(
+          metric.extractPath(distance, (distance + 11).clamp(0, metric.length)),
+          paint,
+        );
+        distance += 20;
+      }
+    }
+    for (final x in [size.width * .08, size.width * .50, size.width * .92]) {
+      canvas.drawCircle(Offset(x, y), 8,
+          Paint()..color = BrandTokens.gold.withValues(alpha: .20));
+      canvas.drawCircle(Offset(x, y), 5, Paint()..color = BrandTokens.gold);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _AuthModeToggle extends StatelessWidget {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/app_state.dart';
@@ -37,11 +38,13 @@ class _AssessmentPageState extends State<AssessmentPage> {
               children: [
                 const BrandEyebrow('One question at a time'),
                 const SizedBox(height: 10),
-                Text('Spiritual Gifts Assessment',
-                    style: Theme.of(context).textTheme.displayMedium),
+                Text(
+                  'Spiritual Gifts Assessment',
+                  style: Theme.of(context).textTheme.displayMedium,
+                ),
                 const SizedBox(height: 8),
                 const Text(
-                    'Respond honestly and without overthinking. GiftPath is a reflective tool, not a verdict about your calling or spiritual maturity.'),
+                    '56 prompts, one at a time. Answer from your actual life, not from the person you think you should be.'),
                 const SizedBox(height: 22),
                 _ProgressHeader(
                     index: index, answered: answered, complete: complete),
@@ -156,12 +159,12 @@ class _QuestionPanel extends StatelessWidget {
         children: [
           Text(
             question.text,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: BrandTokens.ink,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  height: 1.24,
-                ),
+            style: GoogleFonts.inter(
+              color: BrandTokens.ink,
+              fontSize: 26,
+              fontWeight: FontWeight.w900,
+              height: 1.2,
+            ),
           ),
           const SizedBox(height: 20),
           for (final option in const [
@@ -305,45 +308,38 @@ class _QuestionMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        const BrandEyebrow('Question trail'),
-        for (var i = 0; i < assessmentQuestions.length; i++)
-          Tooltip(
-            message: 'Question ${i + 1}',
-            child: InkWell(
-              onTap: () => onSelect(i),
-              borderRadius: BorderRadius.circular(6),
-              child: Container(
-                width: 30,
-                height: 24,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: i == currentIndex
-                      ? scheme.primary
-                      : appState.responses
-                              .containsKey(assessmentQuestions[i].id)
-                          ? scheme.primary.withValues(alpha: .10)
-                          : Colors.white,
-                  borderRadius: BorderRadius.circular(999),
-                  border:
-                      Border.all(color: scheme.primary.withValues(alpha: .16)),
-                ),
-                child: Text(
-                  '${i + 1}',
-                  style: TextStyle(
-                      fontSize: 11,
-                      color:
-                          i == currentIndex ? Colors.white : scheme.onSurface,
-                      fontWeight: FontWeight.w800),
-                ),
-              ),
-            ),
+    final firstMissing = assessmentQuestions
+        .indexWhere((question) => !appState.responses.containsKey(question.id));
+    return InfoCard(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const BrandEyebrow('Question trail'),
+          const SizedBox(height: 8),
+          Text(
+            'You are on question ${currentIndex + 1}. Answered prompts stay on the path, and you can jump back to anything unfinished before revealing results.',
           ),
-      ],
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              OutlinedButton.icon(
+                onPressed: currentIndex == 0 ? null : () => onSelect(0),
+                icon: const Icon(Icons.first_page),
+                label: const Text('First Question'),
+              ),
+              if (firstMissing >= 0)
+                FilledButton.icon(
+                  onPressed: () => onSelect(firstMissing),
+                  icon: const Icon(Icons.route_outlined),
+                  label: Text('Next Open: ${firstMissing + 1}'),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

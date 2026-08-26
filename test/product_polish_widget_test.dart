@@ -52,7 +52,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    expect(find.text('Create an account to view your results'), findsNothing);
+    expect(find.text('Your results are ready'), findsNothing);
 
     await tester.pumpWidget(MaterialApp.router(
       theme: buildGiftPathTheme(),
@@ -60,10 +60,10 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    expect(find.text('Create an account to view your results'), findsOneWidget);
+    expect(find.text('Your results are ready'), findsOneWidget);
     expect(
       find.text(
-          'Your assessment is complete. Sign up, sign in, or continue as a guest to see your gift profile and career matches.'),
+          'Create an account to keep your gift profile, sign in if you already have one, or continue as a guest on this device.'),
       findsOneWidget,
     );
   });
@@ -84,7 +84,7 @@ void main() {
     await tester.tap(find.text('Reveal My Gifts'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Create an account to view your results'), findsOneWidget);
+    expect(find.text('Your results are ready'), findsOneWidget);
   });
 
   testWidgets('results gives the top gift a reveal treatment',

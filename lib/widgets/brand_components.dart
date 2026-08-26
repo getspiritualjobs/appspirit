@@ -82,8 +82,8 @@ class DashedPathProgress extends StatelessWidget {
               return CustomPaint(
                 painter: _DashedPathPainter(
                   progress: value.clamp(0, 1),
-                  color: BrandTokens.forest,
-                  accent: BrandTokens.gold,
+                  color: BrandTokens.gold,
+                  accent: BrandTokens.forest,
                 ),
               );
             },
@@ -112,8 +112,8 @@ class DashedPathConnector extends StatelessWidget {
       child: CustomPaint(
         painter: _DashedPathPainter(
           progress: 1,
-          color: BrandTokens.forest,
-          accent: BrandTokens.gold,
+          color: BrandTokens.gold,
+          accent: BrandTokens.forest,
           subtle: true,
         ),
         size: Size.infinite,

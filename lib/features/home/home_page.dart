@@ -288,7 +288,7 @@ class _HeroPathPainter extends CustomPainter {
     canvas.drawPath(path.shift(const Offset(0, 4)), shadow);
 
     final track = Paint()
-      ..color = BrandTokens.cream.withValues(alpha: .30)
+      ..color = BrandTokens.gold.withValues(alpha: .54)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4.6
       ..strokeCap = StrokeCap.round;
