@@ -23,6 +23,10 @@ Future<void> main() async {
   }
 
   String? initialLocation;
+  if (Uri.base.queryParameters['reset-password'] == '1' ||
+      Uri.base.queryParameters['mode'] == 'reset-password') {
+    initialLocation = '/reset-password';
+  }
   if (kDebugMode && Uri.base.queryParameters['demo'] == 'results') {
     appState.loadDemoAssessment();
     if (Uri.base.queryParameters['go'] == 'opportunities') {

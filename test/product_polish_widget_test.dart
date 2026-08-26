@@ -68,6 +68,18 @@ void main() {
     );
   });
 
+  testWidgets('reset password route opens the new password page',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp.router(
+      theme: buildGiftPathTheme(),
+      routerConfig: _routerFor('/reset-password'),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Reset your password'), findsOneWidget);
+    expect(find.textContaining('Enter a new password'), findsOneWidget);
+  });
+
   testWidgets('completed assessment routes through account step before results',
       (WidgetTester tester) async {
     for (final question in assessmentQuestions) {
@@ -152,6 +164,11 @@ GoRouter _routerFor(String initialLocation) {
       ),
       GoRoute(
           path: '/auth', builder: (_, __) => const Scaffold(body: AuthPage())),
+      GoRoute(
+        path: '/reset-password',
+        builder: (_, __) =>
+            const Scaffold(body: AuthPage(resetPasswordOnly: true)),
+      ),
       GoRoute(
         path: '/results',
         builder: (_, __) => const Scaffold(body: Text('Results')),

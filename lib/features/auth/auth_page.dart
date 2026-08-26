@@ -12,7 +12,9 @@ import '../../widgets/brand_mark.dart';
 import '../../widgets/responsive.dart';
 
 class AuthPage extends StatefulWidget {
-  const AuthPage({super.key});
+  const AuthPage({this.resetPasswordOnly = false, super.key});
+
+  final bool resetPasswordOnly;
 
   @override
   State<AuthPage> createState() => _AuthPageState();
@@ -42,6 +44,11 @@ class _AuthPageState extends State<AuthPage> {
   @override
   void initState() {
     super.initState();
+    if (widget.resetPasswordOnly) {
+      resetPasswordMode = true;
+      createMode = false;
+      message = 'Choose a new password to finish resetting your account.';
+    }
     if (Env.hasSupabase) {
       authSubscription =
           Supabase.instance.client.auth.onAuthStateChange.listen((state) {
@@ -75,6 +82,7 @@ class _AuthPageState extends State<AuthPage> {
     final isRealAccount = user != null && !isGuest;
     final returnTo = _safeReturnTo;
     final returningToResults = _returningToResults;
+    final resettingPassword = widget.resetPasswordOnly || resetPasswordMode;
 
     return SingleChildScrollView(
       child: PageBand(
@@ -86,21 +94,32 @@ class _AuthPageState extends State<AuthPage> {
               const BrandEyebrow('Private saving'),
               const SizedBox(height: 10),
               Text(
-                  returningToResults
-                      ? 'Your results are ready'
-                      : 'Save your results and opportunities',
+                  resettingPassword
+                      ? 'Reset your password'
+                      : returningToResults
+                          ? 'Your results are ready'
+                          : 'Save your results and opportunities',
                   style: Theme.of(context).textTheme.headlineMedium),
               const SizedBox(height: 8),
-              Text(returningToResults
-                  ? 'Create an account to keep your gift profile, sign in if you already have one, or continue as a guest on this device.'
-                  : 'Create an account when you want your results, career matches, saved jobs, and search preferences to follow you across devices.'),
-              if (returningToResults) ...[
+              Text(resettingPassword
+                  ? 'Enter a new password for your GiftPath account. After it updates, you can sign in and keep going.'
+                  : returningToResults
+                      ? 'Create an account to keep your gift profile, sign in if you already have one, or continue as a guest on this device.'
+                      : 'Create an account when you want your results, career matches, saved jobs, and search preferences to follow you across devices.'),
+              if (returningToResults && !resettingPassword) ...[
                 const SizedBox(height: 18),
                 const _ResultsHandoffTrail(),
               ],
               const SizedBox(height: 18),
               if (!Env.hasSupabase)
                 const _SetupNotice()
+              else if (resettingPassword)
+                _ResetPasswordPanel(
+                  controller: resetPassword,
+                  loading: loading,
+                  message: message,
+                  onSubmit: _updateRecoveredPassword,
+                )
               else if (forgotPasswordMode)
                 _ForgotPasswordPanel(
                   controller: email,
@@ -114,22 +133,14 @@ class _AuthPageState extends State<AuthPage> {
                   onSubmit: _sendPasswordReset,
                 )
               else if (isRealAccount)
-                if (resetPasswordMode)
-                  _ResetPasswordPanel(
-                    controller: resetPassword,
-                    loading: loading,
-                    message: message,
-                    onSubmit: _updateRecoveredPassword,
-                  )
-                else
-                  _AccountPanel(
-                    email: user.email ?? 'Signed-in user',
-                    returnTo: returnTo,
-                    onSignOut: () async {
-                      await Supabase.instance.client.auth.signOut();
-                      if (mounted) setState(() => message = 'Signed out.');
-                    },
-                  )
+                _AccountPanel(
+                  email: user.email ?? 'Signed-in user',
+                  returnTo: returnTo,
+                  onSignOut: () async {
+                    await Supabase.instance.client.auth.signOut();
+                    if (mounted) setState(() => message = 'Signed out.');
+                  },
+                )
               else ...[
                 if (isGuest) const _GuestPanel(),
                 if (isGuest) const SizedBox(height: 16),
@@ -295,7 +306,7 @@ class _AuthPageState extends State<AuthPage> {
     try {
       await Supabase.instance.client.auth.resetPasswordForEmail(
         trimmedEmail,
-        redirectTo: '${Uri.base.origin}/auth',
+        redirectTo: _passwordResetRedirectUrl,
       );
       setState(() => message =
           'Check your email for a password reset link from GiftPath.');
@@ -328,6 +339,9 @@ class _AuthPageState extends State<AuthPage> {
         resetPasswordMode = false;
         message = 'Password updated. You are signed in.';
       });
+      if (widget.resetPasswordOnly && mounted) {
+        context.go('/auth');
+      }
     } on AuthException catch (error) {
       setState(() => message = error.message);
     } finally {
@@ -389,6 +403,16 @@ class _AuthPageState extends State<AuthPage> {
     return Uri(
       path: '/auth',
       queryParameters: {'returnTo': returnTo},
+    )
+        .replace(
+            scheme: Uri.base.scheme, host: Uri.base.host, port: Uri.base.port)
+        .toString();
+  }
+
+  String get _passwordResetRedirectUrl {
+    return Uri(
+      path: '/',
+      queryParameters: {'reset-password': '1'},
     )
         .replace(
             scheme: Uri.base.scheme, host: Uri.base.host, port: Uri.base.port)

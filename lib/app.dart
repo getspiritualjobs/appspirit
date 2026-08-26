@@ -41,6 +41,9 @@ class GiftPathApp extends StatelessWidget {
             GoRoute(path: '/about', builder: (_, __) => const AboutPage()),
             GoRoute(path: '/auth', builder: (_, __) => const AuthPage()),
             GoRoute(
+                path: '/reset-password',
+                builder: (_, __) => const AuthPage(resetPasswordOnly: true)),
+            GoRoute(
                 path: '/subscribe', builder: (_, __) => const SubscribePage()),
             GoRoute(
                 path: '/billing/success',
