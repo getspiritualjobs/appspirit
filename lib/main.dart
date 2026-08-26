@@ -29,6 +29,8 @@ Future<void> main() async {
       initialLocation = '/opportunities';
     } else if (Uri.base.queryParameters['go'] == 'results') {
       initialLocation = '/results';
+    } else if (Uri.base.queryParameters['go'] == 'signup') {
+      initialLocation = '/auth?returnTo=/results';
     }
   }
 
