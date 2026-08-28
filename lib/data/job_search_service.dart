@@ -84,7 +84,8 @@ class JobSearchService {
           .whereType<Map>()
           .map((job) => _fromJson(job.cast<String, dynamic>(), careerMatches))
           .where((job) => !remoteOnly || job.remote)
-          .toList();
+          .toList()
+        ..sort((a, b) => b.matchScore.compareTo(a.matchScore));
 
       return JobSearchResult(
         jobs: jobs.isEmpty ? demoJobs : jobs,
@@ -107,14 +108,18 @@ class JobSearchService {
   JobListing _fromJson(
       Map<String, dynamic> json, List<CareerMatch> careerMatches) {
     final title = _asString(json['title']);
+    final company = _asString(json['company'], fallback: 'Unknown company');
+    final location =
+        _asString(json['location'], fallback: 'Location not listed');
+    final description =
+        _asString(json['description'], fallback: 'No description provided.');
     return JobListing(
       id: _asString(json['id'], fallback: title),
       provider: _asString(json['provider'], fallback: 'unknown'),
       title: title,
-      company: _asString(json['company'], fallback: 'Unknown company'),
-      location: _asString(json['location'], fallback: 'Location not listed'),
-      description:
-          _asString(json['description'], fallback: 'No description provided.'),
+      company: company,
+      location: location,
+      description: description,
       salaryMin: _asInt(json['salaryMin']),
       salaryMax: _asInt(json['salaryMax']),
       employmentType:
@@ -123,20 +128,14 @@ class JobSearchService {
       postedDate:
           DateTime.tryParse(_asString(json['postedDate'])) ?? DateTime.now(),
       applicationUrl: _asString(json['applicationUrl']),
-      matchScore: _estimateJobMatch(title, careerMatches),
+      matchScore: estimateJobMatchScore(
+        title: title,
+        company: company,
+        description: description,
+        matchedQuery: _asString(json['matchedQuery']),
+        careerMatches: careerMatches,
+      ),
     );
-  }
-
-  int _estimateJobMatch(String title, List<CareerMatch> careerMatches) {
-    if (careerMatches.isEmpty) return 82;
-    for (final match in careerMatches) {
-      final careerTitle = match.career.title.toLowerCase();
-      final jobTitle = title.toLowerCase();
-      if (jobTitle.contains(careerTitle) || careerTitle.contains(jobTitle)) {
-        return match.score;
-      }
-    }
-    return careerMatches.first.score.clamp(65, 94);
   }
 
   String _asString(Object? value, {String fallback = ''}) {
@@ -150,4 +149,95 @@ class JobSearchService {
     if (value is num) return value.round();
     return int.tryParse(value?.toString() ?? '');
   }
+}
+
+int estimateJobMatchScore({
+  required String title,
+  required String company,
+  required String description,
+  String matchedQuery = '',
+  required List<CareerMatch> careerMatches,
+}) {
+  if (careerMatches.isEmpty) return 82;
+
+  final haystack = _tokenize('$title $company $description');
+  final searchableText = '$title $company $description'.toLowerCase();
+  final queryTokens = _tokenize(matchedQuery);
+  var bestScore = 0;
+
+  for (var index = 0; index < careerMatches.length; index++) {
+    final match = careerMatches[index];
+    final career = match.career;
+    final titleTokens = _tokenize(career.title);
+    final contextTokens = _tokenize([
+      career.category,
+      career.description,
+      career.environment,
+      ...career.interests,
+      ...career.values,
+    ].join(' '));
+
+    final titleOverlapCount = _overlapCount(titleTokens, haystack);
+    final queryOverlapCount = _overlapCount(titleTokens, queryTokens);
+    final hasStrongTitleOverlap =
+        titleOverlapCount >= (titleTokens.length <= 1 ? 1 : 2);
+    final hasStrongQueryOverlap =
+        queryOverlapCount >= (titleTokens.length <= 1 ? 1 : 2);
+    final titleOverlap =
+        hasStrongTitleOverlap ? titleOverlapCount / titleTokens.length : 0.0;
+    final queryOverlap =
+        hasStrongQueryOverlap ? queryOverlapCount / titleTokens.length : 0.0;
+    final contextOverlap = _overlapRatio(contextTokens, haystack);
+    final exactTitleBoost =
+        searchableText.contains(career.title.toLowerCase()) ? 10 : 0;
+    final rankBoost = (5 - index).clamp(0, 5).toDouble();
+    final careerBase = match.score *
+        (hasStrongTitleOverlap || hasStrongQueryOverlap ? .68 : .52);
+
+    final score = careerBase +
+        (titleOverlap * 22) +
+        (queryOverlap * 10) +
+        (contextOverlap * 8) +
+        exactTitleBoost +
+        rankBoost;
+    if (score.round() > bestScore) bestScore = score.round();
+  }
+
+  return bestScore.clamp(55, 99);
+}
+
+Set<String> _tokenize(String value) {
+  const stopWords = {
+    'and',
+    'the',
+    'for',
+    'with',
+    'from',
+    'that',
+    'this',
+    'your',
+    'you',
+    'our',
+    'are',
+    'work',
+    'job',
+    'jobs',
+    'role',
+    'roles',
+  };
+  return value
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^a-z0-9\s]'), ' ')
+      .split(RegExp(r'\s+'))
+      .where((word) => word.length > 2 && !stopWords.contains(word))
+      .toSet();
+}
+
+double _overlapRatio(Set<String> needle, Set<String> haystack) {
+  if (needle.isEmpty || haystack.isEmpty) return 0;
+  return _overlapCount(needle, haystack) / needle.length;
+}
+
+int _overlapCount(Set<String> needle, Set<String> haystack) {
+  return needle.where(haystack.contains).length;
 }

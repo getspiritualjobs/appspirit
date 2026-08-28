@@ -9,6 +9,7 @@ type SearchRequest = {
 type NormalizedJob = {
   id: string;
   provider: string;
+  matchedQuery?: string;
   title: string;
   company: string;
   location: string;
@@ -53,26 +54,39 @@ async function searchAdzuna(titles: string[], req: SearchRequest): Promise<Norma
   const appKey = Deno.env.get("ADZUNA_APP_KEY");
   if (!appId || !appKey) return [];
 
+  const queries = [...new Set(titles.slice(0, 5).map(normalizeCareerQuery).filter(Boolean))];
+  const results = await Promise.all(queries.map((query) => searchAdzunaQuery(query, req, appId, appKey)));
+  return results.flat();
+}
+
+async function searchAdzunaQuery(
+  query: string,
+  req: SearchRequest,
+  appId: string,
+  appKey: string,
+): Promise<NormalizedJob[]> {
   const params = new URLSearchParams({
     app_id: appId,
     app_key: appKey,
-    results_per_page: "20",
-    what: titles.slice(0, 3).join(" OR "),
+    results_per_page: "12",
+    what: query,
     where: req.location || "United States",
     "content-type": "application/json",
   });
   if (req.salaryMin) params.set("salary_min", String(req.salaryMin));
   if (req.employmentType === "full_time") params.set("full_time", "1");
   if (req.remote) params.set("what_or", "remote");
+
   const url = `https://api.adzuna.com/v1/api/jobs/us/search/1?${params}`;
   const response = await fetch(url);
   if (!response.ok) return [];
+
   const data = await response.json();
   const results = Array.isArray(data.results) ? data.results : [];
-
   return results.map((job: Record<string, any>): NormalizedJob => ({
     id: String(job.id),
     provider: "adzuna",
+    matchedQuery: query,
     title: String(job.title ?? ""),
     company: String(job.company?.display_name ?? ""),
     location: String(job.location?.display_name ?? ""),
@@ -84,6 +98,13 @@ async function searchAdzuna(titles: string[], req: SearchRequest): Promise<Norma
     postedDate: typeof job.created === "string" ? job.created : null,
     applicationUrl: String(job.redirect_url ?? ""),
   }));
+}
+
+function normalizeCareerQuery(title: string) {
+  return title
+    .replace(/\b(Specialist|Manager|Coordinator|Director|Consultant)\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim() || title.trim();
 }
 
 async function searchUsaJobs(titles: string[], req: SearchRequest): Promise<NormalizedJob[]> {
@@ -110,6 +131,7 @@ async function searchUsaJobs(titles: string[], req: SearchRequest): Promise<Norm
     return {
       id: String(descriptor.PositionID ?? item.MatchedObjectId),
       provider: "usajobs",
+      matchedQuery: titles[0],
       title: String(descriptor.PositionTitle ?? ""),
       company: String(descriptor.OrganizationName ?? ""),
       location: String(descriptor.PositionLocationDisplay ?? ""),
