@@ -68,12 +68,12 @@ class ResultsPage extends StatelessWidget {
                     _ResultsHero(
                       topGift: topGift,
                       topCareer: topCareer,
-                      onCareers: () => context.go('/careers'),
+                      onCareers: () => context.go('/opportunities'),
                       onJobs: () => context.go('/opportunities'),
                     ),
                     const SizedBox(height: 24),
                     _NextStepBar(
-                      onCareers: () => context.go('/careers'),
+                      onCareers: () => context.go('/opportunities'),
                       onJobs: () => context.go('/opportunities'),
                       onSave: appState.saveCurrentResult,
                     ),
@@ -262,7 +262,7 @@ class _ResultsPathGraphic extends StatelessWidget {
               runSpacing: 10,
               children: [
                 const _PathPill('Gifts', 'Known'),
-                _PathPill('Careers', careerTitle),
+                _PathPill('Career lanes', careerTitle),
                 const _PathPill('Open jobs', 'One free match'),
               ],
             ),
@@ -274,7 +274,7 @@ class _ResultsPathGraphic extends StatelessWidget {
                 FilledButton.icon(
                   onPressed: onCareers,
                   icon: const Icon(Icons.work_outline),
-                  label: const Text('Compare Careers'),
+                  label: const Text('Choose a Career Lane'),
                   style: FilledButton.styleFrom(
                     backgroundColor: BrandTokens.gold,
                     foregroundColor: BrandTokens.forest,
@@ -430,9 +430,9 @@ class _NextStepBar extends StatelessWidget {
           ),
           _NextStepAction(
             eyebrow: '02',
-            title: 'Compare careers',
+            title: 'Choose career lanes',
             body:
-                'See which roles line up with the whole profile, not just one strength.',
+                'Pick the kinds of work you want the opportunity search to follow.',
             icon: Icons.work_outline,
             onTap: onCareers,
           ),

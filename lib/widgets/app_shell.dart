@@ -13,7 +13,6 @@ class AppShell extends StatelessWidget {
     ('Home', '/'),
     ('Assessment', '/assessment'),
     ('My Gifts', '/results'),
-    ('Careers', '/careers'),
     ('Opportunities', '/opportunities'),
     ('Saved', '/saved'),
     ('About', '/about'),

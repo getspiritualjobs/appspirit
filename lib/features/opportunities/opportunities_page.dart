@@ -8,6 +8,7 @@ import '../../core/theme.dart';
 import '../../data/job_search_service.dart';
 import '../../widgets/brand_components.dart';
 import '../../widgets/brand_mark.dart';
+import '../../widgets/gift_badge.dart';
 import '../../widgets/responsive.dart';
 
 class OpportunitiesPage extends StatefulWidget {
@@ -23,6 +24,7 @@ class _OpportunitiesPageState extends State<OpportunitiesPage> {
   JobSearchResult? result;
   var loading = false;
   var remoteOnly = false;
+  final selectedCareerIds = <String>{};
 
   @override
   void initState() {
@@ -40,7 +42,7 @@ class _OpportunitiesPageState extends State<OpportunitiesPage> {
   Future<void> _search() async {
     setState(() => loading = true);
     final next = await service.search(
-      careerMatches: appState.careerMatches,
+      careerMatches: _activeCareerMatches,
       location: location.text,
       remoteOnly: remoteOnly,
     );
@@ -49,6 +51,24 @@ class _OpportunitiesPageState extends State<OpportunitiesPage> {
       result = next;
       loading = false;
     });
+  }
+
+  List<CareerMatch> get _activeCareerMatches {
+    final selected = appState.careerMatches
+        .where((match) => selectedCareerIds.contains(match.career.id))
+        .toList();
+    return selected.isEmpty ? appState.careerMatches : selected;
+  }
+
+  void _toggleCareer(CareerMatch match) {
+    setState(() {
+      if (selectedCareerIds.contains(match.career.id)) {
+        selectedCareerIds.remove(match.career.id);
+      } else {
+        selectedCareerIds.add(match.career.id);
+      }
+    });
+    _search();
   }
 
   @override
@@ -71,7 +91,7 @@ class _OpportunitiesPageState extends State<OpportunitiesPage> {
           );
         }
 
-        final titles = appState.careerMatches
+        final titles = _activeCareerMatches
             .take(5)
             .map((match) => match.career.title)
             .join(', ');
@@ -88,20 +108,29 @@ class _OpportunitiesPageState extends State<OpportunitiesPage> {
               children: [
                 const BrandEyebrow('Matched opportunities'),
                 const SizedBox(height: 10),
-                Text('Opportunities for You',
+                Text('Opportunities',
                     style: Theme.of(context).textTheme.displayMedium),
                 const SizedBox(height: 8),
                 Text(
                   appState.hasActiveSubscription
-                      ? 'Searches are generated from your highest-ranked careers: $titles.'
-                      : 'Your first opportunity is free. Upgrade to view the rest of your matched job list.',
+                      ? 'Choose the career lanes you want to explore, then search live openings from those matches.'
+                      : 'Pick the career lanes that interest you. Your first live job match is free.',
                 ),
                 const SizedBox(height: 18),
+                _CareerFocusPanel(
+                  selectedCareerIds: selectedCareerIds,
+                  onToggleCareer: _toggleCareer,
+                  onSearch: _search,
+                ),
+                const SizedBox(height: 16),
+                _PreferencePanel(onUpdated: _search),
+                const SizedBox(height: 20),
                 _JobSearchPanel(
                   location: location,
                   remoteOnly: remoteOnly,
                   loading: loading,
                   result: result,
+                  titles: titles,
                   onRemoteChanged: (value) =>
                       setState(() => remoteOnly = value),
                   onSearch: _search,
@@ -176,12 +205,290 @@ class _UpgradeCard extends StatelessWidget {
   }
 }
 
+class _CareerFocusPanel extends StatelessWidget {
+  const _CareerFocusPanel({
+    required this.selectedCareerIds,
+    required this.onToggleCareer,
+    required this.onSearch,
+  });
+
+  final Set<String> selectedCareerIds;
+  final ValueChanged<CareerMatch> onToggleCareer;
+  final VoidCallback onSearch;
+
+  @override
+  Widget build(BuildContext context) {
+    final matches = appState.careerMatches.take(8).toList();
+    final selectedCount = matches
+        .where((match) => selectedCareerIds.contains(match.career.id))
+        .length;
+    return InfoCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const IconBadge(Icons.route_outlined, size: 44),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Career lanes from your gifts',
+                        style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 6),
+                    Text(selectedCount == 0
+                        ? 'Searches start from your strongest matches. Select one or more lanes to focus the live jobs.'
+                        : '$selectedCount career ${selectedCount == 1 ? 'lane' : 'lanes'} selected for live job search.'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = constraints.maxWidth >= 920
+                  ? 4
+                  : constraints.maxWidth >= 660
+                      ? 2
+                      : 1;
+              return GridView.count(
+                crossAxisCount: columns,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: columns == 1
+                    ? 1.85
+                    : columns == 2
+                        ? 1.2
+                        : 1.0,
+                children: [
+                  for (var i = 0; i < matches.length; i++)
+                    _CareerFocusCard(
+                      match: matches[i],
+                      selected:
+                          selectedCareerIds.contains(matches[i].career.id),
+                      topMatch: i == 0,
+                      onTap: () => onToggleCareer(matches[i]),
+                    ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 14),
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton.icon(
+              onPressed: onSearch,
+              icon: const Icon(Icons.search),
+              label: const Text('Search jobs from these careers'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CareerFocusCard extends StatelessWidget {
+  const _CareerFocusCard({
+    required this.match,
+    required this.selected,
+    required this.topMatch,
+    required this.onTap,
+  });
+
+  final CareerMatch match;
+  final bool selected;
+  final bool topMatch;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final saved = appState.isCareerSaved(match.career);
+    return Material(
+      color: selected
+          ? BrandTokens.forest.withValues(alpha: .08)
+          : BrandTokens.cream.withValues(alpha: .55),
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: selected
+                  ? BrandTokens.forest
+                  : BrandTokens.forest.withValues(alpha: .16),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    topMatch ? 'TOP MATCH' : '${match.score}% MATCH',
+                    style: TextStyle(
+                      color: topMatch ? BrandTokens.gold : BrandTokens.forest,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    selected
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_unchecked,
+                    size: 18,
+                    color: BrandTokens.forest,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                match.career.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                match.career.description,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const Spacer(),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final gift in match.strongestGifts.take(2))
+                    GiftBadge(gift, dense: true),
+                  ActionChip(
+                    avatar: Icon(
+                      saved ? Icons.bookmark : Icons.bookmark_border,
+                      size: 16,
+                    ),
+                    label: Text(saved ? 'Saved' : 'Save'),
+                    onPressed: () => appState.toggleSavedCareer(match),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PreferencePanel extends StatefulWidget {
+  const _PreferencePanel({required this.onUpdated});
+
+  final VoidCallback onUpdated;
+
+  @override
+  State<_PreferencePanel> createState() => _PreferencePanelState();
+}
+
+class _PreferencePanelState extends State<_PreferencePanel> {
+  final interests = <String>{...appState.preference.interests};
+  final values = <String>{...appState.preference.values};
+
+  static const allInterests = [
+    'Helping people',
+    'Teaching',
+    'Technology',
+    'Business',
+    'Healthcare',
+    'Creative work',
+    'Working with my hands',
+    'Leadership',
+    'Numbers/data',
+    'Communication',
+    'Community impact',
+    'Faith/ministry'
+  ];
+  static const allValues = [
+    'High earning potential',
+    'Work-life balance',
+    'Helping others',
+    'Remote work',
+    'Stability',
+    'Creativity',
+    'Leadership opportunities',
+    'Flexible schedule',
+    'Mission-driven work'
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return InfoCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Refine the work you want to explore',
+              style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          const Text(
+              'These preferences re-rank your career lanes before the job search runs.'),
+          const SizedBox(height: 14),
+          const Text('Interests'),
+          const SizedBox(height: 8),
+          Wrap(spacing: 8, runSpacing: 8, children: [
+            for (final item in allInterests)
+              FilterChip(
+                label: Text(item),
+                selected: interests.contains(item),
+                onSelected: (selected) => setState(() =>
+                    selected ? interests.add(item) : interests.remove(item)),
+              ),
+          ]),
+          const SizedBox(height: 14),
+          const Text('Work values'),
+          const SizedBox(height: 8),
+          Wrap(spacing: 8, runSpacing: 8, children: [
+            for (final item in allValues)
+              FilterChip(
+                label: Text(item),
+                selected: values.contains(item),
+                onSelected: (selected) => setState(
+                    () => selected ? values.add(item) : values.remove(item)),
+              ),
+          ]),
+          const SizedBox(height: 14),
+          Align(
+            alignment: Alignment.centerRight,
+            child: FilledButton.icon(
+              onPressed: () async {
+                await appState.updatePreference(
+                    UserPreference(interests: interests, values: values));
+                widget.onUpdated();
+              },
+              icon: const Icon(Icons.tune),
+              label: const Text('Update matches'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _JobSearchPanel extends StatelessWidget {
   const _JobSearchPanel({
     required this.location,
     required this.remoteOnly,
     required this.loading,
     required this.result,
+    required this.titles,
     required this.onRemoteChanged,
     required this.onSearch,
   });
@@ -190,6 +497,7 @@ class _JobSearchPanel extends StatelessWidget {
   final bool remoteOnly;
   final bool loading;
   final JobSearchResult? result;
+  final String titles;
   final ValueChanged<bool> onRemoteChanged;
   final VoidCallback onSearch;
 
@@ -217,7 +525,7 @@ class _JobSearchPanel extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(result?.message ??
-              'Searches use your highest-ranked career matches and run through Supabase so API keys stay off the client.'),
+              'Searching from: $titles. Requests run through Supabase so Adzuna keys stay off the client.'),
           const SizedBox(height: 12),
           LayoutBuilder(
             builder: (context, constraints) {

@@ -168,8 +168,8 @@ class _SavedCareers extends StatelessWidget {
           title: 'No saved careers yet',
           body: 'Save the career matches that feel worth a second look.',
           action: FilledButton(
-              onPressed: () => context.go('/careers'),
-              child: const Text('Browse Careers')),
+              onPressed: () => context.go('/opportunities'),
+              child: const Text('Browse Opportunities')),
         ),
       );
     }

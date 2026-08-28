@@ -7,7 +7,6 @@ import 'features/assessment/assessment_page.dart';
 import 'features/auth/auth_page.dart';
 import 'features/billing/billing_success_page.dart';
 import 'features/billing/subscribe_page.dart';
-import 'features/careers/careers_page.dart';
 import 'features/home/home_page.dart';
 import 'features/opportunities/opportunities_page.dart';
 import 'features/results/results_page.dart';
@@ -33,7 +32,7 @@ class GiftPathApp extends StatelessWidget {
                 path: '/assessment',
                 builder: (_, __) => const AssessmentPage()),
             GoRoute(path: '/results', builder: (_, __) => const ResultsPage()),
-            GoRoute(path: '/careers', builder: (_, __) => const CareersPage()),
+            GoRoute(path: '/careers', redirect: (_, __) => '/opportunities'),
             GoRoute(
                 path: '/opportunities',
                 builder: (_, __) => const OpportunitiesPage()),
