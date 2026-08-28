@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/app_state.dart';
 import '../../core/env.dart';
 import '../../core/theme.dart';
+import '../../data/billing_service.dart';
 import '../../widgets/brand_components.dart';
 import '../../widgets/brand_mark.dart';
 import '../../widgets/responsive.dart';
@@ -143,6 +145,9 @@ class _AuthPageState extends State<AuthPage> {
                 _AccountPanel(
                   email: user.email ?? 'Signed-in user',
                   returnTo: returnTo,
+                  loading: loading,
+                  hasActiveSubscription: appState.hasActiveSubscription,
+                  onManageBilling: _manageBilling,
                   onSignOut: () async {
                     await Supabase.instance.client.auth.signOut();
                     if (mounted) setState(() => message = 'Signed out.');
@@ -288,6 +293,16 @@ class _AuthPageState extends State<AuthPage> {
         if (mounted) context.go(returnTo);
         return;
       }
+      if (create) {
+        final confirmationPath = Uri(
+          path: '/confirm-account',
+          queryParameters: {
+            if (returnTo != null) 'returnTo': returnTo,
+          },
+        ).toString();
+        if (mounted) context.go(confirmationPath);
+        return;
+      }
       setState(() => message = create
           ? 'Check your email to confirm your account. You can view your results now on this device.'
           : 'Signed in.');
@@ -402,6 +417,31 @@ class _AuthPageState extends State<AuthPage> {
     } finally {
       if (mounted) setState(() => loading = false);
     }
+  }
+
+  Future<void> _manageBilling() async {
+    setState(() {
+      loading = true;
+      message = '';
+    });
+    final result = await BillingService().createBillingPortalSession();
+    if (!mounted) return;
+    setState(() => loading = false);
+
+    if (!result.isSuccess) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.error ?? 'Billing management is unavailable.'),
+          action: SnackBarAction(
+            label: 'Subscribe',
+            onPressed: () => context.go('/subscribe'),
+          ),
+        ),
+      );
+      return;
+    }
+
+    await launchUrl(Uri.parse(result.url!), webOnlyWindowName: '_self');
   }
 
   String get _authRedirectUrl {
@@ -622,11 +662,17 @@ class _GuestPanel extends StatelessWidget {
 class _AccountPanel extends StatelessWidget {
   const _AccountPanel({
     required this.email,
+    required this.loading,
+    required this.hasActiveSubscription,
+    required this.onManageBilling,
     required this.onSignOut,
     this.returnTo,
   });
 
   final String email;
+  final bool loading;
+  final bool hasActiveSubscription;
+  final Future<void> Function() onManageBilling;
   final Future<void> Function() onSignOut;
   final String? returnTo;
 
@@ -634,17 +680,34 @@ class _AccountPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return BrandNotice(
       icon: Icons.check_circle_outline,
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: Text('Signed in as $email')),
-          if (returnTo != null) ...[
-            FilledButton(
-              onPressed: () => context.go(returnTo!),
-              child: const Text('Continue'),
-            ),
-            const SizedBox(width: 8),
-          ],
-          OutlinedButton(onPressed: onSignOut, child: const Text('Sign Out')),
+          Text('Signed in as $email'),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              if (returnTo != null)
+                FilledButton(
+                  onPressed: () => context.go(returnTo!),
+                  child: const Text('Continue'),
+                ),
+              OutlinedButton.icon(
+                onPressed: loading ? null : onManageBilling,
+                icon: Icon(hasActiveSubscription
+                    ? Icons.manage_accounts_outlined
+                    : Icons.credit_card_outlined),
+                label: Text(hasActiveSubscription
+                    ? 'Manage subscription'
+                    : 'Billing portal'),
+              ),
+              OutlinedButton(
+                  onPressed: loading ? null : onSignOut,
+                  child: const Text('Sign out')),
+            ],
+          ),
         ],
       ),
     );

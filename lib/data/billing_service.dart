@@ -61,6 +61,41 @@ class BillingService {
     }
   }
 
+  Future<BillingCheckoutResult> createBillingPortalSession() async {
+    if (!Env.hasSupabase) {
+      return const BillingCheckoutResult.failure(
+        'Supabase must be configured before billing can be managed.',
+      );
+    }
+
+    final auth = Supabase.instance.client.auth;
+    final user = auth.currentUser;
+    if (user == null || user.isAnonymous) {
+      return const BillingCheckoutResult.failure(
+        'Sign in before managing billing.',
+      );
+    }
+
+    try {
+      final origin = Uri.base.origin;
+      final response = await Supabase.instance.client.functions.invoke(
+        'create-billing-portal',
+        body: {
+          'returnUrl': '$origin/auth',
+        },
+      );
+      final data = response.data;
+      if (data is Map && data['url'] is String) {
+        return BillingCheckoutResult.success(data['url'] as String);
+      }
+      return const BillingCheckoutResult.failure(
+        'Stripe did not return a billing portal URL.',
+      );
+    } catch (error) {
+      return BillingCheckoutResult.failure(error.toString());
+    }
+  }
+
   Future<bool> hasActiveSubscription() async {
     if (!Env.hasSupabase) return false;
     final user = Supabase.instance.client.auth.currentUser;

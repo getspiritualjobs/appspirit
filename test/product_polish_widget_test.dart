@@ -8,6 +8,8 @@ import 'package:spiritual_gifts_career_discovery/data/seed_data.dart';
 import 'package:spiritual_gifts_career_discovery/features/assessment/assessment_page.dart';
 import 'package:spiritual_gifts_career_discovery/features/auth/auth_page.dart';
 import 'package:spiritual_gifts_career_discovery/features/billing/subscribe_page.dart';
+import 'package:spiritual_gifts_career_discovery/features/legal/confirm_account_page.dart';
+import 'package:spiritual_gifts_career_discovery/features/legal/legal_page.dart';
 import 'package:spiritual_gifts_career_discovery/features/opportunities/opportunities_page.dart';
 import 'package:spiritual_gifts_career_discovery/features/results/results_page.dart';
 import 'package:spiritual_gifts_career_discovery/widgets/brand_components.dart';
@@ -80,6 +82,18 @@ void main() {
     expect(find.text('PRIVATE SAVING'), findsNothing);
   });
 
+  testWidgets('confirm account route explains the email step',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp.router(
+      theme: buildGiftPathTheme(),
+      routerConfig: _routerFor('/confirm-account?returnTo=/results'),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Confirm your account'), findsOneWidget);
+    expect(find.text('View results'), findsOneWidget);
+  });
+
   testWidgets('completed assessment routes through account step before results',
       (WidgetTester tester) async {
     for (final question in assessmentQuestions) {
@@ -145,6 +159,19 @@ void main() {
     expect(find.textContaining(r'$7.77'), findsOneWidget);
     expect(find.textContaining(r'$77.77'), findsOneWidget);
   });
+
+  testWidgets('legal pages include launch policy drafts',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp.router(
+      theme: buildGiftPathTheme(),
+      routerConfig: _routerFor('/cancellation'),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cancellation policy'), findsOneWidget);
+    expect(find.text('How to cancel'), findsOneWidget);
+    expect(find.textContaining('Stripe billing portal'), findsOneWidget);
+  });
 }
 
 Widget _shell(Widget child) {
@@ -165,9 +192,28 @@ GoRouter _routerFor(String initialLocation) {
       GoRoute(
           path: '/auth', builder: (_, __) => const Scaffold(body: AuthPage())),
       GoRoute(
+        path: '/confirm-account',
+        builder: (_, __) => const Scaffold(body: ConfirmAccountPage()),
+      ),
+      GoRoute(
         path: '/reset-password',
         builder: (_, __) =>
             const Scaffold(body: AuthPage(resetPasswordOnly: true)),
+      ),
+      GoRoute(
+        path: '/terms',
+        builder: (_, __) =>
+            const Scaffold(body: LegalPage(document: LegalDocument.terms)),
+      ),
+      GoRoute(
+        path: '/privacy',
+        builder: (_, __) =>
+            const Scaffold(body: LegalPage(document: LegalDocument.privacy)),
+      ),
+      GoRoute(
+        path: '/cancellation',
+        builder: (_, __) => const Scaffold(
+            body: LegalPage(document: LegalDocument.cancellation)),
       ),
       GoRoute(
         path: '/results',

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/theme.dart';
 import '../../data/billing_service.dart';
 import '../../widgets/brand_components.dart';
 import '../../widgets/brand_mark.dart';
@@ -27,13 +28,15 @@ class _SubscribePageState extends State<SubscribePage> {
           children: [
             const BrandEyebrow('Full access'),
             const SizedBox(height: 10),
-            Text('Unlock every matched opportunity',
+            Text('Unlock your opportunity portal',
                 style: Theme.of(context).textTheme.displayMedium),
             const SizedBox(height: 10),
             const Text(
-              'Your first matched job is free. Subscribe when you want the full list, saved jobs, and ongoing searches from your career matches.',
+              'Your first matched job is free. The portal opens the full job list, career-lane filtering, saved jobs, and ongoing searches from your strongest matches.',
             ),
             const SizedBox(height: 22),
+            const _PortalSummary(),
+            const SizedBox(height: 18),
             LayoutBuilder(
               builder: (context, constraints) {
                 final wide = constraints.maxWidth > 720;
@@ -88,7 +91,7 @@ class _SubscribePageState extends State<SubscribePage> {
                       style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 6),
                   const Text(
-                    'The Opportunities page shows the full matched list instead of one free result. Your existing results, saved careers, and saved jobs stay private to your account.',
+                    'Opportunities shows the full matched list instead of one free result. Your results, saved careers, and saved jobs stay private to your account. You can manage or cancel your subscription from Account.',
                   ),
                 ],
               ),
@@ -98,6 +101,22 @@ class _SubscribePageState extends State<SubscribePage> {
               onPressed: () => context.go('/opportunities'),
               icon: const Icon(Icons.arrow_back),
               label: const Text('Back to Opportunities'),
+            ),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                TextButton(
+                    onPressed: () => context.go('/terms'),
+                    child: const Text('Terms')),
+                TextButton(
+                    onPressed: () => context.go('/privacy'),
+                    child: const Text('Privacy')),
+                TextButton(
+                    onPressed: () => context.go('/cancellation'),
+                    child: const Text('Cancellation policy')),
+              ],
             ),
           ],
         ),
@@ -125,6 +144,109 @@ class _SubscribePageState extends State<SubscribePage> {
     }
 
     await launchUrl(Uri.parse(result.url!), webOnlyWindowName: '_self');
+  }
+}
+
+class _PortalSummary extends StatelessWidget {
+  const _PortalSummary();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: BrandTokens.forest,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: BrandTokens.ink.withValues(alpha: .12),
+            blurRadius: 26,
+            offset: const Offset(0, 16),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final narrow = constraints.maxWidth < 680;
+            const items = [
+              _PortalStep('01', 'One free job', 'See a first real opening.'),
+              _PortalStep('02', 'Career lanes', 'Choose the paths to follow.'),
+              _PortalStep('03', 'Full list', 'Compare all matched jobs.'),
+            ];
+            return narrow
+                ? Column(
+                    children: [
+                      for (var i = 0; i < items.length; i++) ...[
+                        items[i],
+                        if (i != items.length - 1) const SizedBox(height: 12),
+                      ],
+                    ],
+                  )
+                : Row(
+                    children: [
+                      for (var i = 0; i < items.length; i++) ...[
+                        Expanded(child: items[i]),
+                        if (i != items.length - 1) const SizedBox(width: 12),
+                      ],
+                    ],
+                  );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _PortalStep extends StatelessWidget {
+  const _PortalStep(this.number, this.title, this.body);
+
+  final String number;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CircleAvatar(
+          radius: 18,
+          backgroundColor: BrandTokens.gold,
+          child: Text(
+            number,
+            style: const TextStyle(
+              color: BrandTokens.forest,
+              fontWeight: FontWeight.w900,
+              fontSize: 12,
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: BrandTokens.cream,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                body,
+                style: TextStyle(
+                  color: BrandTokens.cream.withValues(alpha: .76),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 

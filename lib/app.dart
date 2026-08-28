@@ -7,6 +7,8 @@ import 'features/assessment/assessment_page.dart';
 import 'features/auth/auth_page.dart';
 import 'features/billing/billing_success_page.dart';
 import 'features/billing/subscribe_page.dart';
+import 'features/legal/confirm_account_page.dart';
+import 'features/legal/legal_page.dart';
 import 'features/home/home_page.dart';
 import 'features/opportunities/opportunities_page.dart';
 import 'features/results/results_page.dart';
@@ -40,8 +42,23 @@ class GiftPathApp extends StatelessWidget {
             GoRoute(path: '/about', builder: (_, __) => const AboutPage()),
             GoRoute(path: '/auth', builder: (_, __) => const AuthPage()),
             GoRoute(
+                path: '/confirm-account',
+                builder: (_, __) => const ConfirmAccountPage()),
+            GoRoute(
                 path: '/reset-password',
                 builder: (_, __) => const AuthPage(resetPasswordOnly: true)),
+            GoRoute(
+                path: '/terms',
+                builder: (_, __) =>
+                    const LegalPage(document: LegalDocument.terms)),
+            GoRoute(
+                path: '/privacy',
+                builder: (_, __) =>
+                    const LegalPage(document: LegalDocument.privacy)),
+            GoRoute(
+                path: '/cancellation',
+                builder: (_, __) =>
+                    const LegalPage(document: LegalDocument.cancellation)),
             GoRoute(
                 path: '/subscribe', builder: (_, __) => const SubscribePage()),
             GoRoute(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../widgets/brand_components.dart';
 import '../../widgets/responsive.dart';
@@ -48,6 +49,34 @@ class AboutPage extends StatelessWidget {
               title: 'Purpose',
               body:
                   'Use this app to consider how your gifts may show up in work, church, relationships, volunteering, family, and community. It should never replace Scripture, wise counsel, prayer, or real-world experience.',
+            ),
+            InfoCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Policies',
+                      style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 8),
+                  const Text(
+                      'Draft launch policies for using GiftPath, handling saved data, and managing subscriptions.'),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      OutlinedButton(
+                          onPressed: () => context.go('/terms'),
+                          child: const Text('Terms')),
+                      OutlinedButton(
+                          onPressed: () => context.go('/privacy'),
+                          child: const Text('Privacy')),
+                      OutlinedButton(
+                          onPressed: () => context.go('/cancellation'),
+                          child: const Text('Cancellation')),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),

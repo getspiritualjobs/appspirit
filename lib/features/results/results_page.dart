@@ -6,6 +6,7 @@ import '../../core/app_state.dart';
 import '../../core/models.dart';
 import '../../core/scoring.dart';
 import '../../core/theme.dart';
+import '../../data/job_search_service.dart';
 import '../../data/seed_data.dart';
 import '../../widgets/brand_components.dart';
 import '../../widgets/gift_badge.dart';
@@ -98,7 +99,11 @@ class ResultsPage extends StatelessWidget {
                       },
                     ),
                     const SizedBox(height: 26),
-                    if (topCareer != null) _CareerBridge(match: topCareer),
+                    if (topCareer != null) ...[
+                      _CareerBridge(match: topCareer),
+                      const SizedBox(height: 14),
+                      _FirstJobBridge(careerMatches: appState.careerMatches),
+                    ],
                     const SizedBox(height: 28),
                     Text(
                       'All Gift Alignments',
@@ -579,6 +584,83 @@ class _CareerBridge extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _FirstJobBridge extends StatelessWidget {
+  const _FirstJobBridge({required this.careerMatches});
+
+  final List<CareerMatch> careerMatches;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<JobSearchResult>(
+      future: JobSearchService().search(careerMatches: careerMatches),
+      builder: (context, snapshot) {
+        final job = snapshot.data?.jobs.isNotEmpty ?? false
+            ? snapshot.data!.jobs.first
+            : null;
+        return InfoCard(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.open_in_new,
+                  color: BrandTokens.forest, size: 34),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const BrandEyebrow('First job match'),
+                    const SizedBox(height: 6),
+                    Text(
+                      job == null
+                          ? 'We are finding your first open role.'
+                          : job.title,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      job == null
+                          ? 'Live openings are pulled from your top career matches when you open Opportunities.'
+                          : '${job.company} · ${job.location}',
+                    ),
+                    const SizedBox(height: 14),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: [
+                        FilledButton.icon(
+                          onPressed: () => context.go('/opportunities'),
+                          icon: const Icon(Icons.route_outlined),
+                          label: const Text('Open opportunities'),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: () => context.go('/subscribe'),
+                          icon: const Icon(Icons.lock_open_outlined),
+                          label: const Text('Unlock more'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              if (job != null) ...[
+                const SizedBox(width: 12),
+                Text(
+                  '${job.matchScore}%',
+                  style: const TextStyle(
+                    color: BrandTokens.gold,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 }
