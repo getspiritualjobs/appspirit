@@ -80,11 +80,11 @@ class JobSearchService {
         );
       }
 
-      final jobs = rawJobs
+      final jobs = dedupeJobListings(rawJobs
           .whereType<Map>()
           .map((job) => _fromJson(job.cast<String, dynamic>(), careerMatches))
           .where((job) => !remoteOnly || job.remote)
-          .toList()
+          .toList())
         ..sort((a, b) => b.matchScore.compareTo(a.matchScore));
 
       return JobSearchResult(
@@ -204,6 +204,82 @@ int estimateJobMatchScore({
   }
 
   return bestScore.clamp(55, 99);
+}
+
+List<JobListing> dedupeJobListings(List<JobListing> jobs) {
+  final byFingerprint = <String, JobListing>{};
+  for (final job in jobs) {
+    final key = _jobFingerprint(job);
+    final existing = byFingerprint[key];
+    if (existing == null) {
+      byFingerprint[key] = job;
+      continue;
+    }
+
+    byFingerprint[key] = _mergeDuplicateJob(existing, job);
+  }
+  return byFingerprint.values.toList();
+}
+
+JobListing _mergeDuplicateJob(JobListing current, JobListing duplicate) {
+  final differentLocation =
+      _normalizeText(current.location) != _normalizeText(duplicate.location);
+  final betterSalary = current.salaryMin == null && duplicate.salaryMin != null;
+  final betterUrl =
+      current.applicationUrl.isEmpty && duplicate.applicationUrl.isNotEmpty;
+  final base = betterSalary || betterUrl ? duplicate : current;
+
+  return JobListing(
+    id: base.id,
+    provider: base.provider,
+    title: base.title,
+    company: base.company,
+    location: differentLocation ? 'Multiple locations' : base.location,
+    description: base.description,
+    salaryMin: base.salaryMin,
+    salaryMax: base.salaryMax,
+    employmentType: base.employmentType,
+    remote: current.remote || duplicate.remote,
+    postedDate: current.postedDate.isAfter(duplicate.postedDate)
+        ? current.postedDate
+        : duplicate.postedDate,
+    applicationUrl: base.applicationUrl,
+    matchScore: current.matchScore > duplicate.matchScore
+        ? current.matchScore
+        : duplicate.matchScore,
+  );
+}
+
+String _jobFingerprint(JobListing job) {
+  final title = _normalizeText(job.title);
+  final company = _normalizeText(job.company);
+  final description = _normalizeText(job.description);
+  if (title.isNotEmpty && company.isNotEmpty) {
+    return [
+      job.provider,
+      company,
+      title,
+      description.length > 160 ? description.substring(0, 160) : description,
+    ].join(':');
+  }
+  return [
+    job.provider,
+    _normalizeText(job.applicationUrl),
+    title,
+  ].join(':');
+}
+
+String _normalizeText(String value) {
+  return value
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^a-z0-9]+'), ' ')
+      .replaceAll(
+        RegExp(
+            r'\b(remote|hybrid|onsite|part|time|full|opening|grand|urgent|hiring)\b'),
+        ' ',
+      )
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
 }
 
 Set<String> _tokenize(String value) {

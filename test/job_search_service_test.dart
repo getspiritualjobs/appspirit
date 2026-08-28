@@ -90,4 +90,47 @@ void main() {
     expect(looseFit, lessThan(strongFit));
     expect(looseFit, lessThanOrEqualTo(84));
   });
+
+  test('dedupeJobListings collapses same job in different locations', () {
+    final postedDate = DateTime.utc(2026, 8, 28);
+    final jobs = [
+      JobListing(
+        id: 'adzuna-1',
+        provider: 'adzuna',
+        title: 'Part Time Product Demonstrator in Costco - Grand Opening',
+        company: 'CDS',
+        location: 'Hidden Springs, Ada County',
+        description:
+            'We want you to help us shape the future of shopping experiences and deliver on our purpose.',
+        salaryMin: 52000,
+        salaryMax: 52000,
+        employmentType: 'part_time',
+        remote: false,
+        postedDate: postedDate,
+        applicationUrl: 'https://example.com/1',
+        matchScore: 55,
+      ),
+      JobListing(
+        id: 'adzuna-2',
+        provider: 'adzuna',
+        title: 'Part Time Product Demonstrator in Costco - Grand Opening',
+        company: 'CDS',
+        location: 'Kenosha, Kenosha County',
+        description:
+            'We want you to help us shape the future of shopping experiences and deliver on our purpose.',
+        salaryMin: 54000,
+        salaryMax: 54000,
+        employmentType: 'part_time',
+        remote: false,
+        postedDate: postedDate,
+        applicationUrl: 'https://example.com/2',
+        matchScore: 55,
+      ),
+    ];
+
+    final deduped = dedupeJobListings(jobs);
+
+    expect(deduped, hasLength(1));
+    expect(deduped.first.location, 'Multiple locations');
+  });
 }
