@@ -14,6 +14,7 @@ class AppShell extends StatelessWidget {
     ('Assessment', '/assessment'),
     ('My Gifts', '/results'),
     ('Opportunities', '/opportunities'),
+    ('Blog', '/blog'),
     ('Saved', '/saved'),
     ('About', '/about'),
   ];
@@ -22,7 +23,7 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).uri.path;
     final width = MediaQuery.sizeOf(context).width;
-    final isWide = width >= 900;
+    final isWide = width >= 1080;
 
     return Scaffold(
       appBar: AppBar(
@@ -48,7 +49,9 @@ class AppShell extends StatelessWidget {
                   _NavButton(
                       label: item.$1,
                       path: item.$2,
-                      selected: location == item.$2),
+                      selected: location == item.$2 ||
+                          (item.$2 == '/blog' &&
+                              location.startsWith('/blog/'))),
                 Padding(
                   padding: const EdgeInsets.only(right: 28, left: 8),
                   child: OutlinedButton.icon(
@@ -88,7 +91,9 @@ class AppShell extends StatelessWidget {
                     for (final item in nav)
                       ListTile(
                         title: Text(item.$1),
-                        selected: location == item.$2,
+                        selected: location == item.$2 ||
+                            (item.$2 == '/blog' &&
+                                location.startsWith('/blog/')),
                         onTap: () {
                           Navigator.of(context).pop();
                           context.go(item.$2);

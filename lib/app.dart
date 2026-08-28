@@ -5,6 +5,7 @@ import 'core/theme.dart';
 import 'features/about/about_page.dart';
 import 'features/assessment/assessment_page.dart';
 import 'features/auth/auth_page.dart';
+import 'features/blog/blog_page.dart';
 import 'features/billing/billing_success_page.dart';
 import 'features/billing/subscribe_page.dart';
 import 'features/legal/confirm_account_page.dart';
@@ -38,6 +39,12 @@ class GiftPathApp extends StatelessWidget {
             GoRoute(
                 path: '/opportunities',
                 builder: (_, __) => const OpportunitiesPage()),
+            GoRoute(path: '/blog', builder: (_, __) => const BlogPage()),
+            GoRoute(
+              path: '/blog/:slug',
+              builder: (_, state) =>
+                  BlogPostPage(slug: state.pathParameters['slug'] ?? ''),
+            ),
             GoRoute(path: '/saved', builder: (_, __) => const SavedPage()),
             GoRoute(path: '/about', builder: (_, __) => const AboutPage()),
             GoRoute(path: '/auth', builder: (_, __) => const AuthPage()),

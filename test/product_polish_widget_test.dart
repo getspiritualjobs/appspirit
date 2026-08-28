@@ -7,6 +7,7 @@ import 'package:spiritual_gifts_career_discovery/core/theme.dart';
 import 'package:spiritual_gifts_career_discovery/data/seed_data.dart';
 import 'package:spiritual_gifts_career_discovery/features/assessment/assessment_page.dart';
 import 'package:spiritual_gifts_career_discovery/features/auth/auth_page.dart';
+import 'package:spiritual_gifts_career_discovery/features/blog/blog_page.dart';
 import 'package:spiritual_gifts_career_discovery/features/billing/subscribe_page.dart';
 import 'package:spiritual_gifts_career_discovery/features/legal/confirm_account_page.dart';
 import 'package:spiritual_gifts_career_discovery/features/legal/legal_page.dart';
@@ -172,6 +173,28 @@ void main() {
     expect(find.text('How to cancel'), findsOneWidget);
     expect(find.textContaining('Stripe billing portal'), findsOneWidget);
   });
+
+  testWidgets('blog list and post routes render launch content',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp.router(
+      theme: buildGiftPathTheme(),
+      routerConfig: _routerFor('/blog'),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('GIFTPATH JOURNAL'), findsOneWidget);
+    expect(find.text('Notes on gifts, work, and next steps'), findsOneWidget);
+
+    await tester.pumpWidget(MaterialApp.router(
+      theme: buildGiftPathTheme(),
+      routerConfig: _routerFor('/blog/spiritual-gifts-and-career-discernment'),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('How spiritual gifts can shape career discernment'),
+        findsOneWidget);
+    expect(find.text('Take the assessment'), findsOneWidget);
+  });
 }
 
 Widget _shell(Widget child) {
@@ -218,6 +241,16 @@ GoRouter _routerFor(String initialLocation) {
       GoRoute(
         path: '/results',
         builder: (_, __) => const Scaffold(body: Text('Results')),
+      ),
+      GoRoute(
+        path: '/blog',
+        builder: (_, __) => const Scaffold(body: BlogPage()),
+      ),
+      GoRoute(
+        path: '/blog/:slug',
+        builder: (_, state) => Scaffold(
+          body: BlogPostPage(slug: state.pathParameters['slug'] ?? ''),
+        ),
       ),
     ],
   );
