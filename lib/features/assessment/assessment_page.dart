@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/app_state.dart';
 import '../../core/models.dart';
+import '../../core/scoring.dart';
 import '../../core/theme.dart';
 import '../../data/seed_data.dart';
 import '../../widgets/brand_components.dart';
@@ -19,6 +20,7 @@ class AssessmentPage extends StatefulWidget {
 class _AssessmentPageState extends State<AssessmentPage> {
   var index = 0;
   var saving = false;
+  var retaking = false;
 
   AssessmentQuestion get question => assessmentQuestions[index];
 
@@ -27,6 +29,23 @@ class _AssessmentPageState extends State<AssessmentPage> {
     return AnimatedBuilder(
       animation: appState,
       builder: (context, _) {
+        if (appState.hasCompletedAssessment && !retaking) {
+          return SingleChildScrollView(
+            child: PageBand(
+              maxWidth: 820,
+              child: _CompletedAssessmentPanel(
+                onRetake: () {
+                  appState.startRetake();
+                  setState(() {
+                    index = 0;
+                    retaking = true;
+                  });
+                },
+              ),
+            ),
+          );
+        }
+
         final answered = appState.responses.length;
         final complete = answered == assessmentQuestions.length;
         final response = appState.responses[question.id];
@@ -81,7 +100,10 @@ class _AssessmentPageState extends State<AssessmentPage> {
                           setState(() => saving = true);
                           await appState.completeAssessment();
                           if (!mounted) return;
-                          setState(() => saving = false);
+                          setState(() {
+                            saving = false;
+                            retaking = false;
+                          });
                           GoRouter.of(this.context)
                               .go('/auth?returnTo=/results');
                         }
@@ -97,6 +119,86 @@ class _AssessmentPageState extends State<AssessmentPage> {
           ),
         );
       },
+    );
+  }
+}
+
+class _CompletedAssessmentPanel extends StatelessWidget {
+  const _CompletedAssessmentPanel({required this.onRetake});
+
+  final VoidCallback onRetake;
+
+  @override
+  Widget build(BuildContext context) {
+    final topGift = appState.topThree.isEmpty
+        ? null
+        : giftLabel(appState.topThree.first.gift);
+    final topCareer = appState.careerMatches.isEmpty
+        ? null
+        : appState.careerMatches.first.career.title;
+
+    return InfoCard(
+      padding: const EdgeInsets.all(26),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const BrandEyebrow('Assessment complete'),
+          const SizedBox(height: 10),
+          Text(
+            'You have already taken the quiz.',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            topGift == null
+                ? 'Your saved GiftPath result is ready to review.'
+                : 'Your latest result starts with $topGift. You can review it, explore aligned opportunities, or retake the assessment if your season has changed.',
+          ),
+          const SizedBox(height: 18),
+          BrandNotice(
+            icon: Icons.route_outlined,
+            accent: true,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Current path',
+                  style: TextStyle(fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 6),
+                Text([
+                  if (topGift != null) 'Top gift: $topGift',
+                  if (topCareer != null) 'Top career lane: $topCareer',
+                  if (topGift == null && topCareer == null)
+                    'Saved result available',
+                ].join('  |  ')),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              FilledButton.icon(
+                onPressed: () => context.go('/results'),
+                icon: const Icon(Icons.auto_awesome),
+                label: const Text('View results'),
+              ),
+              OutlinedButton.icon(
+                onPressed: () => context.go('/opportunities'),
+                icon: const Icon(Icons.work_outline),
+                label: const Text('See opportunities'),
+              ),
+              TextButton.icon(
+                onPressed: onRetake,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retake assessment'),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

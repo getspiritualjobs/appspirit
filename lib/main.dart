@@ -20,6 +20,8 @@ Future<void> main() async {
       appState.refreshSavedData();
       appState.refreshSubscription();
     });
+    await appState.refreshSavedData();
+    await appState.refreshSubscription();
   }
 
   String? initialLocation;

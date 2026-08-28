@@ -25,6 +25,8 @@ class GiftPathState extends ChangeNotifier {
 
   bool get isComplete => responses.length == assessmentQuestions.length;
   bool get hasResults => giftScores.isNotEmpty;
+  bool get hasCompletedAssessment =>
+      hasResults || savedResults.isNotEmpty || savedResult.isNotEmpty;
   List<GiftScore> get topThree => giftScores.take(3).toList();
 
   void loadDemoAssessment() {
@@ -55,6 +57,16 @@ class GiftPathState extends ChangeNotifier {
 
   void answer(String questionId, int value) {
     responses[questionId] = value;
+    notifyListeners();
+  }
+
+  void startRetake() {
+    responses.clear();
+    giftScores = const [];
+    careerMatches = const [];
+    savedResult = const [];
+    latestAssessmentId = null;
+    assessmentSaveError = null;
     notifyListeners();
   }
 
@@ -179,6 +191,15 @@ class GiftPathState extends ChangeNotifier {
       preference = snapshot.preference;
       if (snapshot.results.isNotEmpty) {
         savedResult = List.unmodifiable(snapshot.results.first.scores);
+        if (giftScores.isEmpty) {
+          giftScores = List.unmodifiable(snapshot.results.first.scores);
+          careerMatches = matchCareers(
+            careers: careers,
+            giftScores: giftScores,
+            preference: preference,
+          );
+          latestAssessmentId = snapshot.results.first.assessmentId;
+        }
       }
       savedDataError = null;
     } catch (error) {

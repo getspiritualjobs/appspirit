@@ -114,6 +114,36 @@ void main() {
     expect(find.text('Your results are ready'), findsOneWidget);
   });
 
+  testWidgets('assessment page recognizes completed results and can retake',
+      (WidgetTester tester) async {
+    appState.giftScores = const [
+      GiftScore(gift: GiftKey.teaching, rawScore: 5, normalizedScore: 94),
+    ];
+    appState.careerMatches = [
+      CareerMatch(
+        career: careers.first,
+        score: 94,
+        strongestGifts: const [GiftKey.teaching],
+        reason: 'Test match.',
+      ),
+    ];
+
+    await tester.pumpWidget(MaterialApp.router(
+      theme: buildGiftPathTheme(),
+      routerConfig: _routerFor('/assessment'),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('You have already taken the quiz.'), findsOneWidget);
+    expect(find.text('View results'), findsOneWidget);
+
+    await tester.tap(find.text('Retake assessment'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Question 1 of 56'), findsOneWidget);
+    expect(appState.hasResults, isFalse);
+  });
+
   testWidgets('results gives the top gift a reveal treatment',
       (WidgetTester tester) async {
     appState.giftScores = const [
