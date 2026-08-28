@@ -41,6 +41,15 @@ class GiftPathApp extends StatelessWidget {
                 builder: (_, __) => const OpportunitiesPage()),
             GoRoute(path: '/blog', builder: (_, __) => const BlogPage()),
             GoRoute(
+              path: '/blog/new',
+              builder: (_, __) => const BlogEditorPage(),
+            ),
+            GoRoute(
+              path: '/blog/:slug/edit',
+              builder: (_, state) =>
+                  BlogEditorPage(slug: state.pathParameters['slug']),
+            ),
+            GoRoute(
               path: '/blog/:slug',
               builder: (_, state) =>
                   BlogPostPage(slug: state.pathParameters['slug'] ?? ''),

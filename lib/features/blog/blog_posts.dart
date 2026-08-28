@@ -1,5 +1,6 @@
 class BlogPost {
   const BlogPost({
+    this.id,
     required this.slug,
     required this.title,
     required this.excerpt,
@@ -7,8 +8,11 @@ class BlogPost {
     required this.publishedLabel,
     required this.readTime,
     required this.sections,
+    this.contentMarkdown,
+    this.isDraft = false,
   });
 
+  final String? id;
   final String slug;
   final String title;
   final String excerpt;
@@ -16,6 +20,8 @@ class BlogPost {
   final String publishedLabel;
   final String readTime;
   final List<BlogSection> sections;
+  final String? contentMarkdown;
+  final bool isDraft;
 }
 
 class BlogSection {
@@ -131,4 +137,49 @@ BlogPost? blogPostBySlug(String slug) {
     if (post.slug == slug) return post;
   }
   return null;
+}
+
+String blogPostToMarkdown(BlogPost post) {
+  return post.sections
+      .map((section) => [
+            '## ${section.heading}',
+            ...section.paragraphs,
+          ].join('\n\n'))
+      .join('\n\n');
+}
+
+List<BlogSection> blogSectionsFromMarkdown(String markdown) {
+  final sections = <BlogSection>[];
+  String heading = 'Note';
+  final paragraphs = <String>[];
+
+  void flush() {
+    if (paragraphs.isEmpty) return;
+    sections.add(BlogSection(
+      heading: heading,
+      paragraphs: List.unmodifiable(paragraphs),
+    ));
+    paragraphs.clear();
+  }
+
+  for (final block in markdown.split(RegExp(r'\n\s*\n'))) {
+    final trimmed = block.trim();
+    if (trimmed.isEmpty) continue;
+    if (trimmed.startsWith('## ')) {
+      flush();
+      heading = trimmed.substring(3).trim();
+      continue;
+    }
+    paragraphs.add(trimmed.replaceAll('\n', ' '));
+  }
+  flush();
+
+  return sections.isEmpty
+      ? [
+          BlogSection(
+            heading: 'Note',
+            paragraphs: [markdown.trim()],
+          )
+        ]
+      : List.unmodifiable(sections);
 }

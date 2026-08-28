@@ -36,7 +36,7 @@ class _AuthPageState extends State<AuthPage> {
   String? get _safeReturnTo {
     final value = GoRouterState.of(context).uri.queryParameters['returnTo'];
     return switch (value) {
-      '/results' || '/opportunities' || '/saved' => value,
+      '/results' || '/opportunities' || '/saved' || '/blog' => value,
       _ => null,
     };
   }

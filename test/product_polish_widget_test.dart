@@ -195,6 +195,17 @@ void main() {
         findsOneWidget);
     expect(find.text('Take the assessment'), findsOneWidget);
   });
+
+  testWidgets('blog editor requires admin access', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp.router(
+      theme: buildGiftPathTheme(),
+      routerConfig: _routerFor('/blog/new'),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Admin access needed'), findsOneWidget);
+    expect(find.text('Write a blog post'), findsNothing);
+  });
 }
 
 Widget _shell(Widget child) {
@@ -245,6 +256,16 @@ GoRouter _routerFor(String initialLocation) {
       GoRoute(
         path: '/blog',
         builder: (_, __) => const Scaffold(body: BlogPage()),
+      ),
+      GoRoute(
+        path: '/blog/new',
+        builder: (_, __) => const Scaffold(body: BlogEditorPage()),
+      ),
+      GoRoute(
+        path: '/blog/:slug/edit',
+        builder: (_, state) => Scaffold(
+          body: BlogEditorPage(slug: state.pathParameters['slug']),
+        ),
       ),
       GoRoute(
         path: '/blog/:slug',
