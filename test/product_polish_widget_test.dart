@@ -177,6 +177,21 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('MATCHED OPPORTUNITIES'), findsOneWidget);
+    expect(find.text('Career lanes'), findsWidgets);
+    expect(find.text('Refine'), findsWidgets);
+    expect(find.text('Live jobs'), findsWidgets);
+    expect(find.text('Unlock Full List'), findsNothing);
+
+    await tester.ensureVisible(find.text('Refine work preferences'));
+    await tester.tap(find.text('Refine work preferences'));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('See suggested jobs'));
+    await tester.tap(find.text('See suggested jobs'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Suggested live matches'), findsOneWidget);
+    expect(find.text('How job match works'), findsOneWidget);
     expect(find.text('Unlock Full List'), findsOneWidget);
     expect(find.textContaining(r'$7.77'), findsNothing);
     expect(find.textContaining(r'$77.77'), findsNothing);

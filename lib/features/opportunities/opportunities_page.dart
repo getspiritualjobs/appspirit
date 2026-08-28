@@ -24,13 +24,13 @@ class _OpportunitiesPageState extends State<OpportunitiesPage> {
   JobSearchResult? result;
   var loading = false;
   var remoteOnly = false;
+  var stage = _OpportunityStage.careerLanes;
   final selectedCareerIds = <String>{};
 
   @override
   void initState() {
     super.initState();
     appState.refreshSubscription();
-    _search();
   }
 
   @override
@@ -68,7 +68,11 @@ class _OpportunitiesPageState extends State<OpportunitiesPage> {
         selectedCareerIds.add(match.career.id);
       }
     });
-    _search();
+  }
+
+  Future<void> _goToJobs() async {
+    setState(() => stage = _OpportunityStage.jobs);
+    await _search();
   }
 
   @override
@@ -113,39 +117,56 @@ class _OpportunitiesPageState extends State<OpportunitiesPage> {
                 const SizedBox(height: 8),
                 Text(
                   appState.hasActiveSubscription
-                      ? 'Choose the career lanes you want to explore, then search live openings from those matches.'
-                      : 'Pick the career lanes that interest you. Your first live job match is free.',
+                      ? 'Choose the career lanes you want to explore, refine the kind of work you want, then search live openings from those matches.'
+                      : 'Pick the career lanes that interest you, refine the work, then see your first live job match free.',
                 ),
                 const SizedBox(height: 18),
-                _CareerFocusPanel(
-                  selectedCareerIds: selectedCareerIds,
-                  onToggleCareer: _toggleCareer,
-                  onSearch: _search,
-                ),
+                _OpportunityProgress(stage: stage),
                 const SizedBox(height: 16),
-                _PreferencePanel(onUpdated: _search),
-                const SizedBox(height: 20),
-                _JobSearchPanel(
-                  location: location,
-                  remoteOnly: remoteOnly,
-                  loading: loading,
-                  result: result,
-                  titles: titles,
-                  onRemoteChanged: (value) =>
-                      setState(() => remoteOnly = value),
-                  onSearch: _search,
-                ),
-                const SizedBox(height: 20),
-                if (loading && jobs.isEmpty)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: CircularProgressIndicator(),
-                    ),
+                if (stage == _OpportunityStage.careerLanes)
+                  _CareerFocusPanel(
+                    selectedCareerIds: selectedCareerIds,
+                    onToggleCareer: _toggleCareer,
+                    onContinue: () =>
+                        setState(() => stage = _OpportunityStage.refine),
+                  )
+                else if (stage == _OpportunityStage.refine)
+                  _PreferencePanel(
+                    onBack: () =>
+                        setState(() => stage = _OpportunityStage.careerLanes),
+                    onUpdated: _goToJobs,
                   )
                 else ...[
-                  for (final job in visibleJobs) _JobCard(job: job),
-                  if (lockedCount > 0) _UpgradeCard(lockedCount: lockedCount),
+                  _JobSearchPanel(
+                    location: location,
+                    remoteOnly: remoteOnly,
+                    loading: loading,
+                    result: result,
+                    titles: titles,
+                    onBack: () =>
+                        setState(() => stage = _OpportunityStage.refine),
+                    onRemoteChanged: (value) =>
+                        setState(() => remoteOnly = value),
+                    onSearch: _search,
+                  ),
+                  const SizedBox(height: 16),
+                  _MatchExplanationPanel(
+                      activeCareerMatches: _activeCareerMatches),
+                  const SizedBox(height: 20),
+                  if (loading && jobs.isEmpty)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32),
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  else ...[
+                    Text('Suggested live matches',
+                        style: Theme.of(context).textTheme.headlineMedium),
+                    const SizedBox(height: 12),
+                    for (final job in visibleJobs) _JobCard(job: job),
+                    if (lockedCount > 0) _UpgradeCard(lockedCount: lockedCount),
+                  ],
                 ],
               ],
             ),
@@ -154,6 +175,169 @@ class _OpportunitiesPageState extends State<OpportunitiesPage> {
       },
     );
   }
+}
+
+enum _OpportunityStage { careerLanes, refine, jobs }
+
+class _OpportunityProgress extends StatelessWidget {
+  const _OpportunityProgress({required this.stage});
+
+  final _OpportunityStage stage;
+
+  @override
+  Widget build(BuildContext context) {
+    final activeIndex = _OpportunityStage.values.indexOf(stage);
+    const steps = [
+      ('Career lanes', 'Choose the paths worth exploring.'),
+      ('Refine', 'Name the work shape you want.'),
+      ('Live jobs', 'Compare suggested openings.'),
+    ];
+
+    return InfoCard(
+      padding: const EdgeInsets.all(16),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final narrow = constraints.maxWidth < 680;
+          final children = [
+            for (var i = 0; i < steps.length; i++)
+              Expanded(
+                flex: narrow ? 0 : 1,
+                child: _ProgressStep(
+                  number: i + 1,
+                  title: steps[i].$1,
+                  body: steps[i].$2,
+                  active: i == activeIndex,
+                  complete: i < activeIndex,
+                ),
+              ),
+          ];
+          return narrow
+              ? Column(
+                  children: [
+                    for (final child in children) ...[
+                      SizedBox(width: double.infinity, child: child),
+                      if (child != children.last) const SizedBox(height: 10),
+                    ],
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    children[0],
+                    const _ProgressConnector(),
+                    children[1],
+                    const _ProgressConnector(),
+                    children[2],
+                  ],
+                );
+        },
+      ),
+    );
+  }
+}
+
+class _ProgressStep extends StatelessWidget {
+  const _ProgressStep({
+    required this.number,
+    required this.title,
+    required this.body,
+    required this.active,
+    required this.complete,
+  });
+
+  final int number;
+  final String title;
+  final String body;
+  final bool active;
+  final bool complete;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = complete || active ? BrandTokens.forest : BrandTokens.moss;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: complete
+                ? BrandTokens.forest
+                : active
+                    ? BrandTokens.gold
+                    : BrandTokens.cream,
+            shape: BoxShape.circle,
+            border:
+                Border.all(color: BrandTokens.forest.withValues(alpha: .22)),
+          ),
+          child: Text(
+            '$number',
+            style: TextStyle(
+              color: complete ? BrandTokens.cream : BrandTokens.forest,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.w900,
+                  )),
+              const SizedBox(height: 2),
+              Text(
+                body,
+                style: const TextStyle(fontSize: 13),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ProgressConnector extends StatelessWidget {
+  const _ProgressConnector();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 52,
+      height: 34,
+      child: CustomPaint(
+        painter: _ProgressConnectorPainter(),
+      ),
+    );
+  }
+}
+
+class _ProgressConnectorPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = BrandTokens.gold.withValues(alpha: .62)
+      ..strokeWidth = 2
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+    var x = 4.0;
+    while (x < size.width - 4) {
+      canvas.drawLine(
+        Offset(x, size.height / 2),
+        Offset((x + 8).clamp(0, size.width), size.height / 2),
+        paint,
+      );
+      x += 14;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _UpgradeCard extends StatelessWidget {
@@ -209,12 +393,12 @@ class _CareerFocusPanel extends StatelessWidget {
   const _CareerFocusPanel({
     required this.selectedCareerIds,
     required this.onToggleCareer,
-    required this.onSearch,
+    required this.onContinue,
   });
 
   final Set<String> selectedCareerIds;
   final ValueChanged<CareerMatch> onToggleCareer;
-  final VoidCallback onSearch;
+  final VoidCallback onContinue;
 
   @override
   Widget build(BuildContext context) {
@@ -282,9 +466,9 @@ class _CareerFocusPanel extends StatelessWidget {
           Align(
             alignment: Alignment.centerRight,
             child: OutlinedButton.icon(
-              onPressed: onSearch,
-              icon: const Icon(Icons.search),
-              label: const Text('Search jobs from these careers'),
+              onPressed: onContinue,
+              icon: const Icon(Icons.arrow_forward),
+              label: const Text('Refine work preferences'),
             ),
           ),
         ],
@@ -390,8 +574,9 @@ class _CareerFocusCard extends StatelessWidget {
 }
 
 class _PreferencePanel extends StatefulWidget {
-  const _PreferencePanel({required this.onUpdated});
+  const _PreferencePanel({required this.onBack, required this.onUpdated});
 
+  final VoidCallback onBack;
   final VoidCallback onUpdated;
 
   @override
@@ -464,17 +649,25 @@ class _PreferencePanelState extends State<_PreferencePanel> {
               ),
           ]),
           const SizedBox(height: 14),
-          Align(
-            alignment: Alignment.centerRight,
-            child: FilledButton.icon(
-              onPressed: () async {
-                await appState.updatePreference(
-                    UserPreference(interests: interests, values: values));
-                widget.onUpdated();
-              },
-              icon: const Icon(Icons.tune),
-              label: const Text('Update matches'),
-            ),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              OutlinedButton.icon(
+                onPressed: widget.onBack,
+                icon: const Icon(Icons.arrow_back),
+                label: const Text('Career lanes'),
+              ),
+              FilledButton.icon(
+                onPressed: () async {
+                  await appState.updatePreference(
+                      UserPreference(interests: interests, values: values));
+                  widget.onUpdated();
+                },
+                icon: const Icon(Icons.arrow_forward),
+                label: const Text('See suggested jobs'),
+              ),
+            ],
           ),
         ],
       ),
@@ -489,6 +682,7 @@ class _JobSearchPanel extends StatelessWidget {
     required this.loading,
     required this.result,
     required this.titles,
+    required this.onBack,
     required this.onRemoteChanged,
     required this.onSearch,
   });
@@ -498,6 +692,7 @@ class _JobSearchPanel extends StatelessWidget {
   final bool loading;
   final JobSearchResult? result;
   final String titles;
+  final VoidCallback onBack;
   final ValueChanged<bool> onRemoteChanged;
   final VoidCallback onSearch;
 
@@ -513,6 +708,12 @@ class _JobSearchPanel extends StatelessWidget {
               Expanded(
                   child: Text('Live job search',
                       style: Theme.of(context).textTheme.titleLarge)),
+              TextButton.icon(
+                onPressed: loading ? null : onBack,
+                icon: const Icon(Icons.arrow_back, size: 18),
+                label: const Text('Refine'),
+              ),
+              const SizedBox(width: 8),
               Chip(
                 avatar: Icon(
                     live
@@ -596,6 +797,41 @@ class _JobSearchPanel extends StatelessWidget {
               if (live) const Chip(label: Text('Source links preserved')),
               if (!live) const Chip(label: Text('Demo listings')),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MatchExplanationPanel extends StatelessWidget {
+  const _MatchExplanationPanel({required this.activeCareerMatches});
+
+  final List<CareerMatch> activeCareerMatches;
+
+  @override
+  Widget build(BuildContext context) {
+    final topCareers = activeCareerMatches
+        .take(3)
+        .map((match) => '${match.career.title} (${match.score}%)')
+        .join(', ');
+    return BrandNotice(
+      icon: Icons.percent_outlined,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'How job match works',
+            style: TextStyle(fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'GiftPath starts with your selected career lanes${topCareers.isEmpty ? '' : ' - $topCareers'}. A job gets a higher score when its title or search query overlaps that career lane, its description shares words with the lane category, work environment, interests, and values, and the career lane itself ranked highly from your gift profile.',
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'It is a directional fit score, not a hiring prediction. Use it to decide what is worth opening first.',
+            style: TextStyle(fontWeight: FontWeight.w700),
           ),
         ],
       ),
