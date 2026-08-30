@@ -42,7 +42,15 @@ class AppShell extends StatelessWidget {
             filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: BrandTokens.surface.withValues(alpha: .86),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    BrandTokens.surface.withValues(alpha: .94),
+                    BrandTokens.cream.withValues(alpha: .88),
+                    BrandTokens.creamDim.withValues(alpha: .82),
+                  ],
+                ),
               ),
             ),
           ),
@@ -51,7 +59,7 @@ class AppShell extends StatelessWidget {
           preferredSize: const Size.fromHeight(1),
           child: Container(
             height: 1,
-            color: BrandTokens.gold.withValues(alpha: .22),
+            color: BrandTokens.gold.withValues(alpha: .28),
           ),
         ),
         title: InkWell(
@@ -142,13 +150,12 @@ class _NavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return TextButton(
       onPressed: () => context.go(path),
       style: TextButton.styleFrom(
         backgroundColor:
             selected ? BrandTokens.forest.withValues(alpha: .10) : null,
-        foregroundColor: selected ? scheme.primary : scheme.onSurface,
+        foregroundColor: selected ? BrandTokens.forest : BrandTokens.ink,
         minimumSize: const Size(40, 38),
         padding: const EdgeInsets.symmetric(horizontal: 14),
         shape: const StadiumBorder(),

@@ -47,9 +47,10 @@ class InfoCard extends StatelessWidget {
         border: Border.all(color: BrandTokens.forest.withValues(alpha: .08)),
         boxShadow: [
           BoxShadow(
-            color: BrandTokens.ink.withValues(alpha: .06),
-            blurRadius: 24,
-            offset: const Offset(0, 14),
+            color: BrandTokens.forestDeep.withValues(alpha: .08),
+            blurRadius: 42,
+            spreadRadius: -26,
+            offset: const Offset(0, 24),
           ),
         ],
       ),

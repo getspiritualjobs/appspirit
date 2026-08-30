@@ -133,7 +133,18 @@ class _HeroSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewportHeight = MediaQuery.sizeOf(context).height;
     return DecoratedBox(
-      decoration: const BoxDecoration(color: BrandTokens.cream),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            BrandTokens.creamDim.withValues(alpha: .64),
+            BrandTokens.cream,
+            BrandTokens.cream,
+          ],
+          stops: const [0, .36, 1],
+        ),
+      ),
       child: PageBand(
         padding: const EdgeInsets.fromLTRB(20, 28, 20, 34),
         child: LayoutBuilder(
@@ -320,20 +331,20 @@ class _FeatureSection extends StatelessWidget {
 
   static const _items = [
     (
-      Icons.auto_stories_outlined,
+      _FeatureGlyphKind.scripture,
       'Rooted, not trendy',
       'Built on the seven gifts named in Romans 12, with room for the '
           'fuller lists in 1 Corinthians and Ephesians — not a '
           'repackaged personality quiz.',
     ),
     (
-      Icons.hourglass_bottom_outlined,
+      _FeatureGlyphKind.time,
       'Seven honest minutes',
       'One question at a time so answers come from your actual life, '
           'not the version of you that’s performing for a test.',
     ),
     (
-      Icons.route_outlined,
+      _FeatureGlyphKind.path,
       'From score to job',
       'Your alignment score becomes career lanes, then real '
           'opportunities — so reflection turns into a next step, not '
@@ -402,7 +413,7 @@ class _FeatureSection extends StatelessWidget {
 class _FeatureCard extends StatefulWidget {
   const _FeatureCard(this.data);
 
-  final (IconData, String, String) data;
+  final (_FeatureGlyphKind, String, String) data;
 
   @override
   State<_FeatureCard> createState() => _FeatureCardState();
@@ -460,8 +471,9 @@ class _FeatureCardState extends State<_FeatureCard> {
                     ),
                     borderRadius: BorderRadius.circular(13),
                   ),
-                  child: Icon(widget.data.$1,
-                      color: BrandTokens.goldBright, size: 22),
+                  child: CustomPaint(
+                    painter: _FeatureGlyphPainter(widget.data.$1),
+                  ),
                 ),
                 const SizedBox(height: 18),
                 Text(widget.data.$2,
@@ -479,6 +491,99 @@ class _FeatureCardState extends State<_FeatureCard> {
         ),
       ),
     );
+  }
+}
+
+enum _FeatureGlyphKind { scripture, time, path }
+
+class _FeatureGlyphPainter extends CustomPainter {
+  const _FeatureGlyphPainter(this.kind);
+
+  final _FeatureGlyphKind kind;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = BrandTokens.goldBright
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.2
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    final fill = Paint()
+      ..color = BrandTokens.goldBright.withValues(alpha: .18)
+      ..style = PaintingStyle.fill;
+    final w = size.width;
+    final h = size.height;
+    switch (kind) {
+      case _FeatureGlyphKind.scripture:
+        final left = RRect.fromRectAndRadius(
+          Rect.fromLTWH(w * .18, h * .24, w * .27, h * .50),
+          const Radius.circular(3),
+        );
+        final right = RRect.fromRectAndRadius(
+          Rect.fromLTWH(w * .55, h * .24, w * .27, h * .50),
+          const Radius.circular(3),
+        );
+        canvas.drawRRect(left, fill);
+        canvas.drawRRect(right, fill);
+        canvas.drawRRect(left, paint);
+        canvas.drawRRect(right, paint);
+        canvas.drawLine(
+            Offset(w * .50, h * .28), Offset(w * .50, h * .76), paint);
+      case _FeatureGlyphKind.time:
+        final top = Path()
+          ..moveTo(w * .28, h * .22)
+          ..lineTo(w * .72, h * .22)
+          ..lineTo(w * .57, h * .46)
+          ..lineTo(w * .50, h * .50)
+          ..lineTo(w * .43, h * .46)
+          ..close();
+        final bottom = Path()
+          ..moveTo(w * .28, h * .78)
+          ..lineTo(w * .72, h * .78)
+          ..lineTo(w * .57, h * .54)
+          ..lineTo(w * .50, h * .50)
+          ..lineTo(w * .43, h * .54)
+          ..close();
+        canvas.drawPath(top, fill);
+        canvas.drawPath(bottom, fill);
+        canvas.drawPath(top, paint);
+        canvas.drawPath(bottom, paint);
+        canvas.drawLine(
+            Offset(w * .35, h * .14), Offset(w * .65, h * .14), paint);
+        canvas.drawLine(
+            Offset(w * .35, h * .86), Offset(w * .65, h * .86), paint);
+      case _FeatureGlyphKind.path:
+        final path = Path()
+          ..moveTo(w * .24, h * .72)
+          ..cubicTo(w * .28, h * .40, w * .48, h * .74, w * .52, h * .43)
+          ..cubicTo(w * .55, h * .22, w * .73, h * .30, w * .76, h * .18);
+        _drawDashes(canvas, path, paint, 5, 5);
+        canvas.drawCircle(Offset(w * .24, h * .72), 3.2,
+            Paint()..color = BrandTokens.goldBright);
+        canvas.drawCircle(Offset(w * .76, h * .18), 3.2,
+            Paint()..color = BrandTokens.goldBright);
+    }
+  }
+
+  void _drawDashes(
+      Canvas canvas, Path path, Paint paint, double dash, double gap) {
+    for (final metric in path.computeMetrics()) {
+      var distance = 0.0;
+      while (distance < metric.length) {
+        canvas.drawPath(
+          metric.extractPath(
+              distance, (distance + dash).clamp(0, metric.length)),
+          paint,
+        );
+        distance += dash + gap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _FeatureGlyphPainter oldDelegate) {
+    return kind != oldDelegate.kind;
   }
 }
 
