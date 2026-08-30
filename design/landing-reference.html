@@ -1,0 +1,918 @@
+<title>GiftPath Landing Page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --forest: #24392C;
+    --forest-deep: #16261B;
+    --forest-line: #2E4534;
+    --gold: #C6A046;
+    --gold-bright: #D8B968;
+    --gold-soft: #EADFC0;
+    --cream: #F3ECDF;
+    --cream-dim: #EBE2D0;
+    --surface: #FFFCF7;
+    --ink: #17181A;
+    --moss: #53614F;
+    --moss-soft: #8A9484;
+    --shadow-color: 36 57 44;
+    --nav-surface: 255 252 247;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --forest: #2C4433;
+      --forest-deep: #0F1712;
+      --forest-line: #3A5641;
+      --gold: #D8B968;
+      --gold-bright: #E9CD87;
+      --gold-soft: #40391F;
+      --cream: #10150F;
+      --cream-dim: #161C13;
+      --surface: #171D15;
+      --ink: #F1EEE2;
+      --moss: #AEBAA5;
+      --moss-soft: #6E7A66;
+      --shadow-color: 0 0 0;
+      --nav-surface: 16 21 15;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --forest: #2C4433;
+    --forest-deep: #0F1712;
+    --forest-line: #3A5641;
+    --gold: #D8B968;
+    --gold-bright: #E9CD87;
+    --gold-soft: #40391F;
+    --cream: #10150F;
+    --cream-dim: #161C13;
+    --surface: #171D15;
+    --ink: #F1EEE2;
+    --moss: #AEBAA5;
+    --moss-soft: #6E7A66;
+    --shadow-color: 0 0 0;
+    --nav-surface: 16 21 15;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  img, svg { max-width: 100%; display: block; }
+
+  .display {
+    font-family: "Fraunces", Georgia, "Times New Roman", serif;
+    text-wrap: balance;
+  }
+
+  a { color: inherit; }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ---------- NAV ---------- */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(var(--nav-surface) / 0.86);
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    border-bottom: 1px solid rgba(var(--shadow-color) / 0.08);
+    transition: box-shadow .3s ease;
+  }
+  .nav.scrolled { box-shadow: 0 8px 24px -16px rgba(var(--shadow-color) / .35); }
+
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 76px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    text-decoration: none;
+  }
+  .brand img { width: 30px; height: 30px; }
+  .brand span {
+    font-family: "Fraunces", serif;
+    font-weight: 600;
+    font-size: 26px;
+    color: var(--ink);
+    letter-spacing: .1px;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .nav-links a {
+    text-decoration: none;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--moss);
+    padding: 9px 14px;
+    border-radius: 100px;
+    transition: color .18s ease, background .18s ease;
+  }
+  .nav-links a:hover { color: var(--ink); background: rgba(var(--shadow-color) / .05); }
+
+  .nav-cta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 14px;
+  }
+  .btn {
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+    font-size: 14.5px;
+    border-radius: 12px;
+    padding: 11px 20px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: transform .18s cubic-bezier(.2,.7,.3,1), box-shadow .18s ease, background .18s ease;
+  }
+  .btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .btn-gold {
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color: var(--forest-deep);
+    box-shadow: 0 1px 0 rgba(255,255,255,.35) inset, 0 10px 22px -12px rgba(198,160,70,.75);
+  }
+  .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 1px 0 rgba(255,255,255,.4) inset, 0 14px 26px -12px rgba(198,160,70,.9); }
+  .btn-ghost-nav {
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid rgba(var(--shadow-color) / .18);
+    padding: 9.5px 18px;
+  }
+  .btn-ghost-nav:hover { border-color: rgba(var(--shadow-color) / .34); }
+
+  .nav-toggle { display: none; }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    padding: 108px 0 40px;
+    position: relative;
+  }
+  .hero-grain {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .5;
+    background-image: radial-gradient(rgba(var(--shadow-color)/.05) 1px, transparent 1px);
+    background-size: 22px 22px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black, transparent);
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    font-weight: 800;
+    letter-spacing: 1.9px;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .eyebrow::before {
+    content: "";
+    width: 15px;
+    height: 1.5px;
+    background: var(--gold);
+  }
+
+  .hero-head {
+    max-width: 900px;
+    margin: 40px auto 0;
+    text-align: center;
+  }
+  .hero-head .eyebrow { justify-content: center; margin-bottom: 6px; }
+  .hero-head .eyebrow::before { display: none; }
+
+  .hero-title {
+    font-size: clamp(40px, 6vw, 76px);
+    font-weight: 600;
+    line-height: .98;
+    letter-spacing: -1px;
+    margin: 30px 0 0;
+  }
+  .hero-title em {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--forest);
+  }
+  :root[data-theme="dark"] .hero-title em,
+  @media (prefers-color-scheme: dark) { }
+
+  .hero-sub {
+    margin: 28px auto 0;
+    max-width: 620px;
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--moss);
+    font-weight: 500;
+  }
+  .hero-sub strong {
+    color: var(--gold);
+    font-weight: 800;
+  }
+
+  .hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+  .hero-actions-single {
+    display: flex;
+    justify-content: center;
+    margin-top: 34px;
+  }
+  .how-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 16px auto 0;
+    width: fit-content;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--moss);
+    text-decoration: underline;
+    text-decoration-color: rgba(var(--shadow-color) / .3);
+    text-underline-offset: 4px;
+    transition: color .18s ease;
+  }
+  .how-link:hover { color: var(--forest); }
+  html:not([data-theme="light"]) .how-link:hover,
+  :root[data-theme="dark"] .how-link:hover { color: var(--gold-bright); }
+  .how-link svg { width: 13px; height: 13px; }
+  .btn-lg { font-size: 16px; padding: 15px 26px; border-radius: 14px; }
+  .btn-outline {
+    background: transparent;
+    border: 1.5px solid rgba(var(--shadow-color) / .22);
+    color: var(--ink);
+  }
+  .btn-outline:hover { border-color: var(--forest); background: rgba(var(--shadow-color) / .04); }
+
+  .trust-row {
+    margin-top: 26px;
+    display: flex;
+    justify-content: center;
+    gap: 22px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--moss-soft);
+    letter-spacing: .2px;
+  }
+  .trust-row span { display: inline-flex; align-items: center; gap: 7px; }
+  .trust-row svg { width: 14px; height: 14px; color: var(--gold); }
+
+  /* ---------- HERO PATH VISUAL ---------- */
+  .hero-visual-shell {
+    margin: 52px auto 0;
+    max-width: 1120px;
+    position: relative;
+  }
+  .hero-panel {
+    position: relative;
+    border-radius: 32px;
+    background:
+      radial-gradient(120% 140% at 12% 0%, rgba(216,185,104,.16), transparent 55%),
+      linear-gradient(160deg, var(--forest) 0%, var(--forest-deep) 100%);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.06) inset,
+      0 40px 80px -30px rgba(var(--shadow-color) / .55),
+      0 12px 30px -18px rgba(var(--shadow-color) / .4);
+    padding: clamp(28px, 5vw, 56px);
+    overflow: hidden;
+  }
+  .hero-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(243,236,223,.05) 1px, transparent 1px);
+    background-size: 26px 26px;
+    pointer-events: none;
+  }
+  /* path-stage is the exact same box as the svg (svg is block, width:100%,
+     height:auto, so it renders at width * 380/1040 tall) — every label
+     below is positioned as a percentage of THIS box, computed directly
+     from its node's viewBox coordinates. Same coordinate system for the
+     art and the copy is what keeps them locked together at every width;
+     guessing independent percentages is what caused the original drift. */
+  .path-stage { position: relative; }
+  .path-svg { position: relative; z-index: 1; width: 100%; height: auto; display: block; }
+
+  .path-track {
+    stroke: var(--gold);
+    stroke-opacity: .55;
+    stroke-width: 3.2;
+    stroke-linecap: round;
+    fill: none;
+    stroke-dasharray: 12 11;
+  }
+  .path-track-draw {
+    stroke-dasharray: 900;
+    stroke-dashoffset: 900;
+    animation: draw 2.2s cubic-bezier(.3,.7,.2,1) .3s forwards;
+  }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  .node-halo { fill: var(--gold); opacity: .16; }
+  .node-dot { fill: var(--gold); }
+  .node-num {
+    font-family: "Inter", sans-serif;
+    font-weight: 900;
+    fill: var(--forest-deep);
+  }
+
+  .node-label {
+    position: absolute;
+    z-index: 2;
+    width: 200px;
+  }
+  .node-label .k {
+    font-family: "Fraunces", serif;
+    font-weight: 600;
+    font-size: clamp(18px, 2.5vw, 30px);
+    color: var(--cream);
+    line-height: 1.04;
+    margin: 0 0 5px;
+  }
+  .node-label.accent .k {
+    color: var(--gold-bright);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .node-label.accent .k svg { width: .78em; height: .78em; flex-shrink: 0; }
+  .node-label p {
+    margin: 0;
+    font-size: clamp(12px, 1.25vw, 15px);
+    font-weight: 600;
+    color: rgba(243,236,223,.68);
+    line-height: 1.32;
+  }
+
+  /* left:/top: are each node's x/y as a % of the 1040x380 viewBox — the
+     transform then nudges the label clear of the dot in a direction with
+     open space (below for 1/2/4, above for 3, the peak). */
+  .n1 { left: 12.5%; top: 60.5%; transform: translate(0%, 26px); text-align: left; }
+  .n2 { left: 37.5%; top: 84.2%; transform: translate(-50%, 26px); text-align: center; }
+  .n3 { left: 62.5%; top: 28.9%; transform: translate(-46%, calc(-100% - 26px)); text-align: left; }
+  .n4 { left: 87.5%; top: 57.9%; transform: translate(-100%, 26px); text-align: right; }
+
+  @media (max-width: 720px) {
+    .node-label { width: 132px; }
+    .node-label .k { font-size: 18px; }
+    .node-label p { font-size: 11px; }
+    .n1 { transform: translate(-4%, 20px); }
+    .n2 { transform: translate(-50%, 20px); }
+    .n3 { transform: translate(-40%, calc(-100% - 18px)); }
+    .n4 { transform: translate(-96%, 20px); }
+  }
+
+  /* ---------- SCRIPTURE BAND ---------- */
+  .verse {
+    padding: 100px 0 90px;
+    text-align: center;
+  }
+  .verse blockquote {
+    margin: 0 auto;
+    max-width: 760px;
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-style: italic;
+    font-size: clamp(24px, 3.4vw, 36px);
+    line-height: 1.4;
+    color: var(--forest);
+  }
+  :root[data-theme="dark"] .verse blockquote,
+  html:not([data-theme="light"]) .verse blockquote { color: var(--gold-bright); }
+  .verse cite {
+    display: block;
+    margin-top: 22px;
+    font-style: normal;
+    font-family: "Inter", sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--moss);
+  }
+
+  /* ---------- FEATURE GRID ---------- */
+  .section { padding: 20px 0 100px; }
+  .section-head { max-width: 620px; margin: 0 0 52px; }
+  .section-head h2 {
+    font-size: clamp(30px, 4vw, 44px);
+    font-weight: 600;
+    line-height: 1.08;
+    margin: 14px 0 0;
+    letter-spacing: -.5px;
+  }
+  .section-head p {
+    margin: 16px 0 0;
+    font-size: 17px;
+    color: var(--moss);
+    line-height: 1.55;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+  }
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid rgba(var(--shadow-color) / .08);
+    border-radius: 20px;
+    padding: 30px 26px 32px;
+    box-shadow: 0 20px 40px -32px rgba(var(--shadow-color) / .4);
+    transition: transform .25s cubic-bezier(.2,.7,.3,1), box-shadow .25s ease, border-color .25s ease;
+  }
+  .feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 28px 50px -30px rgba(var(--shadow-color) / .5);
+    border-color: rgba(var(--shadow-color) / .14);
+  }
+  .feature-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, var(--forest), var(--forest-deep));
+    color: var(--gold-bright);
+    margin-bottom: 22px;
+  }
+  .feature-icon svg { width: 22px; height: 22px; }
+  .feature-card h3 {
+    font-family: "Fraunces", serif;
+    font-weight: 600;
+    font-size: 21px;
+    margin: 0 0 9px;
+  }
+  .feature-card p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--moss);
+  }
+
+  /* ---------- HOW IT WORKS (RECAP) ---------- */
+  .how {
+    background: var(--cream-dim);
+    padding: 100px 0;
+    border-top: 1px solid rgba(var(--shadow-color) / .07);
+    border-bottom: 1px solid rgba(var(--shadow-color) / .07);
+  }
+  .how-grid {
+    display: grid;
+    grid-template-columns: .8fr 1.2fr;
+    gap: 64px;
+    align-items: center;
+  }
+  .how-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .how-step {
+    display: flex;
+    gap: 20px;
+    padding: 22px 0;
+    border-top: 1px solid rgba(var(--shadow-color) / .1);
+  }
+  .how-step:last-child { border-bottom: 1px solid rgba(var(--shadow-color) / .1); }
+  .how-num {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--gold);
+    width: 26px;
+    flex-shrink: 0;
+    padding-top: 3px;
+  }
+  .how-step h4 {
+    margin: 0 0 4px;
+    font-size: 17px;
+    font-weight: 800;
+  }
+  .how-step p { margin: 0; font-size: 14.5px; color: var(--moss); line-height: 1.55; }
+
+  .how-card {
+    background: var(--surface);
+    border-radius: 22px;
+    border: 1px solid rgba(var(--shadow-color) / .08);
+    box-shadow: 0 30px 60px -34px rgba(var(--shadow-color) / .45);
+    padding: 34px;
+  }
+  .how-card .tag {
+    display: inline-block;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: rgba(198,160,70,.12);
+    padding: 5px 11px;
+    border-radius: 100px;
+    margin-bottom: 16px;
+  }
+  .how-card h3 {
+    font-family: "Fraunces", serif;
+    font-size: 23px;
+    font-weight: 600;
+    margin: 0 0 10px;
+  }
+  .how-card p { color: var(--moss); font-size: 15px; line-height: 1.6; margin: 0 0 20px; }
+
+  .gift-chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .gift-chip {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 100px;
+    border: 1px solid rgba(var(--shadow-color) / .12);
+    color: var(--forest);
+    background: var(--cream);
+  }
+  :root[data-theme="dark"] .gift-chip,
+  html:not([data-theme="light"]) .gift-chip { color: var(--gold-bright); }
+  .gift-chip.top {
+    background: linear-gradient(160deg, var(--forest), var(--forest-deep));
+    color: var(--gold-bright);
+    border-color: transparent;
+  }
+
+  /* ---------- CTA BAND ---------- */
+  .cta-band {
+    margin: 100px auto 0;
+    max-width: 1180px;
+    padding: 0 32px;
+  }
+  .cta-inner {
+    position: relative;
+    border-radius: 28px;
+    background: linear-gradient(135deg, var(--forest), var(--forest-deep));
+    padding: clamp(48px, 7vw, 76px);
+    text-align: center;
+    overflow: hidden;
+  }
+  .cta-inner::before {
+    content: "";
+    position: absolute;
+    inset: -40% -10% auto auto;
+    width: 460px;
+    height: 460px;
+    background: radial-gradient(circle, rgba(216,185,104,.25), transparent 65%);
+  }
+  .cta-inner h2 {
+    position: relative;
+    font-family: "Fraunces", serif;
+    color: var(--cream);
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 600;
+    margin: 0 auto;
+    max-width: 560px;
+    line-height: 1.15;
+  }
+  .cta-inner p {
+    position: relative;
+    color: rgba(243,236,223,.7);
+    font-size: 16px;
+    margin: 16px auto 0;
+    max-width: 480px;
+  }
+  .cta-inner .hero-actions { position: relative; margin-top: 30px; }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    padding: 80px 0 44px;
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1.4fr repeat(3, 1fr);
+    gap: 40px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid rgba(var(--shadow-color) / .1);
+  }
+  .footer-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-bottom: 14px; }
+  .footer-brand img { width: 26px; height: 26px; }
+  .footer-brand span { font-family: "Fraunces", serif; font-weight: 600; font-size: 21px; }
+  .footer-tag { font-size: 14px; color: var(--moss); max-width: 240px; line-height: 1.55; }
+  .footer-col h5 {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--moss-soft);
+    margin: 0 0 16px;
+  }
+  .footer-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 11px; }
+  .footer-col a { text-decoration: none; font-size: 14.5px; font-weight: 600; color: var(--ink); opacity: .82; }
+  .footer-col a:hover { opacity: 1; color: var(--forest); }
+  html:not([data-theme="light"]) .footer-col a:hover,
+  :root[data-theme="dark"] .footer-col a:hover { color: var(--gold-bright); }
+
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 28px;
+    font-size: 13px;
+    color: var(--moss-soft);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* ---------- reveal on scroll ---------- */
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.3,1); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+    .path-track-draw { stroke-dashoffset: 0; }
+  }
+
+  @media (max-width: 860px) {
+    .nav-links, .nav-cta .btn-ghost-nav { display: none; }
+    .nav-toggle { display: flex; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .how-grid { grid-template-columns: 1fr; gap: 40px; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+
+<nav class="nav" id="nav">
+  <div class="wrap nav-row">
+    <a class="brand" href="#top">
+      <img src="../assets/giftpath-mark.png" alt="" />
+      <span>GiftPath</span>
+    </a>
+    <div class="nav-links">
+      <a href="#path">How it works</a>
+      <a href="#gifts">The gifts</a>
+      <a href="#stories">Stories</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="nav-cta">
+      <a class="btn btn-ghost-nav" href="#">Sign in</a>
+      <a class="btn btn-gold" href="#">Take the assessment</a>
+    </div>
+  </div>
+</nav>
+
+<main id="top">
+  <section class="hero">
+    <div class="hero-grain"></div>
+    <div class="wrap">
+      <div class="hero-head">
+        <span class="eyebrow">Scripture-informed assessment</span>
+        <h1 class="hero-title display">Your gifts were given<br><em>for a reason.</em></h1>
+        <p class="hero-sub">Take the assessment and see where they lead. <strong>Free</strong> to start, <strong>seven minutes</strong> to your first result.</p>
+        <div class="hero-actions-single">
+          <a class="btn btn-gold btn-lg" href="#">
+            Discover my gifts
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+        <a class="how-link" href="#path">
+          How it works
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+        </a>
+        <div class="trust-row">
+          <span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 6.4L21 9l-5 4.6L17.4 21 12 17.3 6.6 21 8 13.6 3 9l6.4-.6z"/></svg>Grounded in Romans 12</span>
+          <span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 6.4L21 9l-5 4.6L17.4 21 12 17.3 6.6 21 8 13.6 3 9l6.4-.6z"/></svg>Free to start</span>
+          <span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.6 6.4L21 9l-5 4.6L17.4 21 12 17.3 6.6 21 8 13.6 3 9l6.4-.6z"/></svg>7-minute first result</span>
+        </div>
+      </div>
+
+      <div class="hero-visual-shell reveal" id="path">
+        <div class="hero-panel">
+          <div class="path-stage">
+            <svg class="path-svg" viewBox="0 0 1040 380" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+              <path class="path-track path-track-draw" d="M130,230 C220,230 260,315 390,320 C470,323 480,170 650,110 C760,70 830,175 910,220" />
+              <g>
+                <circle class="node-halo" cx="130" cy="230" r="26"/>
+                <circle class="node-dot" cx="130" cy="230" r="16"/>
+                <text class="node-num" x="130" y="230" font-size="15" text-anchor="middle" dominant-baseline="central">1</text>
+              </g>
+              <g>
+                <circle class="node-halo" cx="390" cy="320" r="26"/>
+                <circle class="node-dot" cx="390" cy="320" r="16"/>
+                <text class="node-num" x="390" y="320" font-size="15" text-anchor="middle" dominant-baseline="central">2</text>
+              </g>
+              <g>
+                <circle class="node-halo" cx="650" cy="110" r="26"/>
+                <circle class="node-dot" cx="650" cy="110" r="16"/>
+                <text class="node-num" x="650" y="110" font-size="15" text-anchor="middle" dominant-baseline="central">3</text>
+              </g>
+              <g>
+                <circle class="node-halo" cx="910" cy="220" r="26"/>
+                <circle class="node-dot" cx="910" cy="220" r="16"/>
+                <text class="node-num" x="910" y="220" font-size="15" text-anchor="middle" dominant-baseline="central">4</text>
+              </g>
+            </svg>
+
+            <div class="node-label n1">
+              <p class="k display">Quiz</p>
+              <p>Seven quiet minutes, one question at a time.</p>
+            </div>
+            <div class="node-label n2">
+              <p class="k display">Gifts</p>
+              <p>What rises to the top, scored and named.</p>
+            </div>
+            <div class="node-label n3">
+              <p class="k display">Aligned jobs</p>
+              <p>Work that fits the pattern we found.</p>
+            </div>
+            <div class="node-label n4 accent">
+              <p class="k display">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/><circle cx="12" cy="12" r="4.5"/></svg>
+                Fulfillment
+              </p>
+              <p>Shine your light through the work you do.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="verse reveal">
+    <div class="wrap">
+      <blockquote class="display">&ldquo;Each of you should use whatever gift you have received to serve others, as faithful stewards of God&rsquo;s grace in its various forms.&rdquo;</blockquote>
+      <cite>1 Peter 4:10</cite>
+    </div>
+  </section>
+
+  <section class="section" id="gifts">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Why GiftPath</span>
+        <h2 class="display">Reflection first. Direction second.</h2>
+        <p>Most career tools start with a resume. GiftPath starts with who you already are &mdash; then walks that forward into real, searchable next steps.</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10M12 10c0-3-2-6-6-6-1 3 1 6 6 6zM12 10c0-3 2-6 6-6 1 3-1 6-6 6z"/><path d="M6 20h12"/></svg>
+          </div>
+          <h3 class="display">Rooted, not trendy</h3>
+          <p>Built on the seven gifts named in Romans 12, with room for the fuller lists in 1 Corinthians and Ephesians &mdash; not a repackaged personality quiz.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+          </div>
+          <h3 class="display">Seven honest minutes</h3>
+          <p>One question at a time so answers come from your actual life, not the version of you that's performing for a test.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 012-2h9l5 5v11a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>
+          </div>
+          <h3 class="display">From score to job</h3>
+          <p>Your alignment score becomes career lanes, then real opportunities &mdash; so reflection turns into a next step, not just a printout.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" id="stories">
+    <div class="wrap how-grid">
+      <div class="reveal">
+        <span class="eyebrow">The path</span>
+        <h2 class="display" style="font-size:36px;font-weight:600;margin:14px 0 30px;">Four stops, in order</h2>
+        <div class="how-steps">
+          <div class="how-step">
+            <span class="how-num display">01</span>
+            <div><h4>Answer honestly</h4><p>56 short prompts, one screen at a time, no wrong answers.</p></div>
+          </div>
+          <div class="how-step">
+            <span class="how-num display">02</span>
+            <div><h4>See what rises</h4><p>Your top two or three gifts, scored and explained in plain language.</p></div>
+          </div>
+          <div class="how-step">
+            <span class="how-num display">03</span>
+            <div><h4>Explore aligned work</h4><p>Career lanes matched to your pattern, not a generic job board.</p></div>
+          </div>
+          <div class="how-step">
+            <span class="how-num display">04</span>
+            <div><h4>Take a real step</h4><p>Save what resonates and follow it into an actual opportunity.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="how-card reveal">
+        <span class="tag">Sample result</span>
+        <h3 class="display">Your strongest gifts</h3>
+        <p>Based on your answers, these rose to the top &mdash; here's where GiftPath sends you next.</p>
+        <div class="gift-chip-row">
+          <span class="gift-chip top">Teaching &mdash; 92%</span>
+          <span class="gift-chip top">Encouragement &mdash; 87%</span>
+          <span class="gift-chip">Leadership &mdash; 74%</span>
+          <span class="gift-chip">Serving &mdash; 68%</span>
+          <span class="gift-chip">Mercy &mdash; 61%</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cta-band reveal" id="faq">
+    <div class="cta-inner">
+      <h2>Your seven minutes start whenever you're ready.</h2>
+      <p>No account required to see your first result.</p>
+      <div class="hero-actions">
+        <a class="btn btn-gold btn-lg" href="#">
+          Discover my gifts
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <a class="footer-brand" href="#top">
+          <img src="../assets/giftpath-mark.png" alt="" />
+          <span>GiftPath</span>
+        </a>
+        <p class="footer-tag">Discover your gifts. Find your path. A scripture-informed assessment for reflection and next steps.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <ul>
+          <li><a href="#">Assessment</a></li>
+          <li><a href="#">Opportunities</a></li>
+          <li><a href="#">Saved</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Learn</h5>
+        <ul>
+          <li><a href="#">How it works</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">About</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <ul>
+          <li><a href="#">Privacy</a></li>
+          <li><a href="#">Terms</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 GiftPath. Discover your gifts. Find your path.</span>
+      <span>Made for reflection, not prediction.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const navEl = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    navEl.classList.toggle('scrolled', window.scrollY > 8);
+  }, { passive: true });
+
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    }
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
