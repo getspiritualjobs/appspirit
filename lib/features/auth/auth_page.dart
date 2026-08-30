@@ -32,6 +32,7 @@ class _AuthPageState extends State<AuthPage> {
   bool forgotPasswordMode = false;
   bool resetPasswordMode = false;
   String message = '';
+  bool _handledReturnAfterAuth = false;
 
   String? get _safeReturnTo {
     final value = GoRouterState.of(context).uri.queryParameters['returnTo'];
@@ -54,6 +55,20 @@ class _AuthPageState extends State<AuthPage> {
       authSubscription =
           Supabase.instance.client.auth.onAuthStateChange.listen((state) {
         if (!mounted) return;
+        final user = state.session?.user;
+        final returnTo = _safeReturnTo;
+        if (user != null &&
+            !user.isAnonymous &&
+            returnTo != null &&
+            !widget.resetPasswordOnly &&
+            !_handledReturnAfterAuth) {
+          _handledReturnAfterAuth = true;
+          Future.microtask(() async {
+            await appState.refreshSavedData();
+            await appState.refreshSubscription();
+            if (mounted) context.go(returnTo);
+          });
+        }
         setState(() {
           if (state.event == AuthChangeEvent.passwordRecovery) {
             resetPasswordMode = true;
