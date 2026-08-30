@@ -197,6 +197,34 @@ void main() {
     expect(find.textContaining(r'$77.77'), findsNothing);
   });
 
+  testWidgets('opportunities progression renders on mobile width',
+      (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    appState.giftScores = const [
+      GiftScore(gift: GiftKey.teaching, rawScore: 5, normalizedScore: 94),
+    ];
+    appState.careerMatches = [
+      CareerMatch(
+        career: careers.first,
+        score: 94,
+        strongestGifts: const [GiftKey.teaching],
+        reason: 'Test match for mobile opportunities.',
+      ),
+    ];
+
+    await tester.pumpWidget(_shell(const OpportunitiesPage()));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Career lanes'), findsWidgets);
+    expect(find.text('Refine'), findsWidgets);
+    expect(find.text('Live jobs'), findsWidgets);
+  });
+
   testWidgets('subscribe screen shows monthly and yearly choices',
       (WidgetTester tester) async {
     await tester.pumpWidget(_shell(const SubscribePage()));

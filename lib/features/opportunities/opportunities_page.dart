@@ -198,38 +198,35 @@ class _OpportunityProgress extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final narrow = constraints.maxWidth < 680;
-          final children = [
-            for (var i = 0; i < steps.length; i++)
-              Expanded(
-                flex: narrow ? 0 : 1,
-                child: _ProgressStep(
-                  number: i + 1,
-                  title: steps[i].$1,
-                  body: steps[i].$2,
-                  active: i == activeIndex,
-                  complete: i < activeIndex,
-                ),
-              ),
-          ];
-          return narrow
-              ? Column(
-                  children: [
-                    for (final child in children) ...[
-                      SizedBox(width: double.infinity, child: child),
-                      if (child != children.last) const SizedBox(height: 10),
-                    ],
-                  ],
-                )
-              : Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    children[0],
-                    const _ProgressConnector(),
-                    children[1],
-                    const _ProgressConnector(),
-                    children[2],
-                  ],
-                );
+          _ProgressStep buildStep(int index) => _ProgressStep(
+                number: index + 1,
+                title: steps[index].$1,
+                body: steps[index].$2,
+                active: index == activeIndex,
+                complete: index < activeIndex,
+              );
+
+          if (narrow) {
+            return Column(
+              children: [
+                for (var i = 0; i < steps.length; i++) ...[
+                  SizedBox(width: double.infinity, child: buildStep(i)),
+                  if (i != steps.length - 1) const SizedBox(height: 10),
+                ],
+              ],
+            );
+          }
+
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: buildStep(0)),
+              const _ProgressConnector(),
+              Expanded(child: buildStep(1)),
+              const _ProgressConnector(),
+              Expanded(child: buildStep(2)),
+            ],
+          );
         },
       ),
     );
@@ -445,7 +442,7 @@ class _CareerFocusPanel extends StatelessWidget {
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
                 childAspectRatio: columns == 1
-                    ? 1.85
+                    ? 1.35
                     : columns == 2
                         ? 1.2
                         : 1.0,
