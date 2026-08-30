@@ -76,6 +76,17 @@ ThemeData buildGiftPathTheme() {
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(BrandTokens.radiusSm)),
         textStyle: const TextStyle(fontWeight: FontWeight.w700),
+      ).copyWith(
+        // Hover/press feedback — a filled button lifts on hover and
+        // settles on press, instead of sitting dead flat until clicked.
+        elevation: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.pressed)) return 1.0;
+          if (states.contains(WidgetState.hovered)) return 8.0;
+          return 0.0;
+        }),
+        shadowColor:
+            WidgetStatePropertyAll(BrandTokens.gold.withValues(alpha: .45)),
+        animationDuration: const Duration(milliseconds: 160),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -83,8 +94,21 @@ ThemeData buildGiftPathTheme() {
         minimumSize: const Size(48, 48),
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(BrandTokens.radiusSm)),
-        side: BorderSide(color: seed.withValues(alpha: 0.28)),
         textStyle: const TextStyle(fontWeight: FontWeight.w700),
+      ).copyWith(
+        side: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.hovered)) {
+            return BorderSide(color: seed, width: 1.5);
+          }
+          return BorderSide(color: seed.withValues(alpha: 0.28));
+        }),
+        overlayColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.hovered)) {
+            return seed.withValues(alpha: .06);
+          }
+          return null;
+        }),
+        animationDuration: const Duration(milliseconds: 160),
       ),
     ),
     textButtonTheme: TextButtonThemeData(

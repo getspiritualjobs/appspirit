@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -29,8 +31,22 @@ class AppShell extends StatelessWidget {
       appBar: AppBar(
         toolbarHeight: isWide ? 72 : 62,
         titleSpacing: isWide ? 28 : 16,
-        backgroundColor: BrandTokens.cream,
+        backgroundColor: Colors.transparent,
         foregroundColor: BrandTokens.forest,
+        elevation: 0,
+        // Frosted-glass nav, matching the brand mockup's blur-on-scroll
+        // treatment — a flat translucent fill reads dead on Flutter web,
+        // the blur is what makes it feel like it's floating over content.
+        flexibleSpace: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: BrandTokens.surface.withValues(alpha: .86),
+              ),
+            ),
+          ),
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
@@ -134,7 +150,15 @@ class _NavButton extends StatelessWidget {
             selected ? BrandTokens.forest.withValues(alpha: .10) : null,
         foregroundColor: selected ? scheme.primary : scheme.onSurface,
         minimumSize: const Size(40, 38),
-        padding: const EdgeInsets.symmetric(horizontal: 9),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        shape: const StadiumBorder(),
+      ).copyWith(
+        overlayColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.hovered)) {
+            return BrandTokens.forest.withValues(alpha: .07);
+          }
+          return null;
+        }),
       ),
       child: Text(label,
           style: TextStyle(
