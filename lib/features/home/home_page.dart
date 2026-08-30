@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme.dart';
@@ -146,13 +145,13 @@ class _HeroSection extends StatelessWidget {
         ),
       ),
       child: PageBand(
-        padding: const EdgeInsets.fromLTRB(20, 28, 20, 34),
+        padding: const EdgeInsets.fromLTRB(20, 22, 20, 28),
         child: LayoutBuilder(
           builder: (context, constraints) {
             final compact = constraints.maxWidth < 620;
             final heroHeight = compact
-                ? (viewportHeight * .42).clamp(300.0, 430.0)
-                : (viewportHeight * .44).clamp(320.0, 430.0);
+                ? (viewportHeight * .34).clamp(240.0, 330.0)
+                : (viewportHeight * .36).clamp(280.0, 380.0);
             return Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -162,18 +161,20 @@ class _HeroSection extends StatelessWidget {
                   constraints: const BoxConstraints(maxWidth: 1040),
                   child: Text.rich(
                     TextSpan(
-                      style: GoogleFonts.fraunces(
+                      style: TextStyle(
+                        fontFamily: 'Fraunces',
                         color: BrandTokens.ink,
                         fontSize: compact ? 42 : 70,
                         fontWeight: FontWeight.w600,
                         height: .98,
                         letterSpacing: -1,
                       ),
-                      children: [
-                        const TextSpan(text: 'Your gifts were given\n'),
+                      children: const [
+                        TextSpan(text: 'Your gifts were given\n'),
                         TextSpan(
                           text: 'for a reason.',
-                          style: GoogleFonts.fraunces(
+                          style: TextStyle(
+                            fontFamily: 'Fraunces',
                             fontStyle: FontStyle.italic,
                             fontWeight: FontWeight.w500,
                             color: BrandTokens.forest,
@@ -189,11 +190,12 @@ class _HeroSection extends StatelessWidget {
                   constraints: const BoxConstraints(maxWidth: 760),
                   child: Text.rich(
                     TextSpan(
-                      style: GoogleFonts.inter(
-                        color: BrandTokens.ink,
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        color: BrandTokens.moss,
                         fontSize: compact ? 17 : 20,
-                        fontWeight: FontWeight.w700,
-                        height: 1.25,
+                        fontWeight: FontWeight.w500,
+                        height: 1.6,
                       ),
                       children: const [
                         TextSpan(
@@ -289,11 +291,11 @@ class _ScriptureBand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(color: BrandTokens.cream),
+    return const DecoratedBox(
+      decoration: BoxDecoration(color: BrandTokens.cream),
       child: PageBand(
         maxWidth: 760,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 64),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 64),
         child: Column(
           children: [
             Text(
@@ -301,7 +303,8 @@ class _ScriptureBand extends StatelessWidget {
               'to serve others, as faithful stewards of God’s grace in '
               'its various forms.”',
               textAlign: TextAlign.center,
-              style: GoogleFonts.fraunces(
+              style: TextStyle(
+                fontFamily: 'Fraunces',
                 fontStyle: FontStyle.italic,
                 fontWeight: FontWeight.w500,
                 fontSize: 26,
@@ -309,8 +312,8 @@ class _ScriptureBand extends StatelessWidget {
                 color: BrandTokens.forest,
               ),
             ),
-            const SizedBox(height: 18),
-            const Text(
+            SizedBox(height: 18),
+            Text(
               '1 PETER 4:10',
               style: TextStyle(
                 fontSize: 12,
@@ -367,7 +370,8 @@ class _FeatureSection extends StatelessWidget {
                 const BrandEyebrow('Why GiftPath'),
                 const SizedBox(height: 10),
                 Text('Reflection first. Direction second.',
-                    style: GoogleFonts.fraunces(
+                    style: TextStyle(
+                        fontFamily: 'Fraunces',
                         fontSize: wide ? 38 : 28,
                         fontWeight: FontWeight.w600,
                         color: BrandTokens.ink)),
@@ -477,7 +481,8 @@ class _FeatureCardState extends State<_FeatureCard> {
                 ),
                 const SizedBox(height: 18),
                 Text(widget.data.$2,
-                    style: GoogleFonts.fraunces(
+                    style: const TextStyle(
+                        fontFamily: 'Fraunces',
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
                         color: BrandTokens.ink)),
@@ -643,9 +648,12 @@ class _HowHeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text('Four stops, in order',
-        style: GoogleFonts.fraunces(
-            fontSize: 30, fontWeight: FontWeight.w600, color: BrandTokens.ink));
+    return const Text('Four stops, in order',
+        style: TextStyle(
+            fontFamily: 'Fraunces',
+            fontSize: 30,
+            fontWeight: FontWeight.w600,
+            color: BrandTokens.ink));
   }
 }
 
@@ -672,7 +680,8 @@ class _HowStep extends StatelessWidget {
             SizedBox(
               width: 30,
               child: Text(number,
-                  style: GoogleFonts.fraunces(
+                  style: const TextStyle(
+                      fontFamily: 'Fraunces',
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
                       color: BrandTokens.gold)),
@@ -739,8 +748,9 @@ class _SampleResultCard extends StatelessWidget {
                       color: BrandTokens.gold)),
             ),
             const SizedBox(height: 16),
-            Text('Your strongest gifts',
-                style: GoogleFonts.fraunces(
+            const Text('Your strongest gifts',
+                style: TextStyle(
+                    fontFamily: 'Fraunces',
                     fontSize: 22,
                     fontWeight: FontWeight.w600,
                     color: BrandTokens.ink)),
@@ -822,10 +832,11 @@ class _CtaBand extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 56),
             child: Column(
               children: [
-                Text(
+                const Text(
                   'Your seven minutes start whenever you’re ready.',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.fraunces(
+                  style: TextStyle(
+                      fontFamily: 'Fraunces',
                       fontSize: 32,
                       fontWeight: FontWeight.w600,
                       color: BrandTokens.cream,
@@ -1225,7 +1236,8 @@ class _PathStop extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(title,
-            style: GoogleFonts.fraunces(
+            style: TextStyle(
+              fontFamily: 'Fraunces',
               color: accent ? BrandTokens.goldBright : BrandTokens.cream,
               fontSize: compact ? 18 : 26,
               fontWeight: FontWeight.w600,
@@ -1233,7 +1245,8 @@ class _PathStop extends StatelessWidget {
             )),
         const SizedBox(height: 5),
         Text(body,
-            style: GoogleFonts.inter(
+            style: TextStyle(
+              fontFamily: 'Inter',
               color: const Color(0xFFE4DBC7),
               fontSize: compact ? 12 : 14.5,
               fontWeight: FontWeight.w600,

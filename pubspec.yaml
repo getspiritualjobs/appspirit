@@ -12,7 +12,6 @@ dependencies:
   flutter_web_plugins:
     sdk: flutter
   go_router: ^14.2.7
-  google_fonts: ^6.2.1
   supabase_flutter: ^2.8.0
   fl_chart: ^0.69.0
   share_plus: ^10.0.2
@@ -29,3 +28,12 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Variable.ttf
+    - family: Fraunces
+      fonts:
+        - asset: assets/fonts/Fraunces-Variable.ttf
+        - asset: assets/fonts/Fraunces-Italic-Variable.ttf
+          style: italic

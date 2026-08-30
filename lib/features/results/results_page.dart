@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/app_state.dart';
@@ -55,7 +54,8 @@ class ResultsPage extends StatelessWidget {
                     const SizedBox(height: 10),
                     Text(
                       'Your GiftPath is taking shape.',
-                      style: GoogleFonts.fraunces(
+                      style: TextStyle(
+                        fontFamily: 'Fraunces',
                         color: BrandTokens.ink,
                         fontSize: compact ? 40 : 52,
                         fontWeight: FontWeight.w600,
@@ -154,7 +154,8 @@ class _ResultsHero extends StatelessWidget {
               child: Text(
                 gift.name,
                 maxLines: 1,
-                style: GoogleFonts.fraunces(
+                style: TextStyle(
+                  fontFamily: 'Fraunces',
                   color: BrandTokens.cream,
                   fontSize: narrow ? 46 : 56,
                   fontWeight: FontWeight.w600,

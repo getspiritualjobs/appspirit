@@ -9,8 +9,153 @@
     <title>GiftPath</title>
     <link rel="icon" type="image/png" href="favicon.png" />
     <link rel="manifest" href="manifest.json" />
+    <style>
+      @font-face {
+        font-family: "Fraunces";
+        src: url("assets/assets/fonts/Fraunces-Variable.ttf") format("truetype");
+        font-weight: 300 900;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: "Inter";
+        src: url("assets/assets/fonts/Inter-Variable.ttf") format("truetype");
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+        margin: 0;
+        background: #f3ecdf;
+      }
+
+      #giftpath-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: grid;
+        place-items: center;
+        background:
+          radial-gradient(circle at 50% 34%, rgba(198, 160, 70, 0.13), transparent 32rem),
+          linear-gradient(180deg, #ebe2d0 0%, #f3ecdf 42%, #f3ecdf 100%);
+        color: #17181a;
+        transition: opacity 220ms ease, visibility 220ms ease;
+      }
+
+      #giftpath-splash.hidden {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      .giftpath-splash-lockup {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+        transform: translateY(-3vh);
+      }
+
+      .giftpath-splash-mark {
+        width: 68px;
+        height: 68px;
+        object-fit: contain;
+      }
+
+      .giftpath-splash-wordmark {
+        font-family: "Fraunces", Georgia, serif;
+        font-size: 42px;
+        font-weight: 500;
+        line-height: 1;
+        letter-spacing: -0.03em;
+      }
+
+      .giftpath-splash-tagline {
+        color: #c6a046;
+        font-family: "Inter", Arial, sans-serif;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+      }
+
+      .giftpath-splash-path {
+        position: relative;
+        width: 132px;
+        height: 12px;
+        margin-top: 8px;
+      }
+
+      .giftpath-splash-path::before {
+        content: "";
+        position: absolute;
+        inset: 4px 0 auto;
+        border-top: 3px dashed rgba(36, 57, 44, 0.34);
+        border-radius: 999px;
+      }
+
+      .giftpath-splash-path::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        background: #c6a046;
+        box-shadow: 0 0 0 8px rgba(198, 160, 70, 0.18);
+        animation: giftpath-path 1.25s cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
+      }
+
+      @keyframes giftpath-path {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(120px);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #giftpath-splash,
+        .giftpath-splash-path::after {
+          animation: none;
+          transition: none;
+        }
+      }
+    </style>
   </head>
   <body>
+    <div id="giftpath-splash" aria-label="GiftPath is loading">
+      <div class="giftpath-splash-lockup">
+        <img
+          class="giftpath-splash-mark"
+          src="assets/assets/giftpath-mark.png"
+          alt=""
+        />
+        <div class="giftpath-splash-wordmark">GiftPath</div>
+        <div class="giftpath-splash-tagline">Discover your gifts. Find your path.</div>
+        <div class="giftpath-splash-path" aria-hidden="true"></div>
+      </div>
+    </div>
+    <script>
+      function removeGiftPathSplash() {
+        var splash = document.getElementById("giftpath-splash");
+        if (!splash) return;
+        splash.classList.add("hidden");
+        window.setTimeout(function () {
+          splash.remove();
+        }, 260);
+      }
+
+      window.addEventListener("flutter-first-frame", function () {
+        removeGiftPathSplash();
+      });
+      window.setTimeout(removeGiftPathSplash, 8000);
+    </script>
     <script src="flutter_bootstrap.js" async></script>
   </body>
 </html>

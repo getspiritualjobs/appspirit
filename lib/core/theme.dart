@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 abstract final class BrandTokens {
   static const forest = Color(0xFF24392C);
@@ -38,32 +37,53 @@ ThemeData buildGiftPathTheme() {
   // weight), Inter carries body and UI. titleLarge matters most here:
   // card titles all over the app resolve to it, so serif-vs-sans there
   // is the difference between the app matching the landing page or not.
-  final textTheme = GoogleFonts.interTextTheme().copyWith(
-    displayLarge: GoogleFonts.fraunces(
-        fontSize: 66,
-        fontWeight: FontWeight.w600,
-        height: 0.95,
-        letterSpacing: -1,
-        color: BrandTokens.ink),
-    displayMedium: GoogleFonts.fraunces(
-        fontSize: 44,
-        fontWeight: FontWeight.w600,
-        height: 1.04,
-        letterSpacing: -.5,
-        color: BrandTokens.ink),
-    headlineMedium: GoogleFonts.fraunces(
-        fontSize: 32, fontWeight: FontWeight.w600, color: BrandTokens.ink),
-    headlineSmall: GoogleFonts.fraunces(
-        fontSize: 24, fontWeight: FontWeight.w600, color: BrandTokens.ink),
-    titleLarge: GoogleFonts.fraunces(
-        fontSize: 21, fontWeight: FontWeight.w600, color: BrandTokens.ink),
-    titleMedium: GoogleFonts.fraunces(
-        fontSize: 18, fontWeight: FontWeight.w600, color: BrandTokens.ink),
-    bodyLarge:
-        GoogleFonts.inter(fontSize: 16, height: 1.55, color: BrandTokens.moss),
-    bodyMedium:
-        GoogleFonts.inter(fontSize: 15, height: 1.55, color: BrandTokens.moss),
-  );
+  final textTheme =
+      Typography.material2021(platform: TargetPlatform.android).black.copyWith(
+            displayLarge: const TextStyle(
+                fontFamily: 'Fraunces',
+                fontSize: 66,
+                fontWeight: FontWeight.w600,
+                height: 0.95,
+                letterSpacing: -1,
+                color: BrandTokens.ink),
+            displayMedium: const TextStyle(
+                fontFamily: 'Fraunces',
+                fontSize: 44,
+                fontWeight: FontWeight.w600,
+                height: 1.04,
+                letterSpacing: -.5,
+                color: BrandTokens.ink),
+            headlineMedium: const TextStyle(
+                fontFamily: 'Fraunces',
+                fontSize: 32,
+                fontWeight: FontWeight.w600,
+                color: BrandTokens.ink),
+            headlineSmall: const TextStyle(
+                fontFamily: 'Fraunces',
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: BrandTokens.ink),
+            titleLarge: const TextStyle(
+                fontFamily: 'Fraunces',
+                fontSize: 21,
+                fontWeight: FontWeight.w600,
+                color: BrandTokens.ink),
+            titleMedium: const TextStyle(
+                fontFamily: 'Fraunces',
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: BrandTokens.ink),
+            bodyLarge: const TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 16,
+                height: 1.55,
+                color: BrandTokens.moss),
+            bodyMedium: const TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 15,
+                height: 1.55,
+                color: BrandTokens.moss),
+          );
 
   return ThemeData(
     colorScheme: scheme,
@@ -75,7 +95,8 @@ ThemeData buildGiftPathTheme() {
       backgroundColor: BrandTokens.surface.withValues(alpha: .96),
       foregroundColor: BrandTokens.ink,
       surfaceTintColor: Colors.transparent,
-      titleTextStyle: GoogleFonts.inter(
+      titleTextStyle: const TextStyle(
+        fontFamily: 'Inter',
         color: BrandTokens.ink,
         fontSize: 20,
         fontWeight: FontWeight.w800,

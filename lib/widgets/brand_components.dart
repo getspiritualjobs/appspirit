@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../core/theme.dart';
 
@@ -12,7 +11,8 @@ class BrandEyebrow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label.toUpperCase(),
-      style: GoogleFonts.inter(
+      style: const TextStyle(
+        fontFamily: 'Inter',
         color: BrandTokens.gold,
         fontSize: 12,
         fontWeight: FontWeight.w900,

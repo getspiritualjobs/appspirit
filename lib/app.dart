@@ -30,56 +30,95 @@ class GiftPathApp extends StatelessWidget {
         ShellRoute(
           builder: (context, state, child) => AppShell(child: child),
           routes: [
-            GoRoute(path: '/', builder: (_, __) => const HomePage()),
             GoRoute(
-                path: '/assessment',
-                builder: (_, __) => const AssessmentPage()),
-            GoRoute(path: '/results', builder: (_, __) => const ResultsPage()),
+              path: '/',
+              pageBuilder: (_, state) => _brandPage(state, const HomePage()),
+            ),
+            GoRoute(
+              path: '/assessment',
+              pageBuilder: (_, state) =>
+                  _brandPage(state, const AssessmentPage()),
+            ),
+            GoRoute(
+              path: '/results',
+              pageBuilder: (_, state) => _brandPage(state, const ResultsPage()),
+            ),
             GoRoute(path: '/careers', redirect: (_, __) => '/opportunities'),
             GoRoute(
-                path: '/opportunities',
-                builder: (_, __) => const OpportunitiesPage()),
-            GoRoute(path: '/blog', builder: (_, __) => const BlogPage()),
+              path: '/opportunities',
+              pageBuilder: (_, state) =>
+                  _brandPage(state, const OpportunitiesPage()),
+            ),
+            GoRoute(
+              path: '/blog',
+              pageBuilder: (_, state) => _brandPage(state, const BlogPage()),
+            ),
             GoRoute(
               path: '/blog/new',
-              builder: (_, __) => const BlogEditorPage(),
+              pageBuilder: (_, state) =>
+                  _brandPage(state, const BlogEditorPage()),
             ),
             GoRoute(
               path: '/blog/:slug/edit',
-              builder: (_, state) =>
-                  BlogEditorPage(slug: state.pathParameters['slug']),
+              pageBuilder: (_, state) => _brandPage(
+                state,
+                BlogEditorPage(slug: state.pathParameters['slug']),
+              ),
             ),
             GoRoute(
               path: '/blog/:slug',
-              builder: (_, state) =>
-                  BlogPostPage(slug: state.pathParameters['slug'] ?? ''),
+              pageBuilder: (_, state) => _brandPage(
+                state,
+                BlogPostPage(slug: state.pathParameters['slug'] ?? ''),
+              ),
             ),
-            GoRoute(path: '/saved', builder: (_, __) => const SavedPage()),
-            GoRoute(path: '/about', builder: (_, __) => const AboutPage()),
-            GoRoute(path: '/auth', builder: (_, __) => const AuthPage()),
             GoRoute(
-                path: '/confirm-account',
-                builder: (_, __) => const ConfirmAccountPage()),
+              path: '/saved',
+              pageBuilder: (_, state) => _brandPage(state, const SavedPage()),
+            ),
             GoRoute(
-                path: '/reset-password',
-                builder: (_, __) => const AuthPage(resetPasswordOnly: true)),
+              path: '/about',
+              pageBuilder: (_, state) => _brandPage(state, const AboutPage()),
+            ),
             GoRoute(
-                path: '/terms',
-                builder: (_, __) =>
-                    const LegalPage(document: LegalDocument.terms)),
+              path: '/auth',
+              pageBuilder: (_, state) => _brandPage(state, const AuthPage()),
+            ),
             GoRoute(
-                path: '/privacy',
-                builder: (_, __) =>
-                    const LegalPage(document: LegalDocument.privacy)),
+              path: '/confirm-account',
+              pageBuilder: (_, state) =>
+                  _brandPage(state, const ConfirmAccountPage()),
+            ),
             GoRoute(
-                path: '/cancellation',
-                builder: (_, __) =>
-                    const LegalPage(document: LegalDocument.cancellation)),
+              path: '/reset-password',
+              pageBuilder: (_, state) =>
+                  _brandPage(state, const AuthPage(resetPasswordOnly: true)),
+            ),
             GoRoute(
-                path: '/subscribe', builder: (_, __) => const SubscribePage()),
+              path: '/terms',
+              pageBuilder: (_, state) => _brandPage(
+                  state, const LegalPage(document: LegalDocument.terms)),
+            ),
             GoRoute(
-                path: '/billing/success',
-                builder: (_, __) => const BillingSuccessPage()),
+              path: '/privacy',
+              pageBuilder: (_, state) => _brandPage(
+                  state, const LegalPage(document: LegalDocument.privacy)),
+            ),
+            GoRoute(
+              path: '/cancellation',
+              pageBuilder: (_, state) => _brandPage(
+                  state, const LegalPage(document: LegalDocument.cancellation)),
+            ),
+            GoRoute(
+              path: '/subscribe',
+              pageBuilder: (_, state) =>
+                  _brandPage(state, const SubscribePage()),
+            ),
+            GoRoute(
+              path: '/billing/success',
+              pageBuilder: (_, state) =>
+                  _brandPage(state, const BillingSuccessPage()),
+            ),
           ],
         ),
       ],
@@ -92,4 +131,32 @@ class GiftPathApp extends StatelessWidget {
       routerConfig: router,
     );
   }
+}
+
+CustomTransitionPage<void> _brandPage(GoRouterState state, Widget child) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    transitionDuration: const Duration(milliseconds: 180),
+    reverseTransitionDuration: const Duration(milliseconds: 140),
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final reduceMotion = MediaQuery.disableAnimationsOf(context);
+      if (reduceMotion) return child;
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: const Cubic(.2, .7, .3, 1),
+        reverseCurve: Curves.easeOut,
+      );
+      return FadeTransition(
+        opacity: curved,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, .012),
+            end: Offset.zero,
+          ).animate(curved),
+          child: child,
+        ),
+      );
+    },
+  );
 }

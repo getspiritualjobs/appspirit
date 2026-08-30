@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/app_state.dart';
@@ -374,7 +373,8 @@ class _QuestionPanel extends StatelessWidget {
         children: [
           Text(
             question.text,
-            style: GoogleFonts.fraunces(
+            style: const TextStyle(
+              fontFamily: 'Fraunces',
               color: BrandTokens.ink,
               fontSize: 26,
               fontWeight: FontWeight.w600,

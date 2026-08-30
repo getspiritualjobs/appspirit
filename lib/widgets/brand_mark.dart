@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../core/theme.dart';
 
@@ -52,7 +51,8 @@ class GiftPathLogo extends StatelessWidget {
         SizedBox(width: compact ? 8 : 10),
         Text(
           'GiftPath',
-          style: GoogleFonts.fraunces(
+          style: TextStyle(
+            fontFamily: 'Fraunces',
             color: scheme.onSurface,
             fontWeight: FontWeight.w600,
             fontSize: compact ? 24 : 29,
