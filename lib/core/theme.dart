@@ -59,10 +59,10 @@ ThemeData buildGiftPathTheme() {
         fontSize: 21, fontWeight: FontWeight.w600, color: BrandTokens.ink),
     titleMedium: GoogleFonts.fraunces(
         fontSize: 18, fontWeight: FontWeight.w600, color: BrandTokens.ink),
-    bodyLarge: GoogleFonts.inter(
-        fontSize: 16, height: 1.55, color: BrandTokens.moss),
-    bodyMedium: GoogleFonts.inter(
-        fontSize: 15, height: 1.55, color: BrandTokens.moss),
+    bodyLarge:
+        GoogleFonts.inter(fontSize: 16, height: 1.55, color: BrandTokens.moss),
+    bodyMedium:
+        GoogleFonts.inter(fontSize: 15, height: 1.55, color: BrandTokens.moss),
   );
 
   return ThemeData(
@@ -119,7 +119,7 @@ ThemeData buildGiftPathTheme() {
       ).copyWith(
         side: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.hovered)) {
-            return BorderSide(color: seed, width: 1.5);
+            return const BorderSide(color: seed, width: 1.5);
           }
           return BorderSide(color: seed.withValues(alpha: 0.28));
         }),

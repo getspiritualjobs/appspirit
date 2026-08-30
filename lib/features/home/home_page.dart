@@ -7,21 +7,120 @@ import '../../widgets/brand_components.dart';
 import '../../widgets/brand_mark.dart';
 import '../../widgets/responsive.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const SingleChildScrollView(
+    return SingleChildScrollView(
+      controller: _scrollController,
       child: Column(
         children: [
-          _HeroSection(),
-          _ScriptureBand(),
-          _FeatureSection(),
-          _HowItWorksSection(),
-          _CtaBand(),
-          _Footer(),
+          const _HeroSection(),
+          _RevealOnScroll(
+              controller: _scrollController, child: const _ScriptureBand()),
+          _RevealOnScroll(
+              controller: _scrollController, child: const _FeatureSection()),
+          _RevealOnScroll(
+              controller: _scrollController, child: const _HowItWorksSection()),
+          _RevealOnScroll(
+              controller: _scrollController, child: const _CtaBand()),
+          _RevealOnScroll(
+              controller: _scrollController, child: const _Footer()),
         ],
+      ),
+    );
+  }
+}
+
+class _RevealOnScroll extends StatefulWidget {
+  const _RevealOnScroll({
+    required this.controller,
+    required this.child,
+  });
+
+  final ScrollController controller;
+  final Widget child;
+
+  @override
+  State<_RevealOnScroll> createState() => _RevealOnScrollState();
+}
+
+class _RevealOnScrollState extends State<_RevealOnScroll> {
+  final _key = GlobalKey();
+  bool _shown = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_checkVisibility);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkVisibility());
+  }
+
+  @override
+  void didUpdateWidget(covariant _RevealOnScroll oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller == widget.controller) return;
+    oldWidget.controller.removeListener(_checkVisibility);
+    widget.controller.addListener(_checkVisibility);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkVisibility());
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_checkVisibility);
+    super.dispose();
+  }
+
+  void _checkVisibility() {
+    if (_shown || !mounted) return;
+    final context = _key.currentContext;
+    if (context == null) return;
+    final box = context.findRenderObject() as RenderBox?;
+    if (box == null || !box.attached) return;
+    final top = box.localToGlobal(Offset.zero).dy;
+    final height = box.size.height;
+    final viewportHeight = MediaQuery.sizeOf(context).height;
+    if (top < viewportHeight * .88 && top + height > viewportHeight * .12) {
+      setState(() => _shown = true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.disableAnimationsOf(context)) {
+      return KeyedSubtree(key: _key, child: widget.child);
+    }
+
+    return AnimatedOpacity(
+      key: _key,
+      opacity: _shown ? 1 : 0,
+      duration: const Duration(milliseconds: 700),
+      curve: Curves.ease,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween<double>(begin: 18, end: _shown ? 0 : 18),
+        duration: const Duration(milliseconds: 700),
+        curve: const Cubic(.2, .7, .3, 1),
+        builder: (context, offset, child) {
+          return Transform.translate(
+            offset: Offset(0, offset),
+            child: child,
+          );
+        },
+        child: widget.child,
       ),
     );
   }
@@ -122,8 +221,8 @@ class _HeroSection extends StatelessWidget {
                   style: FilledButton.styleFrom(
                     backgroundColor: BrandTokens.gold,
                     foregroundColor: BrandTokens.forest,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 26, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 26, vertical: 16),
                     textStyle: const TextStyle(fontSize: 16),
                   ),
                 ),
@@ -133,11 +232,11 @@ class _HeroSection extends StatelessWidget {
                   child: const Text('How it works'),
                 ),
                 const SizedBox(height: 8),
-                Wrap(
+                const Wrap(
                   alignment: WrapAlignment.center,
                   spacing: 20,
                   runSpacing: 8,
-                  children: const [
+                  children: [
                     _TrustBadge('Grounded in Romans 12'),
                     _TrustBadge('Free to start'),
                     _TrustBadge('7-minute first result'),
@@ -300,56 +399,83 @@ class _FeatureSection extends StatelessWidget {
   }
 }
 
-class _FeatureCard extends StatelessWidget {
+class _FeatureCard extends StatefulWidget {
   const _FeatureCard(this.data);
 
   final (IconData, String, String) data;
 
   @override
+  State<_FeatureCard> createState() => _FeatureCardState();
+}
+
+class _FeatureCardState extends State<_FeatureCard> {
+  bool _hovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: BrandTokens.surface,
-        borderRadius: BorderRadius.circular(BrandTokens.radiusMd),
-        border: Border.all(color: BrandTokens.forest.withValues(alpha: .08)),
-        boxShadow: [
-          BoxShadow(
-            color: BrandTokens.ink.withValues(alpha: .06),
-            blurRadius: 24,
-            offset: const Offset(0, 14),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 26, 24, 28),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [BrandTokens.forest, BrandTokens.forestDeep],
-                ),
-                borderRadius: BorderRadius.circular(13),
-              ),
-              child: Icon(data.$1, color: BrandTokens.goldBright, size: 22),
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final lifted = _hovered && !reduceMotion;
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: TweenAnimationBuilder<double>(
+        tween: Tween<double>(end: lifted ? -4 : 0),
+        duration: const Duration(milliseconds: 250),
+        curve: const Cubic(.2, .7, .3, 1),
+        builder: (context, offset, child) {
+          return Transform.translate(offset: Offset(0, offset), child: child);
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: const Cubic(.2, .7, .3, 1),
+          decoration: BoxDecoration(
+            color: BrandTokens.surface,
+            borderRadius: BorderRadius.circular(BrandTokens.radiusMd),
+            border: Border.all(
+              color: BrandTokens.forest.withValues(alpha: lifted ? .14 : .08),
             ),
-            const SizedBox(height: 18),
-            Text(data.$2,
-                style: GoogleFonts.fraunces(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: BrandTokens.ink)),
-            const SizedBox(height: 8),
-            Text(data.$3,
-                style: const TextStyle(
-                    fontSize: 14.5, color: BrandTokens.moss, height: 1.5)),
-          ],
+            boxShadow: [
+              BoxShadow(
+                color: BrandTokens.ink.withValues(alpha: lifted ? .10 : .06),
+                blurRadius: lifted ? 50 : 24,
+                spreadRadius: lifted ? -30 : 0,
+                offset: Offset(0, lifted ? 28 : 14),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 26, 24, 28),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [BrandTokens.forest, BrandTokens.forestDeep],
+                    ),
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  child: Icon(widget.data.$1,
+                      color: BrandTokens.goldBright, size: 22),
+                ),
+                const SizedBox(height: 18),
+                Text(widget.data.$2,
+                    style: GoogleFonts.fraunces(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: BrandTokens.ink)),
+                const SizedBox(height: 8),
+                Text(widget.data.$3,
+                    style: const TextStyle(
+                        fontSize: 14.5, color: BrandTokens.moss, height: 1.5)),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -368,10 +494,10 @@ class _HowItWorksSection extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final wide = constraints.maxWidth >= 900;
-            final steps = Column(
+            const steps = Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
-              children: const [
+              children: [
                 BrandEyebrow('The path'),
                 SizedBox(height: 10),
                 _HowHeading(),
@@ -389,14 +515,14 @@ class _HowItWorksSection extends StatelessWidget {
             );
             const sample = _SampleResultCard();
             if (!wide) {
-              return Column(
-                  children: [steps, const SizedBox(height: 32), sample]);
+              return const Column(
+                  children: [steps, SizedBox(height: 32), sample]);
             }
-            return Row(
+            return const Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(flex: 4, child: steps),
-                const SizedBox(width: 48),
+                SizedBox(width: 48),
                 Expanded(flex: 5, child: sample),
               ],
             );
@@ -603,8 +729,9 @@ class _CtaBand extends StatelessWidget {
                 const SizedBox(height: 12),
                 Text(
                   'No account required to see your first result.',
-                  style:
-                      TextStyle(fontSize: 15, color: BrandTokens.cream.withValues(alpha: .7)),
+                  style: TextStyle(
+                      fontSize: 15,
+                      color: BrandTokens.cream.withValues(alpha: .7)),
                 ),
                 const SizedBox(height: 26),
                 FilledButton.icon(
@@ -614,8 +741,8 @@ class _CtaBand extends StatelessWidget {
                   style: FilledButton.styleFrom(
                     backgroundColor: BrandTokens.gold,
                     foregroundColor: BrandTokens.forest,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 26, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 26, vertical: 16),
                     textStyle: const TextStyle(fontSize: 16),
                   ),
                 ),
@@ -640,10 +767,10 @@ class _Footer extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final wide = constraints.maxWidth >= 760;
-            final brand = Column(
+            const brand = Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
-              children: const [
+              children: [
                 GiftPathLogo(markSize: 26, compact: true),
                 SizedBox(height: 12),
                 SizedBox(
@@ -681,7 +808,7 @@ class _Footer extends StatelessWidget {
                     ? Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(flex: 3, child: brand),
+                          const Expanded(flex: 3, child: brand),
                           Expanded(flex: 4, child: columns),
                         ],
                       )
@@ -757,15 +884,67 @@ class _FooterColumn extends StatelessWidget {
   }
 }
 
-class _HeroVisual extends StatelessWidget {
+class _HeroVisual extends StatefulWidget {
   const _HeroVisual();
+
+  @override
+  State<_HeroVisual> createState() => _HeroVisualState();
+}
+
+class _HeroVisualState extends State<_HeroVisual>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _progress;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    );
+    _progress = CurvedAnimation(
+      parent: _controller,
+      curve: const Cubic(.3, .7, .2, 1),
+    );
+    Future<void>.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) _controller.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    if (reduceMotion) {
+      return const _HeroVisualLayout(progress: 1);
+    }
+
+    return AnimatedBuilder(
+      animation: _progress,
+      builder: (context, _) => _HeroVisualLayout(progress: _progress.value),
+    );
+  }
+}
+
+class _HeroVisualLayout extends StatelessWidget {
+  const _HeroVisualLayout({required this.progress});
+
+  final double progress;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth < 620) return const _HeroVisualCompact();
-        return const _HeroVisualWide();
+        if (constraints.maxWidth < 620) {
+          return _HeroVisualCompact(progress: progress);
+        }
+        return _HeroVisualWide(progress: progress);
       },
     );
   }
@@ -780,10 +959,11 @@ class _HeroVisual extends StatelessWidget {
 /// by its *bottom* edge so a 1- or 2-line title never collides with the
 /// dot underneath it.
 class _HeroVisualWide extends StatelessWidget {
-  const _HeroVisualWide();
+  const _HeroVisualWide({required this.progress});
 
   static const _labelWidth = 220.0;
   static const _gap = 22.0;
+  final double progress;
 
   @override
   Widget build(BuildContext context) {
@@ -821,8 +1001,11 @@ class _HeroVisualWide extends StatelessWidget {
 
             return Stack(
               children: [
-                const Positioned.fill(
-                    child: CustomPaint(painter: _HeroPathPainter())),
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: _HeroPathPainter(progress: progress),
+                  ),
+                ),
                 stop(0, 'Quiz', 'Seven quiet minutes.'),
                 stop(1, 'Gifts', 'What rises to the top.'),
                 stop(2, 'Aligned jobs', 'Work that fits the pattern.',
@@ -845,7 +1028,9 @@ class _HeroVisualWide extends StatelessWidget {
 /// stays purely decorative here and the four stops read as a plain,
 /// unambiguous 2x2 grid underneath it.
 class _HeroVisualCompact extends StatelessWidget {
-  const _HeroVisualCompact();
+  const _HeroVisualCompact({required this.progress});
+
+  final double progress;
 
   @override
   Widget build(BuildContext context) {
@@ -866,10 +1051,10 @@ class _HeroVisualCompact extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(
+            SizedBox(
               height: 150,
               width: double.infinity,
-              child: CustomPaint(painter: _HeroPathPainter()),
+              child: CustomPaint(painter: _HeroPathPainter(progress: progress)),
             ),
             const SizedBox(height: 20),
             const Row(
@@ -953,7 +1138,9 @@ class _PathStop extends StatelessWidget {
 }
 
 class _HeroPathPainter extends CustomPainter {
-  const _HeroPathPainter();
+  const _HeroPathPainter({required this.progress});
+
+  final double progress;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -984,19 +1171,32 @@ class _HeroPathPainter extends CustomPainter {
     canvas.drawPath(path.shift(const Offset(0, 4)), shadow);
 
     final track = Paint()
-      ..color = BrandTokens.gold.withValues(alpha: .54)
+      ..color = BrandTokens.gold.withValues(alpha: .16)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4.6
       ..strokeCap = StrokeCap.round;
     _drawDashes(canvas, path, track, 18, 13);
 
+    final active = Paint()
+      ..color = BrandTokens.gold.withValues(alpha: .54)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4.6
+      ..strokeCap = StrokeCap.round;
+    _drawDashes(canvas, _extractPath(path, progress), active, 18, 13);
+
     for (var i = 0; i < points.length; i++) {
+      final nodeProgress =
+          ((progress - _nodeThresholds[i]) / .12).clamp(0.0, 1.0);
+      if (nodeProgress <= 0) continue;
       final point = points[i];
       final large = size.width > 760;
-      final haloRadius = large ? 27.0 : 19.0;
-      final nodeRadius = large ? 18.0 : 13.5;
-      canvas.drawCircle(point, haloRadius,
-          Paint()..color = BrandTokens.gold.withValues(alpha: .16));
+      final haloRadius = (large ? 27.0 : 19.0) * nodeProgress;
+      final nodeRadius = (large ? 18.0 : 13.5) * nodeProgress;
+      canvas.drawCircle(
+          point,
+          haloRadius,
+          Paint()
+            ..color = BrandTokens.gold.withValues(alpha: .16 * nodeProgress));
       canvas.drawCircle(point, nodeRadius, Paint()..color = BrandTokens.gold);
       final number = TextPainter(
         text: TextSpan(
@@ -1015,6 +1215,17 @@ class _HeroPathPainter extends CustomPainter {
     }
   }
 
+  Path _extractPath(Path path, double progress) {
+    final extracted = Path();
+    for (final metric in path.computeMetrics()) {
+      extracted.addPath(
+        metric.extractPath(0, metric.length * progress.clamp(0, 1)),
+        Offset.zero,
+      );
+    }
+    return extracted;
+  }
+
   void _drawDashes(
       Canvas canvas, Path path, Paint paint, double dash, double gap) {
     for (final metric in path.computeMetrics()) {
@@ -1031,8 +1242,12 @@ class _HeroPathPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _HeroPathPainter oldDelegate) {
+    return progress != oldDelegate.progress;
+  }
 }
+
+const _nodeThresholds = [0.02, 0.34, 0.64, 0.94];
 
 List<Offset> _heroPathPoints(Size size) {
   if (size.width < 620) {
