@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../core/theme.dart';
+
 class GiftPathMark extends StatelessWidget {
   const GiftPathMark({this.size = 34, this.showBackground = false, super.key});
 
@@ -50,12 +52,12 @@ class GiftPathLogo extends StatelessWidget {
         SizedBox(width: compact ? 8 : 10),
         Text(
           'GiftPath',
-          style: GoogleFonts.cormorantGaramond(
+          style: GoogleFonts.fraunces(
             color: scheme.onSurface,
             fontWeight: FontWeight.w600,
-            fontSize: compact ? 26 : 31,
+            fontSize: compact ? 24 : 29,
             height: .95,
-            letterSpacing: .2,
+            letterSpacing: .1,
           ),
         ),
       ],
@@ -76,7 +78,7 @@ class IconBadge extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: badgeColor.withValues(alpha: .10),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(BrandTokens.radiusSm + 1),
         border: Border.all(color: badgeColor.withValues(alpha: .16)),
       ),
       child: SizedBox(

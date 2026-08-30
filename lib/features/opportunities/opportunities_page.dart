@@ -494,14 +494,14 @@ class _CareerFocusCard extends StatelessWidget {
       color: selected
           ? BrandTokens.forest.withValues(alpha: .08)
           : BrandTokens.cream.withValues(alpha: .55),
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(BrandTokens.radiusSm),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(BrandTokens.radiusSm),
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(BrandTokens.radiusSm),
             border: Border.all(
               color: selected
                   ? BrandTokens.forest

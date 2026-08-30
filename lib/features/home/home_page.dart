@@ -56,11 +56,13 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 22),
-                  SizedBox(
-                    height: heroHeight,
-                    width: double.infinity,
-                    child: const _HeroVisual(),
-                  ),
+                  compact
+                      ? const _HeroVisual()
+                      : SizedBox(
+                          height: heroHeight,
+                          width: double.infinity,
+                          child: const _HeroVisual(),
+                        ),
                   const SizedBox(height: 18),
                   Wrap(
                     alignment: WrapAlignment.center,
@@ -100,121 +102,151 @@ class _HeroVisual extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final compact = constraints.maxWidth < 620;
-        final labelWidth = compact ? 118.0 : 230.0;
-        return SizedBox.expand(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: BrandTokens.forest,
-              borderRadius: BorderRadius.circular(compact ? 18 : 28),
-              boxShadow: [
-                BoxShadow(
-                  color: BrandTokens.ink.withValues(alpha: .14),
-                  blurRadius: 28,
-                  offset: const Offset(0, 16),
-                ),
-              ],
-            ),
-            child: LayoutBuilder(
-              builder: (context, size) {
-                final panelSize = Size(size.maxWidth, size.maxHeight);
-                final points = _heroPathPoints(panelSize);
-                return Stack(
-                  children: [
-                    const Positioned.fill(
-                        child: CustomPaint(painter: _HeroPathPainter())),
-                    _PositionedPathStop(
-                      point: points[0],
-                      offset: compact
-                          ? const Offset(-30, -100)
-                          : const Offset(-70, 44),
-                      panelSize: panelSize,
-                      width: labelWidth,
-                      child: _PathStop(
-                        title: 'Quiz',
-                        body: 'Seven quiet minutes.',
-                        width: labelWidth,
-                        compact: compact,
-                      ),
-                    ),
-                    _PositionedPathStop(
-                      point: points[1],
-                      offset: compact
-                          ? const Offset(-8, 34)
-                          : const Offset(-82, 44),
-                      panelSize: panelSize,
-                      width: labelWidth,
-                      child: _PathStop(
-                        title: 'Gifts',
-                        body: 'What rises to the top.',
-                        width: labelWidth,
-                        compact: compact,
-                      ),
-                    ),
-                    _PositionedPathStop(
-                      point: points[2],
-                      offset: compact
-                          ? const Offset(-92, -98)
-                          : const Offset(42, -138),
-                      panelSize: panelSize,
-                      width: labelWidth,
-                      child: _PathStop(
-                        title: 'Aligned jobs',
-                        body: 'Work that fits the pattern.',
-                        width: labelWidth,
-                        compact: compact,
-                      ),
-                    ),
-                    _PositionedPathStop(
-                      point: points[3],
-                      offset: compact
-                          ? const Offset(-84, 34)
-                          : const Offset(30, 42),
-                      panelSize: panelSize,
-                      width: labelWidth,
-                      child: _PathStop(
-                        title: 'Fulfillment',
-                        body: 'A next step with purpose.',
-                        accent: true,
-                        width: labelWidth,
-                        compact: compact,
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-        );
+        if (constraints.maxWidth < 620) return const _HeroVisualCompact();
+        return const _HeroVisualWide();
       },
     );
   }
 }
 
-class _PositionedPathStop extends StatelessWidget {
-  const _PositionedPathStop({
-    required this.point,
-    required this.offset,
-    required this.panelSize,
-    required this.width,
-    required this.child,
-  });
+/// Desktop/tablet: labels float directly beside their node, the way the
+/// brand mockup does. Each label box is *centered* on its node's x — at
+/// this hero's actual node spacing (nodes sit at roughly 13/38/62/87% of
+/// the panel width) a centered 220px-wide box never reaches a neighboring
+/// node's box, so there's no need to guess pixel offsets per stop. Only
+/// the peak (stop 3) needs to sit above rather than below; it's anchored
+/// by its *bottom* edge so a 1- or 2-line title never collides with the
+/// dot underneath it.
+class _HeroVisualWide extends StatelessWidget {
+  const _HeroVisualWide();
 
-  final Offset point;
-  final Offset offset;
-  final Size panelSize;
-  final double width;
-  final Widget child;
+  static const _labelWidth = 220.0;
+  static const _gap = 22.0;
 
   @override
   Widget build(BuildContext context) {
-    final left =
-        (point.dx + offset.dx).clamp(24.0, panelSize.width - width - 24);
-    final top = (point.dy + offset.dy).clamp(24.0, panelSize.height - 96);
-    return Positioned(
-      left: left,
-      top: top,
-      child: child,
+    return SizedBox.expand(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: BrandTokens.forest,
+          borderRadius: BorderRadius.circular(BrandTokens.radiusLg),
+          boxShadow: [
+            BoxShadow(
+              color: BrandTokens.ink.withValues(alpha: .14),
+              blurRadius: 28,
+              offset: const Offset(0, 16),
+            ),
+          ],
+        ),
+        child: LayoutBuilder(
+          builder: (context, size) {
+            final panelSize = Size(size.maxWidth, size.maxHeight);
+            final points = _heroPathPoints(panelSize);
+
+            Widget stop(int i, String title, String body,
+                {bool accent = false, bool above = false}) {
+              final p = points[i];
+              final left = (p.dx - _labelWidth / 2)
+                  .clamp(16.0, panelSize.width - _labelWidth - 16);
+              return Positioned(
+                left: left,
+                top: above ? null : p.dy + _gap,
+                bottom: above ? panelSize.height - p.dy + _gap : null,
+                width: _labelWidth,
+                child: _PathStop(title: title, body: body, accent: accent),
+              );
+            }
+
+            return Stack(
+              children: [
+                const Positioned.fill(
+                    child: CustomPaint(painter: _HeroPathPainter())),
+                stop(0, 'Quiz', 'Seven quiet minutes.'),
+                stop(1, 'Gifts', 'What rises to the top.'),
+                stop(2, 'Aligned jobs', 'Work that fits the pattern.',
+                    above: true),
+                stop(3, 'Fulfillment', 'A next step with purpose.',
+                    accent: true),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+/// Mobile: at phone width, four nodes spaced across the panel sit too
+/// close together for any floating label wide enough to read — there's
+/// no offset that avoids collision when the labels themselves are wider
+/// than the gap between nodes. Rather than fight that geometry, the path
+/// stays purely decorative here and the four stops read as a plain,
+/// unambiguous 2x2 grid underneath it.
+class _HeroVisualCompact extends StatelessWidget {
+  const _HeroVisualCompact();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: BrandTokens.forest,
+        borderRadius: BorderRadius.circular(BrandTokens.radiusMd),
+        boxShadow: [
+          BoxShadow(
+            color: BrandTokens.ink.withValues(alpha: .14),
+            blurRadius: 22,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 22),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(
+              height: 150,
+              width: double.infinity,
+              child: CustomPaint(painter: _HeroPathPainter()),
+            ),
+            const SizedBox(height: 20),
+            const Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                    child: _PathStop(
+                        title: 'Quiz',
+                        body: 'Seven quiet minutes.',
+                        compact: true)),
+                SizedBox(width: 14),
+                Expanded(
+                    child: _PathStop(
+                        title: 'Gifts',
+                        body: 'What rises to the top.',
+                        compact: true)),
+              ],
+            ),
+            const SizedBox(height: 18),
+            const Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                    child: _PathStop(
+                        title: 'Aligned jobs',
+                        body: 'Work that fits the pattern.',
+                        compact: true)),
+                SizedBox(width: 14),
+                Expanded(
+                    child: _PathStop(
+                        title: 'Fulfillment',
+                        body: 'A next step with purpose.',
+                        accent: true,
+                        compact: true)),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -223,42 +255,37 @@ class _PathStop extends StatelessWidget {
   const _PathStop({
     required this.title,
     required this.body,
-    required this.width,
-    required this.compact,
+    this.compact = false,
     this.accent = false,
   });
 
   final String title;
   final String body;
-  final double width;
   final bool compact;
   final bool accent;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: width,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(title,
-              style: GoogleFonts.inter(
-                color: BrandTokens.cream,
-                fontSize: compact ? 21 : 38,
-                fontWeight: FontWeight.w900,
-                height: 1.02,
-              )),
-          const SizedBox(height: 5),
-          Text(body,
-              style: GoogleFonts.inter(
-                color: const Color(0xFFE4DBC7),
-                fontSize: compact ? 12 : 18,
-                fontWeight: FontWeight.w600,
-                height: 1.25,
-              )),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(title,
+            style: GoogleFonts.fraunces(
+              color: accent ? BrandTokens.goldBright : BrandTokens.cream,
+              fontSize: compact ? 18 : 26,
+              fontWeight: FontWeight.w600,
+              height: 1.05,
+            )),
+        const SizedBox(height: 5),
+        Text(body,
+            style: GoogleFonts.inter(
+              color: const Color(0xFFE4DBC7),
+              fontSize: compact ? 12 : 14.5,
+              fontWeight: FontWeight.w600,
+              height: 1.28,
+            )),
+      ],
     );
   }
 }
