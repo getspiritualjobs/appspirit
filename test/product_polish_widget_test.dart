@@ -42,6 +42,16 @@ void main() {
     await tester.pumpWidget(_shell(const AssessmentPage()));
 
     expect(find.text('ONE QUESTION AT A TIME'), findsOneWidget);
+    expect(find.text('BEFORE YOU BEGIN'), findsOneWidget);
+    expect(find.text('Assessment data notice'), findsOneWidget);
+
+    await tester.ensureVisible(find.byType(Checkbox));
+    await tester.tap(find.byType(Checkbox));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Start assessment'));
+    await tester.tap(find.text('Start assessment'));
+    await tester.pumpAndSettle();
+
     expect(find.text('Question 1 of 56'), findsOneWidget);
     expect(find.text('QUESTION TRAIL'), findsOneWidget);
     expect(find.text('0 of 56 answered'), findsOneWidget);
@@ -140,7 +150,8 @@ void main() {
     await tester.tap(find.text('Retake assessment'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Question 1 of 56'), findsOneWidget);
+    expect(find.text('BEFORE YOU BEGIN'), findsOneWidget);
+    expect(find.text('Start assessment'), findsOneWidget);
     expect(appState.hasResults, isFalse);
   });
 
@@ -363,4 +374,5 @@ void _resetAppState() {
   appState.latestAssessmentId = null;
   appState.assessmentSaveError = null;
   appState.savedDataError = null;
+  appState.assessmentConsentAccepted = false;
 }

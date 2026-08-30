@@ -899,8 +899,10 @@ class _Footer extends StatelessWidget {
                 const _FooterColumn('Learn', ['How it works', 'Blog', 'About']),
                 _FooterColumn('Company', const ['Privacy', 'Terms', 'Contact'],
                     onTap: (label) {
-                  if (label == 'Privacy' || label == 'Terms') {
-                    context.go('/legal');
+                  if (label == 'Privacy') {
+                    context.go('/privacy');
+                  } else if (label == 'Terms') {
+                    context.go('/terms');
                   }
                 }),
               ],

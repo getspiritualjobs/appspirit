@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../data/assessment_repository.dart';
 import '../data/billing_service.dart';
+import '../data/legal_acceptance_repository.dart';
 import '../data/saved_data_repository.dart';
 import '../data/seed_data.dart';
 import 'models.dart';
@@ -22,6 +23,7 @@ class GiftPathState extends ChangeNotifier {
   String? latestAssessmentId;
   String? assessmentSaveError;
   String? savedDataError;
+  bool assessmentConsentAccepted = false;
 
   bool get isComplete => responses.length == assessmentQuestions.length;
   bool get hasResults => giftScores.isNotEmpty;
@@ -60,6 +62,11 @@ class GiftPathState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void acceptAssessmentConsent() {
+    assessmentConsentAccepted = true;
+    notifyListeners();
+  }
+
   void startRetake() {
     responses.clear();
     giftScores = const [];
@@ -67,6 +74,7 @@ class GiftPathState extends ChangeNotifier {
     savedResult = const [];
     latestAssessmentId = null;
     assessmentSaveError = null;
+    assessmentConsentAccepted = false;
     notifyListeners();
   }
 
@@ -83,6 +91,10 @@ class GiftPathState extends ChangeNotifier {
         responses: responses,
         giftScores: giftScores,
       );
+      if (assessmentConsentAccepted && latestAssessmentId != null) {
+        await LegalAcceptanceRepository()
+            .logAssessmentConsent(assessmentId: latestAssessmentId!);
+      }
       await refreshSavedData();
     } catch (error) {
       assessmentSaveError = error.toString();

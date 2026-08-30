@@ -49,6 +49,8 @@ class _AssessmentPageState extends State<AssessmentPage> {
         final answered = appState.responses.length;
         final complete = answered == assessmentQuestions.length;
         final response = appState.responses[question.id];
+        final canStartAssessment =
+            appState.assessmentConsentAccepted || answered > 0;
         return SingleChildScrollView(
           child: PageBand(
             maxWidth: 820,
@@ -65,60 +67,171 @@ class _AssessmentPageState extends State<AssessmentPage> {
                 const Text(
                     '56 prompts, one at a time. Answer from your actual life, not from the person you think you should be.'),
                 const SizedBox(height: 22),
-                _ProgressHeader(
-                    index: index, answered: answered, complete: complete),
-                const SizedBox(height: 18),
-                _QuestionPanel(
-                  question: question,
-                  response: response,
-                  onAnswer: (value) {
-                    appState.answer(question.id, value);
-                    if (index < assessmentQuestions.length - 1) {
-                      Future<void>.delayed(const Duration(milliseconds: 180),
-                          () {
-                        if (mounted) setState(() => index += 1);
-                      });
-                    }
-                  },
-                ),
-                const SizedBox(height: 18),
-                _AssessmentControls(
-                  index: index,
-                  complete: complete,
-                  response: response,
-                  onBack: index == 0 ? null : () => setState(() => index -= 1),
-                  onNext: index == assessmentQuestions.length - 1
-                      ? null
-                      : () => setState(() => index += 1),
-                  onReviewMissing: () {
-                    final missing = assessmentQuestions.indexWhere(
-                        (item) => !appState.responses.containsKey(item.id));
-                    if (missing >= 0) setState(() => index = missing);
-                  },
-                  onFinish: complete
-                      ? () async {
-                          setState(() => saving = true);
-                          await appState.completeAssessment();
-                          if (!mounted) return;
-                          setState(() {
-                            saving = false;
-                            retaking = false;
-                          });
-                          GoRouter.of(this.context)
-                              .go('/auth?returnTo=/results');
-                        }
-                      : null,
-                  saving: saving,
-                ),
-                const SizedBox(height: 22),
-                _QuestionMap(
-                    currentIndex: index,
-                    onSelect: (next) => setState(() => index = next)),
+                if (!canStartAssessment)
+                  _AssessmentConsentPanel(
+                    onAccepted: appState.acceptAssessmentConsent,
+                  )
+                else ...[
+                  _ProgressHeader(
+                      index: index, answered: answered, complete: complete),
+                  const SizedBox(height: 18),
+                  _QuestionPanel(
+                    question: question,
+                    response: response,
+                    onAnswer: (value) {
+                      appState.answer(question.id, value);
+                      if (index < assessmentQuestions.length - 1) {
+                        Future<void>.delayed(const Duration(milliseconds: 180),
+                            () {
+                          if (mounted) setState(() => index += 1);
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 18),
+                  _AssessmentControls(
+                    index: index,
+                    complete: complete,
+                    response: response,
+                    onBack:
+                        index == 0 ? null : () => setState(() => index -= 1),
+                    onNext: index == assessmentQuestions.length - 1
+                        ? null
+                        : () => setState(() => index += 1),
+                    onReviewMissing: () {
+                      final missing = assessmentQuestions.indexWhere(
+                          (item) => !appState.responses.containsKey(item.id));
+                      if (missing >= 0) setState(() => index = missing);
+                    },
+                    onFinish: complete
+                        ? () async {
+                            setState(() => saving = true);
+                            await appState.completeAssessment();
+                            if (!mounted) return;
+                            setState(() {
+                              saving = false;
+                              retaking = false;
+                            });
+                            GoRouter.of(this.context)
+                                .go('/auth?returnTo=/results');
+                          }
+                        : null,
+                    saving: saving,
+                  ),
+                  const SizedBox(height: 22),
+                  _QuestionMap(
+                      currentIndex: index,
+                      onSelect: (next) => setState(() => index = next)),
+                ],
               ],
             ),
           ),
         );
       },
+    );
+  }
+}
+
+class _AssessmentConsentPanel extends StatefulWidget {
+  const _AssessmentConsentPanel({required this.onAccepted});
+
+  final VoidCallback onAccepted;
+
+  @override
+  State<_AssessmentConsentPanel> createState() =>
+      _AssessmentConsentPanelState();
+}
+
+class _AssessmentConsentPanelState extends State<_AssessmentConsentPanel> {
+  var accepted = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return InfoCard(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const BrandEyebrow('Before you begin'),
+          const SizedBox(height: 10),
+          Text(
+            'Confirm this is for you.',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            'GiftPath asks reflective spiritual-gifts questions and uses your answers to generate gift scores, career lanes, and job matches. It is for adults and is not a measure of spiritual worth, maturity, calling, or God\'s will.',
+          ),
+          const SizedBox(height: 16),
+          BrandNotice(
+            icon: Icons.privacy_tip_outlined,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Assessment data notice',
+                  style: TextStyle(fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'When you submit the assessment, GiftPath stores your answers and generated scores so your results can be saved and used for career and opportunity matching.',
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    TextButton(
+                      onPressed: () => context.go('/terms'),
+                      child: const Text('Terms'),
+                    ),
+                    TextButton(
+                      onPressed: () => context.go('/privacy'),
+                      child: const Text('Privacy'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          InkWell(
+            onTap: () => setState(() => accepted = !accepted),
+            borderRadius: BorderRadius.circular(BrandTokens.radiusSm),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Checkbox(
+                    value: accepted,
+                    activeColor: BrandTokens.forest,
+                    checkColor: BrandTokens.cream,
+                    onChanged: (value) =>
+                        setState(() => accepted = value ?? false),
+                  ),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 12),
+                      child: Text(
+                        'I confirm I am 18 or older, accept the Terms and Privacy Policy, and understand GiftPath will process my assessment responses to generate results.',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 18),
+          FilledButton.icon(
+            onPressed: accepted ? widget.onAccepted : null,
+            icon: const Icon(Icons.arrow_forward),
+            label: const Text('Start assessment'),
+          ),
+        ],
+      ),
     );
   }
 }
