@@ -590,12 +590,14 @@ class _AuthModeToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).colorScheme.outline),
+        color: BrandTokens.cream.withValues(alpha: .6),
+        border:
+            Border.all(color: BrandTokens.forest.withValues(alpha: .16)),
         borderRadius: BorderRadius.circular(999),
       ),
       child: SizedBox(
         width: 260,
-        height: 42,
+        height: 44,
         child: Row(
           children: [
             _AuthModeButton(

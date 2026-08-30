@@ -83,6 +83,7 @@ class _SavedResults extends StatelessWidget {
       return Center(
         child: EmptyState(
           icon: Icons.auto_awesome,
+          eyebrow: 'Nothing saved yet',
           title: 'No saved result yet',
           body:
               'Finish the assessment, then save the profile you want to keep.',
@@ -165,6 +166,7 @@ class _SavedCareers extends StatelessWidget {
       return Center(
         child: EmptyState(
           icon: Icons.work_outline,
+          eyebrow: 'Your shortlist',
           title: 'No saved careers yet',
           body: 'Save the career matches that feel worth a second look.',
           action: FilledButton(
@@ -206,6 +208,7 @@ class _SavedJobs extends StatelessWidget {
       return Center(
         child: EmptyState(
           icon: Icons.search,
+          eyebrow: 'Roles to revisit',
           title: 'No saved jobs yet',
           body:
               'Save open roles from the Opportunities page as you compare next steps.',

@@ -50,15 +50,28 @@ class _HeroSection extends StatelessWidget {
                 const SizedBox(height: 10),
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 1040),
-                  child: Text(
-                    'Your gifts were given for a reason.',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
-                      color: BrandTokens.ink,
-                      fontSize: compact ? 42 : 68,
-                      fontWeight: FontWeight.w900,
-                      height: .92,
+                  child: Text.rich(
+                    TextSpan(
+                      style: GoogleFonts.fraunces(
+                        color: BrandTokens.ink,
+                        fontSize: compact ? 42 : 70,
+                        fontWeight: FontWeight.w600,
+                        height: .98,
+                        letterSpacing: -1,
+                      ),
+                      children: [
+                        const TextSpan(text: 'Your gifts were given\n'),
+                        TextSpan(
+                          text: 'for a reason.',
+                          style: GoogleFonts.fraunces(
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.w500,
+                            color: BrandTokens.forest,
+                          ),
+                        ),
+                      ],
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -355,10 +368,10 @@ class _HowItWorksSection extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final wide = constraints.maxWidth >= 900;
-            const steps = Column(
+            final steps = Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
-              children: [
+              children: const [
                 BrandEyebrow('The path'),
                 SizedBox(height: 10),
                 _HowHeading(),
@@ -376,14 +389,14 @@ class _HowItWorksSection extends StatelessWidget {
             );
             const sample = _SampleResultCard();
             if (!wide) {
-              return const Column(
-                  children: [steps, SizedBox(height: 32), sample]);
+              return Column(
+                  children: [steps, const SizedBox(height: 32), sample]);
             }
-            return const Row(
+            return Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(flex: 4, child: steps),
-                SizedBox(width: 48),
+                const SizedBox(width: 48),
                 Expanded(flex: 5, child: sample),
               ],
             );
@@ -627,10 +640,10 @@ class _Footer extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final wide = constraints.maxWidth >= 760;
-            const brand = Column(
+            final brand = Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
-              children: [
+              children: const [
                 GiftPathLogo(markSize: 26, compact: true),
                 SizedBox(height: 12),
                 SizedBox(
@@ -668,7 +681,7 @@ class _Footer extends StatelessWidget {
                     ? Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Expanded(flex: 3, child: brand),
+                          Expanded(flex: 3, child: brand),
                           Expanded(flex: 4, child: columns),
                         ],
                       )

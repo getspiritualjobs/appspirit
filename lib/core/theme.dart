@@ -33,15 +33,36 @@ ThemeData buildGiftPathTheme() {
     onSurface: BrandTokens.ink,
   );
 
+  // Type scale from BRAND.md: Fraunces carries every heading (w500-600,
+  // never the heavier cuts — the mockup's warmth comes from the lighter
+  // weight), Inter carries body and UI. titleLarge matters most here:
+  // card titles all over the app resolve to it, so serif-vs-sans there
+  // is the difference between the app matching the landing page or not.
   final textTheme = GoogleFonts.interTextTheme().copyWith(
     displayLarge: GoogleFonts.fraunces(
-        fontSize: 66, fontWeight: FontWeight.w700, height: 0.95),
+        fontSize: 66,
+        fontWeight: FontWeight.w600,
+        height: 0.95,
+        letterSpacing: -1,
+        color: BrandTokens.ink),
     displayMedium: GoogleFonts.fraunces(
-        fontSize: 46, fontWeight: FontWeight.w700, height: 1.02),
-    headlineMedium:
-        GoogleFonts.fraunces(fontSize: 34, fontWeight: FontWeight.w700),
-    titleLarge: GoogleFonts.inter(fontSize: 21, fontWeight: FontWeight.w700),
-    bodyLarge: GoogleFonts.inter(fontSize: 16, height: 1.55),
+        fontSize: 44,
+        fontWeight: FontWeight.w600,
+        height: 1.04,
+        letterSpacing: -.5,
+        color: BrandTokens.ink),
+    headlineMedium: GoogleFonts.fraunces(
+        fontSize: 32, fontWeight: FontWeight.w600, color: BrandTokens.ink),
+    headlineSmall: GoogleFonts.fraunces(
+        fontSize: 24, fontWeight: FontWeight.w600, color: BrandTokens.ink),
+    titleLarge: GoogleFonts.fraunces(
+        fontSize: 21, fontWeight: FontWeight.w600, color: BrandTokens.ink),
+    titleMedium: GoogleFonts.fraunces(
+        fontSize: 18, fontWeight: FontWeight.w600, color: BrandTokens.ink),
+    bodyLarge: GoogleFonts.inter(
+        fontSize: 16, height: 1.55, color: BrandTokens.moss),
+    bodyMedium: GoogleFonts.inter(
+        fontSize: 15, height: 1.55, color: BrandTokens.moss),
   );
 
   return ThemeData(

@@ -24,6 +24,7 @@ class ResultsPage extends StatelessWidget {
           return PageBand(
             child: EmptyState(
               icon: Icons.auto_awesome,
+              eyebrow: 'Seven minutes away',
               title: 'Your results are waiting',
               body:
                   'Complete the assessment to see your strongest gift alignments and career matches.',
@@ -54,11 +55,12 @@ class ResultsPage extends StatelessWidget {
                     const SizedBox(height: 10),
                     Text(
                       'Your GiftPath is taking shape.',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.fraunces(
                         color: BrandTokens.ink,
-                        fontSize: compact ? 42 : 54,
-                        fontWeight: FontWeight.w900,
-                        height: .98,
+                        fontSize: compact ? 40 : 52,
+                        fontWeight: FontWeight.w600,
+                        height: 1.02,
+                        letterSpacing: -.5,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -152,11 +154,11 @@ class _ResultsHero extends StatelessWidget {
               child: Text(
                 gift.name,
                 maxLines: 1,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.fraunces(
                   color: BrandTokens.cream,
-                  fontSize: narrow ? 48 : 58,
-                  fontWeight: FontWeight.w900,
-                  height: .95,
+                  fontSize: narrow ? 46 : 56,
+                  fontWeight: FontWeight.w600,
+                  height: 1,
                 ),
               ),
             ),

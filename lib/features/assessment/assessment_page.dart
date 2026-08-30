@@ -261,11 +261,11 @@ class _QuestionPanel extends StatelessWidget {
         children: [
           Text(
             question.text,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.fraunces(
               color: BrandTokens.ink,
               fontSize: 26,
-              fontWeight: FontWeight.w900,
-              height: 1.2,
+              fontWeight: FontWeight.w600,
+              height: 1.25,
             ),
           ),
           const SizedBox(height: 20),

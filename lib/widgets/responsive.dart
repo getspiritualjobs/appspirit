@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../core/theme.dart';
 import 'brand_components.dart';
-import 'brand_mark.dart';
 
 class PageBand extends StatelessWidget {
   const PageBand(
@@ -38,15 +37,23 @@ class InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: BrandTokens.surface,
-          borderRadius: BorderRadius.circular(BrandTokens.radiusMd),
-        ),
-        child: Padding(padding: padding, child: child),
+    // Ambient, wide-radius shadow rather than Material's tight default —
+    // per BRAND.md this is what makes a resting card read as "lifted off
+    // the cream" instead of "outlined box".
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: BrandTokens.surface,
+        borderRadius: BorderRadius.circular(BrandTokens.radiusMd),
+        border: Border.all(color: BrandTokens.forest.withValues(alpha: .08)),
+        boxShadow: [
+          BoxShadow(
+            color: BrandTokens.ink.withValues(alpha: .06),
+            blurRadius: 24,
+            offset: const Offset(0, 14),
+          ),
+        ],
       ),
+      child: Padding(padding: padding, child: child),
     );
   }
 }
@@ -57,6 +64,7 @@ class EmptyState extends StatelessWidget {
     required this.title,
     required this.body,
     required this.action,
+    this.eyebrow = 'Start here',
     super.key,
   });
 
@@ -65,22 +73,41 @@ class EmptyState extends StatelessWidget {
   final String body;
   final Widget action;
 
+  /// Per-context label so the three empty states in the app don't all
+  /// read as the same template (BRAND.md).
+  final String eyebrow;
+
   @override
   Widget build(BuildContext context) {
     return InfoCard(
+      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 34),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconBadge(icon, size: 48),
-          const SizedBox(height: 12),
-          const BrandEyebrow('Start here'),
-          const SizedBox(height: 8),
+          // Same forest-gradient badge the landing page's feature cards
+          // use, so an empty state still feels like the brand.
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [BrandTokens.forest, BrandTokens.forestDeep],
+              ),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Icon(icon, color: BrandTokens.goldBright, size: 24),
+          ),
+          const SizedBox(height: 16),
+          BrandEyebrow(eyebrow),
+          const SizedBox(height: 10),
           Text(title,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center),
           const SizedBox(height: 8),
           Text(body, textAlign: TextAlign.center),
-          const SizedBox(height: 18),
+          const SizedBox(height: 22),
           action,
         ],
       ),

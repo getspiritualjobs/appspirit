@@ -84,6 +84,7 @@ class _OpportunitiesPageState extends State<OpportunitiesPage> {
           return PageBand(
             child: EmptyState(
               icon: Icons.assignment_outlined,
+              eyebrow: 'One step first',
               title: 'Take the assessment first',
               body:
                   'Your free opportunity and premium job matches unlock after GiftPath has your gift and career profile.',
