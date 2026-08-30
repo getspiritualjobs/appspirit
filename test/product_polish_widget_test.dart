@@ -81,6 +81,27 @@ void main() {
     );
   });
 
+  testWidgets('create account agreement links to terms and privacy',
+      (WidgetTester tester) async {
+    var accepted = false;
+    await tester.pumpWidget(_shell(StatefulBuilder(
+      builder: (context, setState) {
+        return AccountLegalAgreement(
+          accepted: accepted,
+          onChanged: (value) => setState(() => accepted = value ?? false),
+        );
+      },
+    )));
+
+    expect(find.text('Terms of service'), findsOneWidget);
+    expect(find.text('Privacy policy'), findsOneWidget);
+
+    await tester.tap(find.byType(Checkbox));
+    await tester.pumpAndSettle();
+
+    expect(accepted, isTrue);
+  });
+
   testWidgets('reset password route opens the new password page',
       (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp.router(

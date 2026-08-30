@@ -9,15 +9,24 @@ class LegalAcceptanceRepository {
 
   final SupabaseClient _client;
 
+  Future<void> logAccountConsent() async {
+    await _logAcceptance(assessmentId: null);
+  }
+
   Future<void> logAssessmentConsent({required String assessmentId}) async {
-    if (!Env.hasSupabase || assessmentId.isEmpty) return;
+    if (assessmentId.isEmpty) return;
+    await _logAcceptance(assessmentId: assessmentId);
+  }
+
+  Future<void> _logAcceptance({required String? assessmentId}) async {
+    if (!Env.hasSupabase) return;
 
     final user = _client.auth.currentUser;
     if (user == null) return;
 
     await _client.from('legal_acceptances').insert({
       'user_id': user.id,
-      'assessment_id': assessmentId,
+      if (assessmentId != null) 'assessment_id': assessmentId,
       'age_confirmed': true,
       'terms_version': termsVersion,
       'privacy_version': privacyVersion,

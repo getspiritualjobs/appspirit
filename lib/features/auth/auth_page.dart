@@ -9,6 +9,7 @@ import '../../core/app_state.dart';
 import '../../core/env.dart';
 import '../../core/theme.dart';
 import '../../data/billing_service.dart';
+import '../../data/legal_acceptance_repository.dart';
 import '../../widgets/brand_components.dart';
 import '../../widgets/brand_mark.dart';
 import '../../widgets/responsive.dart';
@@ -31,6 +32,7 @@ class _AuthPageState extends State<AuthPage> {
   bool loading = false;
   bool forgotPasswordMode = false;
   bool resetPasswordMode = false;
+  bool acceptedAccountTerms = false;
   String message = '';
   bool _handledReturnAfterAuth = false;
 
@@ -174,7 +176,10 @@ class _AuthPageState extends State<AuthPage> {
                 _AuthModeToggle(
                   createMode: createMode,
                   enabled: !loading,
-                  onChanged: (value) => setState(() => createMode = value),
+                  onChanged: (value) => setState(() {
+                    createMode = value;
+                    message = '';
+                  }),
                 ),
                 const SizedBox(height: 16),
                 TextField(
@@ -193,6 +198,16 @@ class _AuthPageState extends State<AuthPage> {
                   decoration: InputDecoration(
                       labelText: createMode ? 'Create a password' : 'Password'),
                 ),
+                if (createMode) ...[
+                  const SizedBox(height: 12),
+                  AccountLegalAgreement(
+                    accepted: acceptedAccountTerms,
+                    onChanged: loading
+                        ? null
+                        : (value) => setState(
+                            () => acceptedAccountTerms = value ?? false),
+                  ),
+                ],
                 if (!createMode) ...[
                   const SizedBox(height: 8),
                   Align(
@@ -272,6 +287,11 @@ class _AuthPageState extends State<AuthPage> {
       setState(() => message = 'Use at least 6 characters for your password.');
       return;
     }
+    if (create && !acceptedAccountTerms) {
+      setState(
+          () => message = 'Please accept the Terms and Privacy Policy first.');
+      return;
+    }
 
     setState(() {
       loading = true;
@@ -294,6 +314,7 @@ class _AuthPageState extends State<AuthPage> {
             emailRedirectTo: Uri.base.origin,
           );
         }
+        await _logAccountConsent();
       } else {
         if (currentUser?.isAnonymous ?? false) {
           await auth.signOut();
@@ -387,12 +408,21 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   Future<void> _google() async {
+    if (createMode && !acceptedAccountTerms) {
+      setState(
+          () => message = 'Please accept the Terms and Privacy Policy first.');
+      return;
+    }
+
     setState(() {
       loading = true;
       message = '';
     });
     try {
       final auth = Supabase.instance.client.auth;
+      if (createMode && auth.currentUser != null) {
+        await _logAccountConsent();
+      }
       if (auth.currentUser?.isAnonymous ?? false) {
         await auth.linkIdentity(
           OAuthProvider.google,
@@ -409,6 +439,14 @@ class _AuthPageState extends State<AuthPage> {
       setState(() => message = error.message);
     } finally {
       if (mounted) setState(() => loading = false);
+    }
+  }
+
+  Future<void> _logAccountConsent() async {
+    try {
+      await LegalAcceptanceRepository().logAccountConsent();
+    } catch (_) {
+      // Account creation should not fail because a non-critical audit insert did.
     }
   }
 
@@ -591,8 +629,7 @@ class _AuthModeToggle extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: BrandTokens.cream.withValues(alpha: .6),
-        border:
-            Border.all(color: BrandTokens.forest.withValues(alpha: .16)),
+        border: Border.all(color: BrandTokens.forest.withValues(alpha: .16)),
         borderRadius: BorderRadius.circular(999),
       ),
       child: SizedBox(
@@ -671,6 +708,101 @@ class _GuestPanel extends StatelessWidget {
       accent: true,
       child: Text(
         'Guest mode lets you take the assessment now. Create an account when you want to keep saved results across devices.',
+      ),
+    );
+  }
+}
+
+class AccountLegalAgreement extends StatelessWidget {
+  const AccountLegalAgreement({
+    required this.accepted,
+    required this.onChanged,
+    super.key,
+  });
+
+  final bool accepted;
+  final ValueChanged<bool?>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: BrandTokens.cream.withValues(alpha: .58),
+        borderRadius: BorderRadius.circular(BrandTokens.radiusSm),
+        border: Border.all(color: BrandTokens.forest.withValues(alpha: .14)),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(BrandTokens.radiusSm),
+        onTap: onChanged == null ? null : () => onChanged!(!accepted),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Checkbox(
+                value: accepted,
+                activeColor: BrandTokens.forest,
+                checkColor: BrandTokens.cream,
+                onChanged: onChanged,
+              ),
+              const SizedBox(width: 4),
+              const Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 10),
+                  child: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        'I am 18 or older and agree to the ',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      _InlinePolicyLink(
+                        label: 'Terms of service',
+                        path: '/terms',
+                      ),
+                      Text(
+                        ' and ',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      _InlinePolicyLink(
+                        label: 'Privacy policy',
+                        path: '/privacy',
+                      ),
+                      Text(
+                        '.',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _InlinePolicyLink extends StatelessWidget {
+  const _InlinePolicyLink({required this.label, required this.path});
+
+  final String label;
+  final String path;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => context.go(path),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: BrandTokens.forest,
+          fontWeight: FontWeight.w900,
+          decoration: TextDecoration.underline,
+          decorationColor: BrandTokens.gold,
+          decorationThickness: 1.5,
+        ),
       ),
     );
   }
