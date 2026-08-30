@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -40,6 +42,7 @@ class ResultsPage extends StatelessWidget {
         final topCareer = appState.careerMatches.isEmpty
             ? null
             : appState.careerMatches.first;
+        final subscribed = appState.hasActiveSubscription;
 
         return SingleChildScrollView(
           child: PageBand(
@@ -95,7 +98,11 @@ class ResultsPage extends StatelessWidget {
                           childAspectRatio: columns == 1 ? 2.35 : .98,
                           children: [
                             for (var i = 0; i < top.length; i++)
-                              _TopGiftCard(score: top[i], topReveal: i == 0),
+                              _TopGiftCard(
+                                score: top[i],
+                                topReveal: i == 0,
+                                locked: i > 0 && !subscribed,
+                              ),
                           ],
                         );
                       },
@@ -107,12 +114,20 @@ class ResultsPage extends StatelessWidget {
                       _FirstJobBridge(careerMatches: appState.careerMatches),
                     ],
                     const SizedBox(height: 28),
-                    Text(
-                      'All Gift Alignments',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const SizedBox(height: 12),
-                    for (final score in appState.giftScores) _ScoreRow(score),
+                    if (subscribed) ...[
+                      Text(
+                        'All Gift Alignments',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                      const SizedBox(height: 12),
+                      for (final score in appState.giftScores) _ScoreRow(score),
+                    ] else
+                      _LockedProfilePreview(
+                        title: 'Unlock your full gift profile',
+                        body:
+                            'Your top gift, first career signal, and first job match are visible now. The full gift pattern, deeper career lanes, and more matched jobs open inside the portal.',
+                        onUnlock: () => context.go('/subscribe'),
+                      ),
                   ],
                 );
               },
@@ -669,15 +684,20 @@ class _FirstJobBridge extends StatelessWidget {
 }
 
 class _TopGiftCard extends StatelessWidget {
-  const _TopGiftCard({required this.score, required this.topReveal});
+  const _TopGiftCard({
+    required this.score,
+    required this.topReveal,
+    required this.locked,
+  });
 
   final GiftScore score;
   final bool topReveal;
+  final bool locked;
 
   @override
   Widget build(BuildContext context) {
     final gift = gifts.firstWhere((item) => item.key == score.gift);
-    return InfoCard(
+    final card = InfoCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -699,6 +719,86 @@ class _TopGiftCard extends StatelessWidget {
           const Spacer(),
           Text(gift.scripture,
               style: const TextStyle(fontWeight: FontWeight.w700)),
+        ],
+      ),
+    );
+    if (!locked) return card;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        ImageFiltered(
+          imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+          child: Opacity(opacity: .42, child: card),
+        ),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: BrandTokens.cream.withValues(alpha: .72),
+            borderRadius: BorderRadius.circular(BrandTokens.radiusLg),
+            border: Border.all(color: BrandTokens.gold.withValues(alpha: .20)),
+          ),
+          child: const Center(
+            child: Padding(
+              padding: EdgeInsets.all(18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.lock_outline, color: BrandTokens.forest, size: 30),
+                  SizedBox(height: 10),
+                  BrandEyebrow('Portal preview'),
+                  SizedBox(height: 6),
+                  Text(
+                    'More gift detail unlocks after subscribing.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LockedProfilePreview extends StatelessWidget {
+  const _LockedProfilePreview({
+    required this.title,
+    required this.body,
+    required this.onUnlock,
+  });
+
+  final String title;
+  final String body;
+  final VoidCallback onUnlock;
+
+  @override
+  Widget build(BuildContext context) {
+    return InfoCard(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.lock_open_outlined,
+              color: BrandTokens.forest, size: 34),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const BrandEyebrow('Full profile'),
+                const SizedBox(height: 6),
+                Text(title, style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 6),
+                Text(body),
+                const SizedBox(height: 14),
+                FilledButton.icon(
+                  onPressed: onUnlock,
+                  icon: const Icon(Icons.lock_open_outlined),
+                  label: const Text('Unlock more'),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

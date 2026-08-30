@@ -53,6 +53,10 @@ async function handleCheckoutCompleted(session: Record<string, unknown>) {
 
   await upsertCustomer(userId, customerId);
   await upsertSubscription({ userId, customerId, subscriptionId, subscription });
+  await logAppEvent(userId, "subscription_started", {
+    stripe_subscription_id: subscriptionId,
+    source: "checkout.session.completed",
+  });
 }
 
 async function handleSubscriptionUpsert(subscription: Record<string, unknown>) {
@@ -74,6 +78,7 @@ async function handleSubscriptionUpsert(subscription: Record<string, unknown>) {
 async function handleSubscriptionDeleted(subscription: Record<string, unknown>) {
   const subscriptionId = asString(subscription.id);
   if (!subscriptionId) throw new Error("Deleted subscription is missing an id.");
+  const customerId = asString(subscription.customer);
 
   const { error } = await serviceClient()
     .from("billing_subscriptions")
@@ -84,6 +89,13 @@ async function handleSubscriptionDeleted(subscription: Record<string, unknown>) 
     })
     .eq("stripe_subscription_id", subscriptionId);
   if (error) throw error;
+
+  const userId = customerId ? await findUserIdForCustomer(customerId) : null;
+  if (userId) {
+    await logAppEvent(userId, "subscription_canceled", {
+      stripe_subscription_id: subscriptionId,
+    });
+  }
 }
 
 async function handleInvoicePaymentFailed(invoice: Record<string, unknown>) {
@@ -140,6 +152,19 @@ async function upsertSubscription({
       },
       { onConflict: "stripe_subscription_id" },
     );
+  if (error) throw error;
+}
+
+async function logAppEvent(
+  userId: string,
+  eventName: string,
+  properties: Record<string, unknown> = {},
+) {
+  const { error } = await serviceClient().from("app_events").insert({
+    user_id: userId,
+    event_name: eventName,
+    properties,
+  });
   if (error) throw error;
 }
 

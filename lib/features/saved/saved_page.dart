@@ -229,8 +229,7 @@ class _SavedJobs extends StatelessWidget {
                 contentPadding: EdgeInsets.zero,
                 title: Text(job.title,
                     style: const TextStyle(fontWeight: FontWeight.w800)),
-                subtitle:
-                    Text('${job.company} · ${job.location} · ${job.provider}'),
+                subtitle: Text('${job.company} · ${job.location}'),
                 trailing: IconButton(
                   tooltip: 'Remove',
                   onPressed: () => appState.toggleSavedJob(job),

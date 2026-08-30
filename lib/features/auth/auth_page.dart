@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/app_state.dart';
 import '../../core/env.dart';
 import '../../core/theme.dart';
+import '../../data/analytics_repository.dart';
 import '../../data/billing_service.dart';
 import '../../data/legal_acceptance_repository.dart';
 import '../../widgets/brand_components.dart';
@@ -33,6 +34,7 @@ class _AuthPageState extends State<AuthPage> {
   bool forgotPasswordMode = false;
   bool resetPasswordMode = false;
   bool acceptedAccountTerms = false;
+  bool passwordVisible = false;
   String message = '';
   bool _handledReturnAfterAuth = false;
 
@@ -193,10 +195,22 @@ class _AuthPageState extends State<AuthPage> {
                 TextField(
                   controller: password,
                   enabled: !loading,
-                  obscureText: true,
+                  obscureText: !passwordVisible,
                   autofillHints: const [AutofillHints.password],
                   decoration: InputDecoration(
-                      labelText: createMode ? 'Create a password' : 'Password'),
+                    labelText: createMode ? 'Create a password' : 'Password',
+                    suffixIcon: IconButton(
+                      onPressed: loading
+                          ? null
+                          : () => setState(
+                              () => passwordVisible = !passwordVisible),
+                      icon: Icon(passwordVisible
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined),
+                      tooltip:
+                          passwordVisible ? 'Hide password' : 'Show password',
+                    ),
+                  ),
                 ),
                 if (createMode) ...[
                   const SizedBox(height: 12),
@@ -302,6 +316,8 @@ class _AuthPageState extends State<AuthPage> {
       final auth = Supabase.instance.client.auth;
       final currentUser = auth.currentUser;
       if (create) {
+        await AnalyticsRepository().logEvent('account_create_started',
+            properties: {'method': 'email'});
         if (currentUser?.isAnonymous ?? false) {
           await auth.updateUser(
             UserAttributes(email: trimmedEmail, password: enteredPassword),
@@ -315,6 +331,8 @@ class _AuthPageState extends State<AuthPage> {
           );
         }
         await _logAccountConsent();
+        await AnalyticsRepository().logEvent('account_create_completed',
+            properties: {'method': 'email'});
       } else {
         if (currentUser?.isAnonymous ?? false) {
           await auth.signOut();
@@ -423,6 +441,10 @@ class _AuthPageState extends State<AuthPage> {
       if (createMode && auth.currentUser != null) {
         await _logAccountConsent();
       }
+      await AnalyticsRepository().logEvent(
+        createMode ? 'account_create_started' : 'account_sign_in_started',
+        properties: {'method': 'google'},
+      );
       if (auth.currentUser?.isAnonymous ?? false) {
         await auth.linkIdentity(
           OAuthProvider.google,
@@ -927,7 +949,7 @@ class _ForgotPasswordPanel extends StatelessWidget {
   }
 }
 
-class _ResetPasswordPanel extends StatelessWidget {
+class _ResetPasswordPanel extends StatefulWidget {
   const _ResetPasswordPanel({
     required this.controller,
     required this.loading,
@@ -941,6 +963,13 @@ class _ResetPasswordPanel extends StatelessWidget {
   final Future<void> Function() onSubmit;
 
   @override
+  State<_ResetPasswordPanel> createState() => _ResetPasswordPanelState();
+}
+
+class _ResetPasswordPanelState extends State<_ResetPasswordPanel> {
+  var passwordVisible = false;
+
+  @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Column(
@@ -952,20 +981,31 @@ class _ResetPasswordPanel extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         TextField(
-          controller: controller,
-          enabled: !loading,
-          obscureText: true,
+          controller: widget.controller,
+          enabled: !widget.loading,
+          obscureText: !passwordVisible,
           autofillHints: const [AutofillHints.newPassword],
-          decoration: const InputDecoration(labelText: 'New password'),
+          decoration: InputDecoration(
+            labelText: 'New password',
+            suffixIcon: IconButton(
+              onPressed: widget.loading
+                  ? null
+                  : () => setState(() => passwordVisible = !passwordVisible),
+              icon: Icon(passwordVisible
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined),
+              tooltip: passwordVisible ? 'Hide password' : 'Show password',
+            ),
+          ),
         ),
         const SizedBox(height: 14),
         FilledButton(
-          onPressed: loading ? null : onSubmit,
-          child: Text(loading ? 'Updating...' : 'Update password'),
+          onPressed: widget.loading ? null : widget.onSubmit,
+          child: Text(widget.loading ? 'Updating...' : 'Update password'),
         ),
-        if (message.isNotEmpty) ...[
+        if (widget.message.isNotEmpty) ...[
           const SizedBox(height: 12),
-          Text(message, style: TextStyle(color: scheme.primary)),
+          Text(widget.message, style: TextStyle(color: scheme.primary)),
         ],
       ],
     );

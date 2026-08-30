@@ -166,7 +166,7 @@ const _terms = _LegalContent(
       'Paid subscriptions renew automatically until canceled. You can cancel future renewal online through the Stripe billing portal from your Account screen.',
     ]),
     _LegalSection('Career and job information', [
-      'Career information and match percentages are generated from your responses, seeded career data, preferences, and available job data from third-party providers. They are estimates for comparison, not guarantees.',
+      'Career information, alignment percentages, and job suggestions are generated from your GiftPath profile, preferences, and available job information. They are estimates for comparison, not guarantees.',
       'Job listings may change, expire, or contain errors from third-party sources. Always review the employer\'s posting before applying.',
     ]),
     _LegalSection('Changes and availability', [
@@ -206,7 +206,7 @@ const _privacy = _LegalContent(
       'Saved assessment data is used to keep your results available across devices and to support career and opportunity matching.',
     ]),
     _LegalSection('Service providers', [
-      'GiftPath uses Supabase for authentication and database services, Stripe for payments and subscription management, Resend for transactional email, Cloudflare for hosting and delivery, and job data providers such as Adzuna for live listings.',
+      'GiftPath uses Supabase for authentication and database services, Stripe for payments and subscription management, Resend for transactional email, Cloudflare for hosting and delivery, and third-party job data providers for available listings.',
       'These providers process information as needed to deliver their services to GiftPath.',
     ]),
     _LegalSection('Your choices', [

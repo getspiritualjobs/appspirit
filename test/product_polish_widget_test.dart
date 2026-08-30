@@ -222,8 +222,9 @@ void main() {
     await tester.tap(find.text('See suggested jobs'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Suggested live matches'), findsOneWidget);
-    expect(find.text('How job match works'), findsOneWidget);
+    expect(find.text('Your first matched opening'), findsOneWidget);
+    expect(find.text('How job match works'), findsNothing);
+    expect(find.text('Unlock search tools'), findsOneWidget);
     expect(find.text('Unlock Full List'), findsOneWidget);
     expect(find.textContaining(r'$7.77'), findsNothing);
     expect(find.textContaining(r'$77.77'), findsNothing);

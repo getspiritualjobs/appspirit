@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/env.dart';
+import 'analytics_repository.dart';
 
 class BillingCheckoutResult {
   const BillingCheckoutResult.success(this.url) : error = null;
@@ -40,6 +41,10 @@ class BillingService {
     }
 
     try {
+      await AnalyticsRepository().logEvent(
+        'checkout_started',
+        properties: {'plan': plan.apiValue},
+      );
       final origin = Uri.base.origin;
       final response = await Supabase.instance.client.functions.invoke(
         'create-checkout-session',

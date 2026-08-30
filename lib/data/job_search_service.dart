@@ -75,8 +75,7 @@ class JobSearchService {
         return JobSearchResult(
           jobs: demoJobs,
           source: JobSearchSource.demo,
-          message:
-              'Demo jobs are showing until Adzuna or USAJOBS credentials are added to Supabase.',
+          message: 'We are preparing live opportunities for this profile.',
         );
       }
 
@@ -92,15 +91,14 @@ class JobSearchService {
         source: jobs.isEmpty ? JobSearchSource.demo : JobSearchSource.live,
         providers: jobs.isEmpty ? const [] : providers,
         message: jobs.isEmpty
-            ? 'No live jobs matched those filters, so demo jobs are showing.'
+            ? 'No current openings matched those filters, so we are showing starter examples.'
             : null,
       );
     } catch (error) {
       return JobSearchResult(
         jobs: demoJobs,
         source: JobSearchSource.demo,
-        message:
-            'Demo jobs are showing because the live job search is not deployed yet.',
+        message: 'We could not refresh live openings right now.',
       );
     }
   }
@@ -253,13 +251,11 @@ JobListing _mergeDuplicateJob(JobListing current, JobListing duplicate) {
 String _jobFingerprint(JobListing job) {
   final title = _normalizeText(job.title);
   final company = _normalizeText(job.company);
-  final description = _normalizeText(job.description);
   if (title.isNotEmpty && company.isNotEmpty) {
     return [
       job.provider,
       company,
       title,
-      description.length > 160 ? description.substring(0, 160) : description,
     ].join(':');
   }
   return [

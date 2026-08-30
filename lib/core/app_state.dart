@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../data/assessment_repository.dart';
+import '../data/analytics_repository.dart';
 import '../data/billing_service.dart';
 import '../data/legal_acceptance_repository.dart';
 import '../data/saved_data_repository.dart';
@@ -24,6 +25,7 @@ class GiftPathState extends ChangeNotifier {
   String? assessmentSaveError;
   String? savedDataError;
   bool assessmentConsentAccepted = false;
+  int _lastProgressBucket = 0;
 
   bool get isComplete => responses.length == assessmentQuestions.length;
   bool get hasResults => giftScores.isNotEmpty;
@@ -59,11 +61,13 @@ class GiftPathState extends ChangeNotifier {
 
   void answer(String questionId, int value) {
     responses[questionId] = value;
+    _logAssessmentProgress();
     notifyListeners();
   }
 
   void acceptAssessmentConsent() {
     assessmentConsentAccepted = true;
+    AnalyticsRepository().logEvent('assessment_consent_accepted');
     notifyListeners();
   }
 
@@ -75,6 +79,7 @@ class GiftPathState extends ChangeNotifier {
     latestAssessmentId = null;
     assessmentSaveError = null;
     assessmentConsentAccepted = false;
+    _lastProgressBucket = 0;
     notifyListeners();
   }
 
@@ -96,6 +101,16 @@ class GiftPathState extends ChangeNotifier {
             .logAssessmentConsent(assessmentId: latestAssessmentId!);
       }
       await refreshSavedData();
+      await AnalyticsRepository().logEvent(
+        'assessment_completed',
+        assessmentId: latestAssessmentId,
+        properties: {
+          'answered_count': responses.length,
+          'top_gift': giftScores.isEmpty ? null : giftScores.first.gift.name,
+          'top_score':
+              giftScores.isEmpty ? null : giftScores.first.normalizedScore,
+        },
+      );
     } catch (error) {
       assessmentSaveError = error.toString();
     }
@@ -218,5 +233,26 @@ class GiftPathState extends ChangeNotifier {
       savedDataError = error.toString();
     }
     notifyListeners();
+  }
+
+  void _logAssessmentProgress() {
+    final answered = responses.length;
+    final bucket = answered == 1
+        ? 1
+        : answered == assessmentQuestions.length
+            ? assessmentQuestions.length
+            : (answered ~/ 5) * 5;
+    if (bucket <= 0 || bucket == _lastProgressBucket) return;
+    _lastProgressBucket = bucket;
+    AnalyticsRepository().logEvent(
+      'assessment_progress',
+      assessmentId: latestAssessmentId,
+      properties: {
+        'answered_count': answered,
+        'total_count': assessmentQuestions.length,
+        'progress_percent':
+            (answered / assessmentQuestions.length * 100).round(),
+      },
+    );
   }
 }

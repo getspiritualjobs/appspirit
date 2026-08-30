@@ -41,6 +41,7 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+const maxJobAgeDays = 45;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -52,7 +53,7 @@ Deno.serve(async (req) => {
       searchAdzuna(titles, body),
       searchUsaJobs(titles, body),
     ]);
-    const rawJobs = [...adzuna, ...usajobs];
+    const rawJobs = filterCurrentJobs([...adzuna, ...usajobs]);
     const jobs = dedupeJobs(rawJobs).slice(0, 50);
     const providers = [...new Set(jobs.map((job) => job.provider))];
     await logJobApiUsage({
@@ -146,7 +147,7 @@ async function searchAdzunaQuery(
 
   const data = await response.json();
   const results = Array.isArray(data.results) ? data.results : [];
-  const jobs = results.map((job: Record<string, any>): NormalizedJob => ({
+  const jobs = filterCurrentJobs(results.map((job: Record<string, any>): NormalizedJob => ({
     id: String(job.id),
     provider: "adzuna",
     matchedQuery: query,
@@ -160,7 +161,7 @@ async function searchAdzunaQuery(
     remote: /remote/i.test(`${job.title} ${job.description} ${job.location?.display_name}`),
     postedDate: typeof job.created === "string" ? job.created : null,
     applicationUrl: String(job.redirect_url ?? ""),
-  }));
+  })));
   await writeJobCache(cacheKey, "adzuna", jobs);
   await logJobApiUsage({
     provider: "adzuna",
@@ -234,7 +235,7 @@ async function searchUsaJobs(titles: string[], req: SearchRequest): Promise<Norm
   const data = await response.json();
   const items = Array.isArray(data.SearchResult?.SearchResultItems) ? data.SearchResult.SearchResultItems : [];
 
-  const jobs = items.map((item: Record<string, any>): NormalizedJob => {
+  const jobs = filterCurrentJobs(items.map((item: Record<string, any>): NormalizedJob => {
     const descriptor = item.MatchedObjectDescriptor ?? {};
     const remuneration = descriptor.PositionRemuneration?.[0] ?? {};
     return {
@@ -252,7 +253,7 @@ async function searchUsaJobs(titles: string[], req: SearchRequest): Promise<Norm
       postedDate: typeof descriptor.PublicationStartDate === "string" ? descriptor.PublicationStartDate : null,
       applicationUrl: String(descriptor.PositionURI ?? ""),
     };
-  });
+  }));
   await writeJobCache(cacheKey, "usajobs", jobs);
   await logJobApiUsage({
     provider: "usajobs",
@@ -291,14 +292,25 @@ function dedupeJobs(jobs: NormalizedJob[]) {
   return unique;
 }
 
+function filterCurrentJobs(jobs: NormalizedJob[]) {
+  return jobs.filter((job) => isCurrentJob(job.postedDate));
+}
+
+function isCurrentJob(postedDate: string | null) {
+  if (!postedDate) return true;
+  const parsed = Date.parse(postedDate);
+  if (!Number.isFinite(parsed)) return true;
+  const cutoff = Date.now() - maxJobAgeDays * 24 * 60 * 60 * 1000;
+  return parsed >= cutoff;
+}
+
 function jobFingerprint(job: NormalizedJob) {
   const title = fingerprintText(job.title)
     .replace(/\b(remote|hybrid|onsite|part|time|full|opening|grand|urgent|hiring)\b/g, " ")
     .replace(/\s+/g, " ")
     .trim();
   const company = fingerprintText(job.company);
-  const description = fingerprintText(job.description).slice(0, 160);
-  if (title && company) return `${job.provider}:${company}:${title}:${description}`;
+  if (title && company) return `${job.provider}:${company}:${title}`;
   return `${job.provider}:${fingerprintText(job.applicationUrl)}:${title}`;
 }
 
@@ -352,7 +364,9 @@ async function readJobCache(cacheKey: string): Promise<NormalizedJob[] | null> {
     if (!response.ok) return null;
     const rows = await response.json();
     const cached = Array.isArray(rows) ? rows[0]?.response : null;
-    return Array.isArray(cached) ? cached as NormalizedJob[] : null;
+    if (!Array.isArray(cached)) return null;
+    const current = filterCurrentJobs(cached as NormalizedJob[]);
+    return current.length > 0 ? current : null;
   } catch (_) {
     return null;
   }

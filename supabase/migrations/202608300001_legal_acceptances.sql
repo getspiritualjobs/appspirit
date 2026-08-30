@@ -18,13 +18,16 @@ create index if not exists legal_acceptances_assessment_id_idx
 
 alter table public.legal_acceptances enable row level security;
 
+drop policy if exists "users read own legal acceptances"
+  on public.legal_acceptances;
 create policy "users read own legal acceptances"
   on public.legal_acceptances
   for select
   using (auth.uid() = user_id);
 
+drop policy if exists "users create own legal acceptances"
+  on public.legal_acceptances;
 create policy "users create own legal acceptances"
   on public.legal_acceptances
   for insert
   with check (auth.uid() = user_id and age_confirmed = true);
-
