@@ -249,9 +249,9 @@ class _FeatureSection extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: BrandTokens.ink)),
                 const SizedBox(height: 12),
-                const ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 620),
-                  child: Text(
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 620),
+                  child: const Text(
                     'Most career tools start with a resume. GiftPath starts '
                     'with who you already are — then walks that forward '
                     'into real, searchable next steps.',
