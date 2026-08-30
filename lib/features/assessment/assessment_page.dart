@@ -302,7 +302,7 @@ class _AnswerOption extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(BrandTokens.radiusSm),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 140),
         width: double.infinity,
@@ -310,7 +310,7 @@ class _AnswerOption extends StatelessWidget {
         decoration: BoxDecoration(
           color:
               selected ? scheme.primary.withValues(alpha: .10) : Colors.white,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(BrandTokens.radiusSm),
           border: Border.all(
               color: selected
                   ? scheme.primary

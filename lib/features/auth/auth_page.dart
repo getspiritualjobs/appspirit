@@ -490,7 +490,7 @@ class _ResultsHandoffTrail extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: BrandTokens.cream.withValues(alpha: .64),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(BrandTokens.radiusMd),
         border: Border.all(color: BrandTokens.gold.withValues(alpha: .24)),
       ),
       child: const Padding(

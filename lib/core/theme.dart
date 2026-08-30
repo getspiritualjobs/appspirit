@@ -3,11 +3,21 @@ import 'package:google_fonts/google_fonts.dart';
 
 abstract final class BrandTokens {
   static const forest = Color(0xFF24392C);
+  static const forestDeep = Color(0xFF16261B);
   static const gold = Color(0xFFC6A046);
+  static const goldBright = Color(0xFFD8B968);
   static const cream = Color(0xFFF3ECDF);
+  static const creamDim = Color(0xFFEBE2D0);
   static const surface = Color(0xFFFFFCF7);
   static const ink = Color(0xFF17181A);
   static const moss = Color(0xFF53614F);
+  static const mossSoft = Color(0xFF8A9484);
+
+  /// Radius tier — buttons/inputs/chips get the small end, cards the
+  /// middle, hero/CTA panels the large end. See BRAND.md.
+  static const radiusSm = 12.0;
+  static const radiusMd = 20.0;
+  static const radiusLg = 32.0;
 }
 
 ThemeData buildGiftPathTheme() {
@@ -53,24 +63,26 @@ ThemeData buildGiftPathTheme() {
     cardTheme: CardThemeData(
       color: scheme.surface,
       surfaceTintColor: Colors.transparent,
-      elevation: 2,
-      shadowColor: seed.withValues(alpha: .08),
+      elevation: 0,
+      shadowColor: seed.withValues(alpha: .16),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: seed.withValues(alpha: 0.10)),
+        borderRadius: BorderRadius.circular(BrandTokens.radiusMd),
+        side: BorderSide(color: seed.withValues(alpha: 0.08)),
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         minimumSize: const Size(48, 48),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(BrandTokens.radiusSm)),
         textStyle: const TextStyle(fontWeight: FontWeight.w700),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(48, 48),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(BrandTokens.radiusSm)),
         side: BorderSide(color: seed.withValues(alpha: 0.28)),
         textStyle: const TextStyle(fontWeight: FontWeight.w700),
       ),
@@ -78,25 +90,27 @@ ThemeData buildGiftPathTheme() {
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         minimumSize: const Size(44, 44),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(BrandTokens.radiusSm)),
         textStyle: const TextStyle(fontWeight: FontWeight.w700),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(BrandTokens.radiusSm)),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: seed.withValues(alpha: .24)),
+        borderRadius: BorderRadius.circular(BrandTokens.radiusSm),
+        borderSide: BorderSide(color: seed.withValues(alpha: .20)),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(BrandTokens.radiusSm),
         borderSide: const BorderSide(color: seed, width: 1.5),
       ),
       filled: true,
       fillColor: Colors.white,
     ),
     chipTheme: ChipThemeData(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      shape: const StadiumBorder(),
       side: BorderSide(color: seed.withValues(alpha: .14)),
       backgroundColor: BrandTokens.surface,
       selectedColor: seed.withValues(alpha: .12),

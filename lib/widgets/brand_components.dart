@@ -140,7 +140,7 @@ class BrandNotice extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: color.withValues(alpha: accent ? .12 : .08),
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        borderRadius: BorderRadius.circular(BrandTokens.radiusMd),
         border: Border.all(color: color.withValues(alpha: .16)),
       ),
       child: Padding(

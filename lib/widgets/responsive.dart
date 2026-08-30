@@ -43,7 +43,7 @@ class InfoCard extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: BrandTokens.surface,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(BrandTokens.radiusMd),
         ),
         child: Padding(padding: padding, child: child),
       ),

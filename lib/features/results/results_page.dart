@@ -504,7 +504,7 @@ class _NextStepAction extends StatelessWidget {
       padding: const EdgeInsets.all(18),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(BrandTokens.radiusMd),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
