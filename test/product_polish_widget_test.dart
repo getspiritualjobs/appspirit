@@ -5,6 +5,7 @@ import 'package:spiritual_gifts_career_discovery/core/app_state.dart';
 import 'package:spiritual_gifts_career_discovery/core/models.dart';
 import 'package:spiritual_gifts_career_discovery/core/theme.dart';
 import 'package:spiritual_gifts_career_discovery/data/seed_data.dart';
+import 'package:spiritual_gifts_career_discovery/features/admin/admin_page.dart';
 import 'package:spiritual_gifts_career_discovery/features/assessment/assessment_page.dart';
 import 'package:spiritual_gifts_career_discovery/features/auth/auth_page.dart';
 import 'package:spiritual_gifts_career_discovery/features/blog/blog_page.dart';
@@ -312,6 +313,18 @@ void main() {
     expect(find.text('Admin access needed'), findsOneWidget);
     expect(find.text('Write a blog post'), findsNothing);
   });
+
+  testWidgets('admin dashboard requires admin access',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp.router(
+      theme: buildGiftPathTheme(),
+      routerConfig: _routerFor('/admin'),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Admin access only'), findsOneWidget);
+    expect(find.text('Admin dashboard'), findsNothing);
+  });
 }
 
 Widget _shell(Widget child) {
@@ -378,6 +391,10 @@ GoRouter _routerFor(String initialLocation) {
         builder: (_, state) => Scaffold(
           body: BlogPostPage(slug: state.pathParameters['slug'] ?? ''),
         ),
+      ),
+      GoRoute(
+        path: '/admin',
+        builder: (_, __) => const Scaffold(body: AdminPage()),
       ),
     ],
   );

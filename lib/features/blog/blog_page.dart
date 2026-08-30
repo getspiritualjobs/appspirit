@@ -73,10 +73,21 @@ class _BlogPageState extends State<BlogPage> {
                   ],
                 ),
                 if (isAdmin)
-                  FilledButton.icon(
-                    onPressed: () => context.go('/blog/new'),
-                    icon: const Icon(Icons.edit_note),
-                    label: const Text('New post'),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () => context.go('/admin'),
+                        icon: const Icon(Icons.insights_outlined),
+                        label: const Text('Admin'),
+                      ),
+                      FilledButton.icon(
+                        onPressed: () => context.go('/blog/new'),
+                        icon: const Icon(Icons.edit_note),
+                        label: const Text('New post'),
+                      ),
+                    ],
                   ),
               ],
             ),

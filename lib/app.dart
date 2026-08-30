@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'core/theme.dart';
+import 'features/admin/admin_page.dart';
 import 'features/about/about_page.dart';
 import 'features/assessment/assessment_page.dart';
 import 'features/auth/auth_page.dart';
@@ -79,6 +80,10 @@ class GiftPathApp extends StatelessWidget {
             GoRoute(
               path: '/about',
               pageBuilder: (_, state) => _brandPage(state, const AboutPage()),
+            ),
+            GoRoute(
+              path: '/admin',
+              pageBuilder: (_, state) => _brandPage(state, const AdminPage()),
             ),
             GoRoute(
               path: '/auth',
