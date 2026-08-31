@@ -57,8 +57,9 @@ class _SubscribePageState extends State<SubscribePage> {
                     price: r'$77.77',
                     cadence: 'per year',
                     description:
-                        'Best value if you want GiftPath available through a longer season of discernment.',
+                        'A full year of the opportunity portal for less than ten monthly payments.',
                     icon: Icons.savings_outlined,
+                    badge: 'Save 17%',
                     loading: loadingPlan == BillingPlan.yearly,
                     onPressed: () => _openCheckout(BillingPlan.yearly),
                   ),
@@ -259,6 +260,7 @@ class _PlanCard extends StatelessWidget {
     required this.icon,
     required this.loading,
     required this.onPressed,
+    this.badge,
     this.primary = false,
   });
 
@@ -269,6 +271,7 @@ class _PlanCard extends StatelessWidget {
   final IconData icon;
   final bool loading;
   final VoidCallback onPressed;
+  final String? badge;
   final bool primary;
 
   @override
@@ -277,7 +280,36 @@ class _PlanCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IconBadge(icon, size: 42),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              IconBadge(icon, size: 42),
+              const Spacer(),
+              if (badge != null)
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: BrandTokens.gold.withValues(alpha: .18),
+                    border: Border.all(
+                      color: BrandTokens.gold.withValues(alpha: .62),
+                    ),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                    child: Text(
+                      badge!.toUpperCase(),
+                      style: const TextStyle(
+                        color: BrandTokens.forest,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: .9,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
           const SizedBox(height: 14),
           if (primary) ...[
             const BrandEyebrow('Most flexible'),

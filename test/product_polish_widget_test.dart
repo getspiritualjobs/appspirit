@@ -77,9 +77,10 @@ void main() {
     expect(find.text('Your results are ready'), findsOneWidget);
     expect(
       find.text(
-          'Create an account to keep your gift profile, sign in if you already have one, or continue as a guest on this device.'),
+          'Create a free account or sign in to view and keep your GiftPath results.'),
       findsOneWidget,
     );
+    expect(find.text('View results as guest'), findsNothing);
   });
 
   testWidgets('create account agreement links to terms and privacy',
@@ -266,6 +267,7 @@ void main() {
     expect(find.text('FULL ACCESS'), findsOneWidget);
     expect(find.textContaining(r'$7.77'), findsOneWidget);
     expect(find.textContaining(r'$77.77'), findsOneWidget);
+    expect(find.text('SAVE 17%'), findsOneWidget);
   });
 
   testWidgets('legal pages include launch policy drafts',

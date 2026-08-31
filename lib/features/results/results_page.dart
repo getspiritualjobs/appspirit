@@ -2,8 +2,10 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/app_state.dart';
+import '../../core/env.dart';
 import '../../core/models.dart';
 import '../../core/scoring.dart';
 import '../../core/theme.dart';
@@ -43,6 +45,30 @@ class ResultsPage extends StatelessWidget {
             ? null
             : appState.careerMatches.first;
         final subscribed = appState.hasActiveSubscription;
+        final user =
+            Env.hasSupabase ? Supabase.instance.client.auth.currentUser : null;
+        final requiresAccount = Env.hasSupabase &&
+            appState.hasResults &&
+            (user == null || user.isAnonymous);
+
+        if (requiresAccount) {
+          return PageBand(
+            child: EmptyState(
+              icon: Icons.lock_outline,
+              eyebrow: 'Account required',
+              title: 'Create an account to see your results',
+              body:
+                  'Your assessment is finished. Create a free account or sign in so GiftPath can keep your results with you.',
+              action: FilledButton(
+                onPressed: () async {
+                  await appState.persistPendingAssessmentForAuth();
+                  if (context.mounted) context.go('/auth?returnTo=/results');
+                },
+                child: const Text('Create account'),
+              ),
+            ),
+          );
+        }
 
         return SingleChildScrollView(
           child: PageBand(

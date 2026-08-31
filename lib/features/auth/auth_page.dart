@@ -133,7 +133,7 @@ class _AuthPageState extends State<AuthPage> {
               if (!resettingPassword) ...[
                 const SizedBox(height: 8),
                 Text(returningToResults
-                    ? 'Create an account to keep your gift profile, sign in if you already have one, or continue as a guest on this device.'
+                    ? 'Create a free account or sign in to view and keep your GiftPath results.'
                     : 'Create an account when you want your results, career matches, saved jobs, and search preferences to follow you across devices.'),
               ],
               if (returningToResults && !resettingPassword) ...[
@@ -175,8 +175,8 @@ class _AuthPageState extends State<AuthPage> {
                   },
                 )
               else ...[
-                if (isGuest) const _GuestPanel(),
-                if (isGuest) const SizedBox(height: 16),
+                if (isGuest && !returningToResults) const _GuestPanel(),
+                if (isGuest && !returningToResults) const SizedBox(height: 16),
                 _AuthModeToggle(
                   createMode: createMode,
                   enabled: !loading,
@@ -262,13 +262,13 @@ class _AuthPageState extends State<AuthPage> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: loading || isGuest ? null : _continueAsGuest,
-                  child: Text(returningToResults
-                      ? 'View results as guest'
-                      : 'Continue as guest'),
-                ),
+                if (!returningToResults) ...[
+                  const SizedBox(height: 10),
+                  TextButton(
+                    onPressed: loading || isGuest ? null : _continueAsGuest,
+                    child: const Text('Continue as guest'),
+                  ),
+                ],
                 if (message.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   Text(message,
