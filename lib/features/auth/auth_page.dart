@@ -214,7 +214,8 @@ class _AuthPageState extends State<AuthPage> {
                               () => passwordVisible = !passwordVisible),
                       icon: Icon(passwordVisible
                           ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined),
+                          : Icons.visibility_outlined,
+                          color: BrandTokens.forest),
                       tooltip:
                           passwordVisible ? 'Hide password' : 'Show password',
                     ),
@@ -236,7 +237,8 @@ class _AuthPageState extends State<AuthPage> {
                                 !confirmPasswordVisible),
                         icon: Icon(confirmPasswordVisible
                             ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined),
+                            : Icons.visibility_outlined,
+                            color: BrandTokens.forest),
                         tooltip: confirmPasswordVisible
                             ? 'Hide password'
                             : 'Show password',
@@ -988,7 +990,8 @@ class _ResetPasswordPanelState extends State<_ResetPasswordPanel> {
                   : () => setState(() => passwordVisible = !passwordVisible),
               icon: Icon(passwordVisible
                   ? Icons.visibility_off_outlined
-                  : Icons.visibility_outlined),
+                  : Icons.visibility_outlined,
+                  color: BrandTokens.forest),
               tooltip: passwordVisible ? 'Hide password' : 'Show password',
             ),
           ),
