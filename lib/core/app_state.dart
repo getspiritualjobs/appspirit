@@ -98,6 +98,30 @@ class GiftPathState extends ChangeNotifier {
     );
   }
 
+  Future<bool> restorePendingAssessmentFromDevice() async {
+    if (hasResults) return false;
+
+    final snapshot = await PendingAssessmentStorage().load();
+    if (snapshot == null || snapshot.responses.isEmpty) return false;
+
+    responses
+      ..clear()
+      ..addAll(snapshot.responses);
+    assessmentConsentAccepted = snapshot.consentAccepted;
+    if (responses.length == assessmentQuestions.length) {
+      giftScores = scoreAssessment(assessmentQuestions, responses);
+      careerMatches = matchCareers(
+        careers: careers,
+        giftScores: giftScores,
+        preference: preference,
+      );
+      savedResult = List.unmodifiable(giftScores);
+    }
+    assessmentSaveError = null;
+    notifyListeners();
+    return true;
+  }
+
   Future<bool> restorePendingAssessmentForSignedInUser() async {
     if (!Env.hasSupabase) return false;
     final user = Supabase.instance.client.auth.currentUser;
@@ -154,6 +178,7 @@ class GiftPathState extends ChangeNotifier {
         careers: careers, giftScores: giftScores, preference: preference);
     savedResult = List.unmodifiable(giftScores);
     assessmentSaveError = null;
+    await persistPendingAssessmentForAuth();
     notifyListeners();
 
     try {

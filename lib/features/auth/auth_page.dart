@@ -28,6 +28,7 @@ class AuthPage extends StatefulWidget {
 class _AuthPageState extends State<AuthPage> {
   final email = TextEditingController();
   final password = TextEditingController();
+  final confirmPassword = TextEditingController();
   final resetPassword = TextEditingController();
   StreamSubscription<AuthState>? authSubscription;
   bool createMode = true;
@@ -36,6 +37,7 @@ class _AuthPageState extends State<AuthPage> {
   bool resetPasswordMode = false;
   bool acceptedAccountTerms = false;
   bool passwordVisible = false;
+  bool confirmPasswordVisible = false;
   String message = '';
   bool _handledReturnAfterAuth = false;
 
@@ -84,6 +86,9 @@ class _AuthPageState extends State<AuthPage> {
         });
       });
     }
+    Future.microtask(() async {
+      await appState.restorePendingAssessmentFromDevice();
+    });
   }
 
   @override
@@ -91,6 +96,7 @@ class _AuthPageState extends State<AuthPage> {
     authSubscription?.cancel();
     email.dispose();
     password.dispose();
+    confirmPassword.dispose();
     resetPassword.dispose();
     super.dispose();
   }
@@ -121,7 +127,7 @@ class _AuthPageState extends State<AuthPage> {
                 resettingPassword
                     ? 'Reset your password'
                     : returningToResults
-                        ? 'Your results are ready'
+                        ? 'Sign up to see your results'
                         : 'Save your results and opportunities',
                 style: resettingPassword
                     ? Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -133,7 +139,7 @@ class _AuthPageState extends State<AuthPage> {
               if (!resettingPassword) ...[
                 const SizedBox(height: 8),
                 Text(returningToResults
-                    ? 'Create a free account or sign in to view and keep your GiftPath results.'
+                    ? 'Create a free account or sign in so GiftPath can show the results from the quiz you just finished.'
                     : 'Create an account when you want your results, career matches, saved jobs, and search preferences to follow you across devices.'),
               ],
               if (returningToResults && !resettingPassword) ...[
@@ -214,6 +220,30 @@ class _AuthPageState extends State<AuthPage> {
                     ),
                   ),
                 ),
+                if (createMode) ...[
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: confirmPassword,
+                    enabled: !loading,
+                    obscureText: !confirmPasswordVisible,
+                    autofillHints: const [AutofillHints.newPassword],
+                    decoration: InputDecoration(
+                      labelText: 'Confirm password',
+                      suffixIcon: IconButton(
+                        onPressed: loading
+                            ? null
+                            : () => setState(() => confirmPasswordVisible =
+                                !confirmPasswordVisible),
+                        icon: Icon(confirmPasswordVisible
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined),
+                        tooltip: confirmPasswordVisible
+                            ? 'Hide password'
+                            : 'Show password',
+                      ),
+                    ),
+                  ),
+                ],
                 if (createMode) ...[
                   const SizedBox(height: 12),
                   AccountLegalAgreement(
@@ -303,6 +333,10 @@ class _AuthPageState extends State<AuthPage> {
       setState(() => message = 'Use at least 6 characters for your password.');
       return;
     }
+    if (create && enteredPassword != confirmPassword.text) {
+      setState(() => message = 'Make sure both passwords match.');
+      return;
+    }
     if (create && !acceptedAccountTerms) {
       setState(
           () => message = 'Please accept the Terms and Privacy Policy first.');
@@ -354,12 +388,12 @@ class _AuthPageState extends State<AuthPage> {
         return;
       }
       if (create) {
-        final confirmationPath = Uri(
-          path: '/confirm-account',
-          queryParameters: {
-            if (returnTo != null) 'returnTo': returnTo,
-          },
-        ).toString();
+        await appState.restorePendingAssessmentFromDevice();
+        if (returnTo != null) {
+          if (mounted) context.go(returnTo);
+          return;
+        }
+        final confirmationPath = Uri(path: '/confirm-account').toString();
         if (mounted) context.go(confirmationPath);
         return;
       }
@@ -444,6 +478,7 @@ class _AuthPageState extends State<AuthPage> {
     });
     try {
       final auth = Supabase.instance.client.auth;
+      await appState.persistPendingAssessmentForAuth();
       if (createMode && auth.currentUser != null) {
         await _logAccountConsent();
       }
@@ -458,7 +493,6 @@ class _AuthPageState extends State<AuthPage> {
         );
       }
       if (auth.currentUser?.isAnonymous ?? false) {
-        await appState.persistPendingAssessmentForAuth();
         await auth.signOut();
       }
       await auth.signInWithOAuth(

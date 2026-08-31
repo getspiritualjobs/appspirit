@@ -23,9 +23,12 @@ Future<void> main() async {
         await appState.refreshSubscription();
       });
     });
+    await appState.restorePendingAssessmentFromDevice();
     await appState.restorePendingAssessmentForSignedInUser();
     await appState.refreshSavedData();
     await appState.refreshSubscription();
+  } else {
+    await appState.restorePendingAssessmentFromDevice();
   }
 
   String? initialLocation;

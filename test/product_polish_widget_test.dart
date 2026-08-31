@@ -66,7 +66,7 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    expect(find.text('Your results are ready'), findsNothing);
+    expect(find.text('Sign up to see your results'), findsNothing);
 
     await tester.pumpWidget(MaterialApp.router(
       theme: buildGiftPathTheme(),
@@ -74,10 +74,10 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    expect(find.text('Your results are ready'), findsOneWidget);
+    expect(find.text('Sign up to see your results'), findsOneWidget);
     expect(
       find.text(
-          'Create a free account or sign in to view and keep your GiftPath results.'),
+          'Create a free account or sign in so GiftPath can show the results from the quiz you just finished.'),
       findsOneWidget,
     );
     expect(find.text('View results as guest'), findsNothing);
@@ -144,7 +144,7 @@ void main() {
     await tester.tap(find.text('Reveal My Gifts'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Your results are ready'), findsOneWidget);
+    expect(find.text('Sign up to see your results'), findsOneWidget);
   });
 
   testWidgets('assessment page recognizes completed results and can retake',
