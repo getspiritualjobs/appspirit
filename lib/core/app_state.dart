@@ -1,12 +1,15 @@
 import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../data/assessment_repository.dart';
 import '../data/analytics_repository.dart';
 import '../data/billing_service.dart';
 import '../data/legal_acceptance_repository.dart';
+import '../data/pending_assessment_storage.dart';
 import '../data/saved_data_repository.dart';
 import '../data/seed_data.dart';
 import '../data/whop_pixel.dart';
+import 'env.dart';
 import 'models.dart';
 import 'scoring.dart';
 
@@ -83,6 +86,66 @@ class GiftPathState extends ChangeNotifier {
     assessmentConsentAccepted = false;
     _lastProgressBucket = 0;
     notifyListeners();
+  }
+
+  Future<void> persistPendingAssessmentForAuth() async {
+    if (responses.isEmpty) return;
+    await PendingAssessmentStorage().save(
+      PendingAssessmentSnapshot(
+        responses: Map<String, int>.from(responses),
+        consentAccepted: assessmentConsentAccepted,
+      ),
+    );
+  }
+
+  Future<bool> restorePendingAssessmentForSignedInUser() async {
+    if (!Env.hasSupabase) return false;
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null || user.isAnonymous) return false;
+
+    final storage = PendingAssessmentStorage();
+    final snapshot = await storage.load();
+    if (snapshot == null || snapshot.responses.isEmpty) return false;
+
+    responses
+      ..clear()
+      ..addAll(snapshot.responses);
+    assessmentConsentAccepted = snapshot.consentAccepted;
+    giftScores = scoreAssessment(assessmentQuestions, responses);
+    careerMatches = matchCareers(
+      careers: careers,
+      giftScores: giftScores,
+      preference: preference,
+    );
+    savedResult = List.unmodifiable(giftScores);
+    assessmentSaveError = null;
+    notifyListeners();
+
+    try {
+      latestAssessmentId = await AssessmentRepository().saveCompletedAssessment(
+        responses: responses,
+        giftScores: giftScores,
+      );
+      if (assessmentConsentAccepted && latestAssessmentId != null) {
+        await LegalAcceptanceRepository()
+            .logAssessmentConsent(assessmentId: latestAssessmentId!);
+      }
+      await AnalyticsRepository().logEvent(
+        'assessment_restored_after_auth',
+        assessmentId: latestAssessmentId,
+        properties: {
+          'answered_count': responses.length,
+          'top_gift': giftScores.isEmpty ? null : giftScores.first.gift.name,
+        },
+      );
+      await refreshSavedData();
+      await storage.clear();
+      return true;
+    } catch (error) {
+      assessmentSaveError = error.toString();
+      notifyListeners();
+      return false;
+    }
   }
 
   Future<void> completeAssessment() async {

@@ -69,6 +69,7 @@ class _AuthPageState extends State<AuthPage> {
             !_handledReturnAfterAuth) {
           _handledReturnAfterAuth = true;
           Future.microtask(() async {
+            await appState.restorePendingAssessmentForSignedInUser();
             await appState.refreshSavedData();
             await appState.refreshSubscription();
             if (mounted) context.go(returnTo);
@@ -457,17 +458,13 @@ class _AuthPageState extends State<AuthPage> {
         );
       }
       if (auth.currentUser?.isAnonymous ?? false) {
-        await auth.linkIdentity(
-          OAuthProvider.google,
-          redirectTo: _authRedirectUrl,
-        );
-        return;
-      } else {
-        await auth.signInWithOAuth(
-          OAuthProvider.google,
-          redirectTo: _authRedirectUrl,
-        );
+        await appState.persistPendingAssessmentForAuth();
+        await auth.signOut();
       }
+      await auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: _authRedirectUrl,
+      );
     } on AuthException catch (error) {
       setState(() => message = error.message);
     } finally {

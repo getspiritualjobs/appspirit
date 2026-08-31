@@ -140,6 +140,23 @@
           }
         } catch (_) {}
       };
+      window.giftPathSavePendingAssessment = function(payload) {
+        try {
+          window.localStorage.setItem("giftpath_pending_assessment", payload);
+        } catch (_) {}
+      };
+      window.giftPathLoadPendingAssessment = function() {
+        try {
+          return window.localStorage.getItem("giftpath_pending_assessment") || "";
+        } catch (_) {
+          return "";
+        }
+      };
+      window.giftPathClearPendingAssessment = function() {
+        try {
+          window.localStorage.removeItem("giftpath_pending_assessment");
+        } catch (_) {}
+      };
     </script>
   </head>
   <body>

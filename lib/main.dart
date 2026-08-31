@@ -17,9 +17,13 @@ Future<void> main() async {
       publishableKey: Env.supabaseAnonKey,
     );
     Supabase.instance.client.auth.onAuthStateChange.listen((_) {
-      appState.refreshSavedData();
-      appState.refreshSubscription();
+      Future.microtask(() async {
+        await appState.restorePendingAssessmentForSignedInUser();
+        await appState.refreshSavedData();
+        await appState.refreshSubscription();
+      });
     });
+    await appState.restorePendingAssessmentForSignedInUser();
     await appState.refreshSavedData();
     await appState.refreshSubscription();
   }
