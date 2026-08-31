@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -127,6 +129,11 @@ class GiftPathState extends ChangeNotifier {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null || user.isAnonymous) return false;
 
+    // A returning account already has its own quiz history. Never let a
+    // snapshot left on this device overwrite it: keep the saved result and
+    // leave the pending copy in place rather than clearing it.
+    if (savedResults.isNotEmpty) return false;
+
     final storage = PendingAssessmentStorage();
     final snapshot = await storage.load();
     if (snapshot == null || snapshot.responses.isEmpty) return false;
@@ -181,16 +188,33 @@ class GiftPathState extends ChangeNotifier {
     await persistPendingAssessmentForAuth();
     notifyListeners();
 
+    // The remote save, consent log and analytics take seconds and can stall,
+    // and the account step needs none of them, so let them settle in the
+    // background instead of holding up the redirect to signup.
+    unawaited(_syncCompletedAssessment());
+  }
+
+  Future<void> _syncCompletedAssessment() async {
+    final user =
+        Env.hasSupabase ? Supabase.instance.client.auth.currentUser : null;
+    // Until the visitor has a real account the result stays pending on the
+    // device only. restorePendingAssessmentForSignedInUser() writes it under
+    // their user id the moment they sign up, so there is nothing to gain from
+    // creating a throwaway anonymous row here.
+    final canSaveRemotely = user != null && !user.isAnonymous;
     try {
-      latestAssessmentId = await AssessmentRepository().saveCompletedAssessment(
-        responses: responses,
-        giftScores: giftScores,
-      );
-      if (assessmentConsentAccepted && latestAssessmentId != null) {
-        await LegalAcceptanceRepository()
-            .logAssessmentConsent(assessmentId: latestAssessmentId!);
+      if (canSaveRemotely) {
+        latestAssessmentId =
+            await AssessmentRepository().saveCompletedAssessment(
+          responses: responses,
+          giftScores: giftScores,
+        );
+        if (assessmentConsentAccepted && latestAssessmentId != null) {
+          await LegalAcceptanceRepository()
+              .logAssessmentConsent(assessmentId: latestAssessmentId!);
+        }
+        await refreshSavedData();
       }
-      await refreshSavedData();
       await AnalyticsRepository().logEvent(
         'assessment_completed',
         assessmentId: latestAssessmentId,

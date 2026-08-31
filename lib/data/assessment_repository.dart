@@ -20,8 +20,7 @@ class AssessmentRepository {
     }
 
     final assessmentId = _uuid.v4();
-    final user = _client.auth.currentUser ??
-        (await _client.auth.signInAnonymously()).user;
+    final user = _client.auth.currentUser;
     final assessment = <String, dynamic>{
       'id': assessmentId,
       'completed_at': DateTime.now().toUtc().toIso8601String(),
