@@ -18,16 +18,15 @@ Future<void> main() async {
     );
     Supabase.instance.client.auth.onAuthStateChange.listen((_) {
       Future.microtask(() async {
-        // Saved results first: restorePendingAssessmentForSignedInUser() needs
-        // them loaded to tell a brand new account from a returning one.
+        // Restore both the account data and any just-finished quiz that was
+        // held on this device during the signup handoff.
         await appState.refreshSavedData();
         await appState.restorePendingAssessmentForSignedInUser();
         await appState.refreshSubscription();
       });
     });
-    // Saved results load first so a returning account shows its own quiz;
-    // restorePendingAssessmentFromDevice() then no-ops via its hasResults
-    // guard instead of displaying a snapshot left on this device.
+    // Startup can arrive with a signed-in account, a just-finished local quiz,
+    // or both, depending on whether the visitor is coming back from OAuth.
     await appState.refreshSavedData();
     await appState.restorePendingAssessmentFromDevice();
     await appState.restorePendingAssessmentForSignedInUser();

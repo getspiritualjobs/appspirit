@@ -15,14 +15,61 @@ import '../../widgets/brand_components.dart';
 import '../../widgets/gift_badge.dart';
 import '../../widgets/responsive.dart';
 
-class ResultsPage extends StatelessWidget {
+class ResultsPage extends StatefulWidget {
   const ResultsPage({super.key});
+
+  @override
+  State<ResultsPage> createState() => _ResultsPageState();
+}
+
+class _ResultsPageState extends State<ResultsPage> {
+  bool _restoringResults = false;
+  bool _attemptedRestore = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(_restoreSignedInResults);
+  }
+
+  Future<void> _restoreSignedInResults() async {
+    if (_attemptedRestore || !Env.hasSupabase || appState.hasResults) return;
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null || user.isAnonymous) return;
+    if (!mounted) return;
+    setState(() {
+      _attemptedRestore = true;
+      _restoringResults = true;
+    });
+    await appState.restorePendingAssessmentFromDevice();
+    await appState.restorePendingAssessmentForSignedInUser();
+    await appState.refreshSavedData();
+    if (mounted) {
+      setState(() => _restoringResults = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: appState,
       builder: (context, _) {
+        final user =
+            Env.hasSupabase ? Supabase.instance.client.auth.currentUser : null;
+
+        if (!appState.hasResults && _restoringResults) {
+          return const PageBand(
+            child: EmptyState(
+              icon: Icons.auto_awesome,
+              eyebrow: 'Restoring results',
+              title: 'One moment',
+              body:
+                  'GiftPath is connecting the assessment you just took to your account.',
+              action: SizedBox.shrink(),
+            ),
+          );
+        }
+
         if (!appState.hasResults) {
           return PageBand(
             child: EmptyState(
@@ -45,8 +92,6 @@ class ResultsPage extends StatelessWidget {
             ? null
             : appState.careerMatches.first;
         final subscribed = appState.hasActiveSubscription;
-        final user =
-            Env.hasSupabase ? Supabase.instance.client.auth.currentUser : null;
         final requiresAccount = Env.hasSupabase &&
             appState.hasResults &&
             (user == null || user.isAnonymous);

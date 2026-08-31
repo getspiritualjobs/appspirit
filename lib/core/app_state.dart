@@ -129,11 +129,6 @@ class GiftPathState extends ChangeNotifier {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null || user.isAnonymous) return false;
 
-    // A returning account already has its own quiz history. Never let a
-    // snapshot left on this device overwrite it: keep the saved result and
-    // leave the pending copy in place rather than clearing it.
-    if (savedResults.isNotEmpty) return false;
-
     final storage = PendingAssessmentStorage();
     final snapshot = await storage.load();
     if (snapshot == null || snapshot.responses.isEmpty) return false;

@@ -69,13 +69,7 @@ class _AuthPageState extends State<AuthPage> {
             returnTo != null &&
             !widget.resetPasswordOnly &&
             !_handledReturnAfterAuth) {
-          _handledReturnAfterAuth = true;
-          Future.microtask(() async {
-            await appState.restorePendingAssessmentForSignedInUser();
-            await appState.refreshSavedData();
-            await appState.refreshSubscription();
-            if (mounted) context.go(returnTo);
-          });
+          unawaited(_handleSignedInReturn(returnTo));
         }
         setState(() {
           if (state.event == AuthChangeEvent.passwordRecovery) {
@@ -88,6 +82,15 @@ class _AuthPageState extends State<AuthPage> {
     }
     Future.microtask(() async {
       await appState.restorePendingAssessmentFromDevice();
+      final returnTo = _safeReturnTo;
+      final user =
+          Env.hasSupabase ? Supabase.instance.client.auth.currentUser : null;
+      if (user != null &&
+          !user.isAnonymous &&
+          returnTo != null &&
+          !widget.resetPasswordOnly) {
+        await _handleSignedInReturn(returnTo);
+      }
     });
   }
 
@@ -295,15 +298,6 @@ class _AuthPageState extends State<AuthPage> {
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.primary)),
                 ],
-                if (returnTo != null && message.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: () => context.go(returnTo),
-                    icon: const Icon(Icons.arrow_forward),
-                    label: Text(
-                        returningToResults ? 'View My Results' : 'Continue'),
-                  ),
-                ],
               ],
             ],
           ),
@@ -340,10 +334,11 @@ class _AuthPageState extends State<AuthPage> {
 
     try {
       final auth = Supabase.instance.client.auth;
+      AuthResponse? signupResponse;
       if (create) {
         await AnalyticsRepository().logEvent('account_create_started',
             properties: {'method': 'email'});
-        await auth.signUp(
+        signupResponse = await auth.signUp(
           email: trimmedEmail,
           password: enteredPassword,
           emailRedirectTo: Uri.base.origin,
@@ -363,16 +358,25 @@ class _AuthPageState extends State<AuthPage> {
       await appState.refreshSubscription();
       final returnTo = _safeReturnTo;
       if (!create && returnTo != null) {
+        await appState.restorePendingAssessmentForSignedInUser();
+        await appState.refreshSavedData();
         if (mounted) context.go(returnTo);
         return;
       }
       if (create) {
         await appState.restorePendingAssessmentFromDevice();
-        if (returnTo != null) {
+        await appState.restorePendingAssessmentForSignedInUser();
+        await appState.refreshSavedData();
+        final hasSession = signupResponse?.session != null ||
+            Supabase.instance.client.auth.currentSession != null;
+        if (returnTo != null && hasSession) {
           if (mounted) context.go(returnTo);
           return;
         }
-        final confirmationPath = Uri(path: '/confirm-account').toString();
+        final confirmationPath = Uri(
+          path: '/confirm-account',
+          queryParameters: returnTo == null ? null : {'returnTo': returnTo},
+        ).toString();
         if (mounted) context.go(confirmationPath);
         return;
       }
@@ -474,6 +478,7 @@ class _AuthPageState extends State<AuthPage> {
       await auth.signInWithOAuth(
         OAuthProvider.google,
         redirectTo: _authRedirectUrl,
+        queryParams: const {'prompt': 'select_account'},
       );
     } on AuthException catch (error) {
       setState(() => message = error.message);
@@ -488,6 +493,15 @@ class _AuthPageState extends State<AuthPage> {
     } catch (_) {
       // Account creation should not fail because a non-critical audit insert did.
     }
+  }
+
+  Future<void> _handleSignedInReturn(String returnTo) async {
+    if (_handledReturnAfterAuth) return;
+    _handledReturnAfterAuth = true;
+    await appState.restorePendingAssessmentForSignedInUser();
+    await appState.refreshSavedData();
+    await appState.refreshSubscription();
+    if (mounted) context.go(returnTo);
   }
 
   Future<void> _manageBilling() async {
