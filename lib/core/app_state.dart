@@ -6,6 +6,7 @@ import '../data/billing_service.dart';
 import '../data/legal_acceptance_repository.dart';
 import '../data/saved_data_repository.dart';
 import '../data/seed_data.dart';
+import '../data/whop_pixel.dart';
 import 'models.dart';
 import 'scoring.dart';
 
@@ -68,6 +69,7 @@ class GiftPathState extends ChangeNotifier {
   void acceptAssessmentConsent() {
     assessmentConsentAccepted = true;
     AnalyticsRepository().logEvent('assessment_consent_accepted');
+    trackWhopEvent('quiz_started');
     notifyListeners();
   }
 
@@ -109,6 +111,13 @@ class GiftPathState extends ChangeNotifier {
           'top_gift': giftScores.isEmpty ? null : giftScores.first.gift.name,
           'top_score':
               giftScores.isEmpty ? null : giftScores.first.normalizedScore,
+        },
+      );
+      trackWhopEvent(
+        'quiz_completed',
+        properties: {
+          'answered_count': responses.length,
+          if (giftScores.isNotEmpty) 'top_gift': giftScores.first.gift.name,
         },
       );
     } catch (error) {

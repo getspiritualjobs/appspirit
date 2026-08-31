@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/env.dart';
 import 'analytics_repository.dart';
+import 'whop_pixel.dart';
 
 class BillingCheckoutResult {
   const BillingCheckoutResult.success(this.url) : error = null;
@@ -44,6 +45,14 @@ class BillingService {
       await AnalyticsRepository().logEvent(
         'checkout_started',
         properties: {'plan': plan.apiValue},
+      );
+      trackWhopEvent(
+        'add_to_cart',
+        properties: {
+          'plan': plan.apiValue,
+          'value': plan == BillingPlan.monthly ? 7.77 : 77.77,
+          'currency': 'USD',
+        },
       );
       final origin = Uri.base.origin;
       final response = await Supabase.instance.client.functions.invoke(

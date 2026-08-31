@@ -11,6 +11,7 @@ import '../../core/theme.dart';
 import '../../data/analytics_repository.dart';
 import '../../data/billing_service.dart';
 import '../../data/legal_acceptance_repository.dart';
+import '../../data/whop_pixel.dart';
 import '../../widgets/brand_components.dart';
 import '../../widgets/brand_mark.dart';
 import '../../widgets/responsive.dart';
@@ -333,6 +334,10 @@ class _AuthPageState extends State<AuthPage> {
         await _logAccountConsent();
         await AnalyticsRepository().logEvent('account_create_completed',
             properties: {'method': 'email'});
+        trackWhopEvent(
+          'complete_registration',
+          properties: {'method': 'email'},
+        );
       } else {
         if (currentUser?.isAnonymous ?? false) {
           await auth.signOut();
@@ -445,6 +450,12 @@ class _AuthPageState extends State<AuthPage> {
         createMode ? 'account_create_started' : 'account_sign_in_started',
         properties: {'method': 'google'},
       );
+      if (createMode) {
+        trackWhopEvent(
+          'complete_registration',
+          properties: {'method': 'google'},
+        );
+      }
       if (auth.currentUser?.isAnonymous ?? false) {
         await auth.linkIdentity(
           OAuthProvider.google,
