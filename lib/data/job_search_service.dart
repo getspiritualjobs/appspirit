@@ -10,6 +10,7 @@ class JobSearchResult {
     required this.source,
     this.providers = const [],
     this.message,
+    this.serverGated = false,
     int? matchedCount,
   }) : matchedCount = matchedCount ?? jobs.length;
 
@@ -22,6 +23,11 @@ class JobSearchResult {
   /// server withholds the locked ones, so this is the only way to know how
   /// many an upgrade would unlock.
   final int matchedCount;
+
+  /// Whether search-jobs applied the free allowance itself. A function that
+  /// predates server side gating omits the marker, and the caller has to keep
+  /// trimming the list so the paywall never depends on deploy order.
+  final bool serverGated;
 }
 
 enum JobSearchSource { live, demo, unavailable }
@@ -93,10 +99,12 @@ class JobSearchService {
         ..sort((a, b) => b.matchScore.compareTo(a.matchScore));
 
       final matchedCount = data['matchedCount'];
+      final serverGated = data.containsKey('entitled');
       return JobSearchResult(
         jobs: jobs.isEmpty ? demoJobs : jobs,
         source: jobs.isEmpty ? JobSearchSource.demo : JobSearchSource.live,
         providers: jobs.isEmpty ? const [] : providers,
+        serverGated: serverGated,
         matchedCount: jobs.isEmpty
             ? null
             : (matchedCount is int && matchedCount > jobs.length

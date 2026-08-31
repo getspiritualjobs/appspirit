@@ -101,11 +101,12 @@ class _OpportunitiesPageState extends State<OpportunitiesPage> {
         }
 
         final jobs = result?.jobs ?? const <JobListing>[];
-        // search-jobs withholds the locked listings for live results, so those
-        // arrive pre-gated. Demo and offline results never pass through it, so
-        // the allowance is still applied here for them. matchedCount is how
+        // search-jobs withholds the locked listings once it reports gating,
+        // so those results arrive pre-trimmed. Demo, offline, and responses
+        // from a function that predates the gate are trimmed here instead, so
+        // the paywall holds regardless of deploy order. matchedCount is how
         // many an upgrade would unlock.
-        final gatedByServer = result?.source == JobSearchSource.live;
+        final gatedByServer = result?.serverGated ?? false;
         final visibleJobs = appState.hasActiveSubscription || gatedByServer
             ? jobs
             : jobs.take(_freeJobAllowance).toList();
