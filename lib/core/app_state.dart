@@ -313,11 +313,6 @@ class GiftPathState extends ChangeNotifier {
   bool isJobSaved(JobListing job) => savedJobs
       .any((item) => item.id == job.id && item.provider == job.provider);
 
-  void activateSubscription() {
-    hasActiveSubscription = true;
-    notifyListeners();
-  }
-
   Future<void> refreshSubscription() async {
     final active = await BillingService().hasActiveSubscription();
     if (active != hasActiveSubscription) {

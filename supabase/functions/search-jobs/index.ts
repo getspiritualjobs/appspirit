@@ -1,3 +1,5 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 type SearchRequest = {
   titles?: string[];
   location?: string;
@@ -42,6 +44,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 const maxJobAgeDays = 45;
+const freeJobAllowance = 1;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -54,7 +57,12 @@ Deno.serve(async (req) => {
       searchUsaJobs(titles, body),
     ]);
     const rawJobs = filterCurrentJobs([...adzuna, ...usajobs]);
-    const jobs = dedupeJobs(rawJobs).slice(0, 50);
+    const matched = dedupeJobs(rawJobs).slice(0, 50);
+    // The opportunity list is the paid product, so the free allowance is
+    // enforced here rather than trimmed in the client: an unentitled caller
+    // never receives the locked listings in the first place.
+    const entitled = await hasActiveSubscription(req);
+    const jobs = entitled ? matched : matched.slice(0, freeJobAllowance);
     const providers = [...new Set(jobs.map((job) => job.provider))];
     await logJobApiUsage({
       provider: "combined",
@@ -64,15 +72,17 @@ Deno.serve(async (req) => {
       salary_min: body.salaryMin,
       employment_type: body.employmentType,
       result_count: rawJobs.length,
-      deduped_count: jobs.length,
+      deduped_count: matched.length,
     });
 
     return Response.json(
       {
         jobs,
         providers,
+        entitled,
+        matchedCount: matched.length,
         demo: jobs.length === 0,
-        usage: { rawCount: rawJobs.length, dedupedCount: jobs.length },
+        usage: { rawCount: rawJobs.length, dedupedCount: matched.length },
       },
       { headers: corsHeaders },
     );
@@ -393,6 +403,35 @@ async function writeJobCache(cacheKey: string, provider: string, jobs: Normalize
       expires_at: expiresAt,
     }),
   }).catch(() => undefined);
+}
+
+async function hasActiveSubscription(req: Request): Promise<boolean> {
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader) return false;
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!supabaseUrl || !serviceRoleKey) return false;
+
+  try {
+    const supabase = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false },
+    });
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    const { data, error } = await supabase.auth.getUser(token);
+    const user = data?.user;
+    if (error || !user || user.is_anonymous) return false;
+
+    const { data: rows } = await supabase
+      .from("billing_subscriptions")
+      .select("status")
+      .eq("user_id", user.id)
+      .in("status", ["active", "trialing"])
+      .limit(1);
+    return Array.isArray(rows) && rows.length > 0;
+  } catch (_) {
+    return false;
+  }
 }
 
 async function logJobApiUsage(log: UsageLog) {

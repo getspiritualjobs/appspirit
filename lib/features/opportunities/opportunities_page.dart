@@ -11,6 +11,10 @@ import '../../widgets/brand_mark.dart';
 import '../../widgets/gift_badge.dart';
 import '../../widgets/responsive.dart';
 
+/// Free visitors see this many live openings; search-jobs enforces the same
+/// number server side for live results.
+const _freeJobAllowance = 1;
+
 class OpportunitiesPage extends StatefulWidget {
   const OpportunitiesPage({super.key});
 
@@ -97,11 +101,18 @@ class _OpportunitiesPageState extends State<OpportunitiesPage> {
         }
 
         final jobs = result?.jobs ?? const <JobListing>[];
-        final visibleJobs =
-            appState.hasActiveSubscription ? jobs : jobs.take(1).toList();
+        // search-jobs withholds the locked listings for live results, so those
+        // arrive pre-gated. Demo and offline results never pass through it, so
+        // the allowance is still applied here for them. matchedCount is how
+        // many an upgrade would unlock.
+        final gatedByServer = result?.source == JobSearchSource.live;
+        final visibleJobs = appState.hasActiveSubscription || gatedByServer
+            ? jobs
+            : jobs.take(_freeJobAllowance).toList();
         final lockedCount = appState.hasActiveSubscription
             ? 0
-            : jobs.length - visibleJobs.length;
+            : ((result?.matchedCount ?? jobs.length) - visibleJobs.length)
+                .clamp(0, 1 << 30);
         return SingleChildScrollView(
           child: PageBand(
             child: Column(

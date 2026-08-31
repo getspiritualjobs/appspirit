@@ -10,12 +10,18 @@ class JobSearchResult {
     required this.source,
     this.providers = const [],
     this.message,
-  });
+    int? matchedCount,
+  }) : matchedCount = matchedCount ?? jobs.length;
 
   final List<JobListing> jobs;
   final JobSearchSource source;
   final List<String> providers;
   final String? message;
+
+  /// How many openings matched before the free allowance was applied. The
+  /// server withholds the locked ones, so this is the only way to know how
+  /// many an upgrade would unlock.
+  final int matchedCount;
 }
 
 enum JobSearchSource { live, demo, unavailable }
@@ -86,10 +92,16 @@ class JobSearchService {
           .toList())
         ..sort((a, b) => b.matchScore.compareTo(a.matchScore));
 
+      final matchedCount = data['matchedCount'];
       return JobSearchResult(
         jobs: jobs.isEmpty ? demoJobs : jobs,
         source: jobs.isEmpty ? JobSearchSource.demo : JobSearchSource.live,
         providers: jobs.isEmpty ? const [] : providers,
+        matchedCount: jobs.isEmpty
+            ? null
+            : (matchedCount is int && matchedCount > jobs.length
+                ? matchedCount
+                : jobs.length),
         message: jobs.isEmpty
             ? 'No current openings matched those filters, so we are showing starter examples.'
             : null,
