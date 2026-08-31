@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/legal_versions.dart';
 import '../../core/theme.dart';
 import '../../widgets/brand_components.dart';
 import '../../widgets/responsive.dart';
@@ -26,16 +25,6 @@ class LegalPage extends StatelessWidget {
             const SizedBox(height: 10),
             Text(content.title,
                 style: Theme.of(context).textTheme.displayMedium),
-            const SizedBox(height: 8),
-            const Text('Draft last updated: $legalDocumentVersion',
-                style: TextStyle(fontWeight: FontWeight.w700)),
-            const SizedBox(height: 18),
-            const BrandNotice(
-              icon: Icons.gavel_outlined,
-              child: Text(
-                'Draft for product planning. Have an attorney review before launch, especially before accepting paid subscribers.',
-              ),
-            ),
             const SizedBox(height: 18),
             for (final section in content.sections) ...[
               InfoCard(
