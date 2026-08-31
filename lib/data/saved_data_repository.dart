@@ -44,7 +44,7 @@ class SavedDataRepository {
   }
 
   Future<void> saveCareer(CareerMatch match) async {
-    final user = await _currentOrAnonymousUser();
+    final user = _currentUser();
     if (user == null) return;
 
     await _client.from('saved_careers').upsert({
@@ -66,7 +66,7 @@ class SavedDataRepository {
   }
 
   Future<void> saveJob(JobListing job) async {
-    final user = await _currentOrAnonymousUser();
+    final user = _currentUser();
     if (user == null) return;
 
     await _client.from('saved_jobs').upsert({
@@ -94,7 +94,7 @@ class SavedDataRepository {
   }
 
   Future<void> savePreference(UserPreference preference) async {
-    final user = await _currentOrAnonymousUser();
+    final user = _currentUser();
     if (user == null) return;
 
     await _client.from('job_search_preferences').upsert({
@@ -185,10 +185,11 @@ class SavedDataRepository {
     );
   }
 
-  Future<User?> _currentOrAnonymousUser() async {
+  User? _currentUser() {
     if (!Env.hasSupabase) return null;
-    return _client.auth.currentUser ??
-        (await _client.auth.signInAnonymously()).user;
+    final user = _client.auth.currentUser;
+    if (user == null || user.isAnonymous) return null;
+    return user;
   }
 
   GiftScore _giftScoreFromRow(Map<String, dynamic> row) {

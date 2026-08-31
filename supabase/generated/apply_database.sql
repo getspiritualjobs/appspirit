@@ -178,18 +178,18 @@ create policy "users insert own profile" on public.profiles for insert with chec
 create policy "users update own profile" on public.profiles for update using (auth.uid() = id);
 
 create policy "users read own assessments" on public.assessments for select using (auth.uid() = user_id);
-create policy "users create own assessments" on public.assessments for insert with check (auth.uid() = user_id or user_id is null);
+create policy "users create own assessments" on public.assessments for insert with check (auth.uid() = user_id);
 create policy "users update own assessments" on public.assessments for update using (auth.uid() = user_id);
 
 create policy "users read own responses" on public.assessment_responses
   for select using (exists (select 1 from public.assessments a where a.id = assessment_id and a.user_id = auth.uid()));
 create policy "users create own responses" on public.assessment_responses
-  for insert with check (exists (select 1 from public.assessments a where a.id = assessment_id and (a.user_id = auth.uid() or a.user_id is null)));
+  for insert with check (exists (select 1 from public.assessments a where a.id = assessment_id and a.user_id = auth.uid()));
 
 create policy "users read own scores" on public.gift_scores
   for select using (exists (select 1 from public.assessments a where a.id = assessment_id and a.user_id = auth.uid()));
 create policy "users create own scores" on public.gift_scores
-  for insert with check (exists (select 1 from public.assessments a where a.id = assessment_id and (a.user_id = auth.uid() or a.user_id is null)));
+  for insert with check (exists (select 1 from public.assessments a where a.id = assessment_id and a.user_id = auth.uid()));
 
 create policy "users manage own saved results" on public.saved_results for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "users manage own saved careers" on public.saved_careers for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

@@ -19,18 +19,15 @@ class AssessmentRepository {
       return null;
     }
 
-    final assessmentId = _uuid.v4();
     final user = _client.auth.currentUser;
+    if (user == null || user.isAnonymous) return null;
+
+    final assessmentId = _uuid.v4();
     final assessment = <String, dynamic>{
       'id': assessmentId,
       'completed_at': DateTime.now().toUtc().toIso8601String(),
+      'user_id': user.id,
     };
-
-    if (user == null) {
-      assessment['anonymous_session_id'] = _uuid.v4();
-    } else {
-      assessment['user_id'] = user.id;
-    }
 
     await _client.from('assessments').insert(assessment);
 
@@ -53,13 +50,11 @@ class AssessmentRepository {
         }
     ]);
 
-    if (user != null) {
-      await _client.from('saved_results').insert({
-        'user_id': user.id,
-        'assessment_id': assessmentId,
-        'title': 'My Spiritual Gifts',
-      });
-    }
+    await _client.from('saved_results').insert({
+      'user_id': user.id,
+      'assessment_id': assessmentId,
+      'title': 'My Spiritual Gifts',
+    });
 
     return assessmentId;
   }

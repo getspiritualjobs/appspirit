@@ -106,8 +106,7 @@ class _AuthPageState extends State<AuthPage> {
     final session =
         Env.hasSupabase ? Supabase.instance.client.auth.currentSession : null;
     final user = session?.user;
-    final isGuest = user?.isAnonymous ?? false;
-    final isRealAccount = user != null && !isGuest;
+    final isRealAccount = user != null && !user.isAnonymous;
     final returnTo = _safeReturnTo;
     final returningToResults = _returningToResults;
     final resettingPassword = widget.resetPasswordOnly || resetPasswordMode;
@@ -181,8 +180,6 @@ class _AuthPageState extends State<AuthPage> {
                   },
                 )
               else ...[
-                if (isGuest && !returningToResults) const _GuestPanel(),
-                if (isGuest && !returningToResults) const SizedBox(height: 16),
                 _AuthModeToggle(
                   createMode: createMode,
                   enabled: !loading,
@@ -292,13 +289,6 @@ class _AuthPageState extends State<AuthPage> {
                     ],
                   ),
                 ),
-                if (!returningToResults) ...[
-                  const SizedBox(height: 10),
-                  TextButton(
-                    onPressed: loading || isGuest ? null : _continueAsGuest,
-                    child: const Text('Continue as guest'),
-                  ),
-                ],
                 if (message.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   Text(message,
@@ -350,22 +340,14 @@ class _AuthPageState extends State<AuthPage> {
 
     try {
       final auth = Supabase.instance.client.auth;
-      final currentUser = auth.currentUser;
       if (create) {
         await AnalyticsRepository().logEvent('account_create_started',
             properties: {'method': 'email'});
-        if (currentUser?.isAnonymous ?? false) {
-          await auth.updateUser(
-            UserAttributes(email: trimmedEmail, password: enteredPassword),
-            emailRedirectTo: Uri.base.origin,
-          );
-        } else {
-          await auth.signUp(
-            email: trimmedEmail,
-            password: enteredPassword,
-            emailRedirectTo: Uri.base.origin,
-          );
-        }
+        await auth.signUp(
+          email: trimmedEmail,
+          password: enteredPassword,
+          emailRedirectTo: Uri.base.origin,
+        );
         await _logAccountConsent();
         await AnalyticsRepository().logEvent('account_create_completed',
             properties: {'method': 'email'});
@@ -374,9 +356,6 @@ class _AuthPageState extends State<AuthPage> {
           properties: {'method': 'email'},
         );
       } else {
-        if (currentUser?.isAnonymous ?? false) {
-          await auth.signOut();
-        }
         await auth.signInWithPassword(
             email: trimmedEmail, password: enteredPassword);
       }
@@ -492,9 +471,6 @@ class _AuthPageState extends State<AuthPage> {
           properties: {'method': 'google'},
         );
       }
-      if (auth.currentUser?.isAnonymous ?? false) {
-        await auth.signOut();
-      }
       await auth.signInWithOAuth(
         OAuthProvider.google,
         redirectTo: _authRedirectUrl,
@@ -511,28 +487,6 @@ class _AuthPageState extends State<AuthPage> {
       await LegalAcceptanceRepository().logAccountConsent();
     } catch (_) {
       // Account creation should not fail because a non-critical audit insert did.
-    }
-  }
-
-  Future<void> _continueAsGuest() async {
-    setState(() {
-      loading = true;
-      message = '';
-    });
-    try {
-      await Supabase.instance.client.auth.signInAnonymously();
-      await appState.refreshSavedData();
-      final returnTo = _safeReturnTo;
-      if (returnTo != null) {
-        if (mounted) context.go(returnTo);
-        return;
-      }
-      setState(() => message =
-          'Guest mode is on. Create an account later to save across devices.');
-    } on AuthException catch (error) {
-      setState(() => message = error.message);
-    } finally {
-      if (mounted) setState(() => loading = false);
     }
   }
 
@@ -757,21 +711,6 @@ class _AuthModeButton extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _GuestPanel extends StatelessWidget {
-  const _GuestPanel();
-
-  @override
-  Widget build(BuildContext context) {
-    return const BrandNotice(
-      icon: Icons.person_outline,
-      accent: true,
-      child: Text(
-        'Guest mode lets you take the assessment now. Create an account when you want to keep saved results across devices.',
       ),
     );
   }
