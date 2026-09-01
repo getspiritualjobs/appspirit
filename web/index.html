@@ -157,6 +157,23 @@
           window.localStorage.removeItem("giftpath_pending_assessment");
         } catch (_) {}
       };
+      window.giftPathGetVisitorId = function() {
+        try {
+          var key = "giftpath_visitor_id";
+          var existing = window.localStorage.getItem(key);
+          if (existing) return existing;
+          var id = "visitor_";
+          if (window.crypto && typeof window.crypto.randomUUID === "function") {
+            id += window.crypto.randomUUID();
+          } else {
+            id += String(Date.now()) + "_" + Math.random().toString(16).slice(2);
+          }
+          window.localStorage.setItem(key, id);
+          return id;
+        } catch (_) {
+          return "";
+        }
+      };
     </script>
   </head>
   <body>
